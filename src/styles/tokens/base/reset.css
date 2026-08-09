@@ -1,0 +1,20 @@
+@layer base {
+  html {
+    @apply bg-canvas text-foreground font-sans;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-canvas text-foreground;
+  }
+
+  ::selection {
+    @apply bg-brand-soft text-brand-hover;
+  }
+
+  :focus-visible {
+    @apply rounded-md outline-2 outline-brand/50 outline-offset-4;
+  }
+}

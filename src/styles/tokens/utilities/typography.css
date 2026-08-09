@@ -1,0 +1,51 @@
+@utility text-display-hero {
+  @apply font-display font-semibold tracking-display text-[clamp(2.75rem,7vw,4rem)] leading-[1.08];
+}
+
+@utility text-page-title {
+  @apply font-display font-semibold tracking-display text-[clamp(2rem,4vw,3rem)] leading-[1.12];
+}
+
+@utility text-section-title {
+  @apply font-display font-semibold tracking-heading text-3xl leading-snug;
+}
+
+@utility text-card-title {
+  @apply font-display font-semibold tracking-heading text-2xl leading-snug;
+}
+
+@utility text-body-large {
+  @apply font-ui text-lg leading-relaxed font-normal;
+}
+
+@utility text-body {
+  @apply font-ui text-md leading-[1.65] font-normal;
+}
+
+@utility text-body-small {
+  @apply font-ui text-sm leading-normal font-normal;
+}
+
+@utility text-label {
+  @apply font-ui text-sm leading-[1.4] font-medium;
+}
+
+@utility text-button {
+  @apply font-ui text-sm leading-[1.2] font-semibold;
+}
+
+@utility text-caption {
+  @apply font-ui text-xs leading-[1.4] font-normal;
+}
+
+@utility text-meta {
+  @apply font-mono text-[0.8125rem] leading-normal tracking-mono font-normal;
+}
+
+@utility text-code {
+  @apply font-mono text-[0.8125rem] leading-[1.6] font-normal;
+}
+
+@utility text-token {
+  @apply font-mono text-xs leading-[1.4] tracking-mono font-medium;
+}

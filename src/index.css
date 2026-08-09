@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@plugin "tailwindcss-react-aria-components";
+@import "./styles/tokens/index.css";
+
+#root {
+  min-height: 100svh;
+}
+
+body {
+  margin: 0;
+}

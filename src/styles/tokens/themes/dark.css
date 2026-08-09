@@ -1,0 +1,29 @@
+.dark {
+  color-scheme: dark;
+
+  --color-canvas-value: var(--color-slate-950);
+  --color-surface-value: var(--color-slate-900);
+  --color-surface-muted-value: var(--color-slate-800);
+
+  --color-foreground-value: var(--color-slate-50);
+  --color-muted-value: var(--color-slate-300);
+  --color-subtle-value: var(--color-slate-400);
+
+  --color-border-value: var(--color-slate-800);
+  --color-border-strong-value: var(--color-slate-700);
+
+  --color-brand-value: var(--color-teal-300);
+  --color-brand-hover-value: var(--color-teal-200);
+  --color-brand-soft-value: color-mix(in oklch, var(--color-teal-500) 12%, transparent);
+  --color-brand-foreground-value: var(--color-teal-950);
+  --color-page-glow-value: color-mix(in oklch, var(--color-teal-400) 12%, transparent);
+
+  --color-danger-value: var(--color-red-100);
+  --color-danger-soft-value: color-mix(in oklch, var(--color-red-600) 14%, transparent);
+
+  --color-success-value: var(--color-green-100);
+  --color-success-soft-value: color-mix(in oklch, var(--color-green-600) 14%, transparent);
+
+  --color-warning-value: var(--color-amber-100);
+  --color-warning-soft-value: color-mix(in oklch, var(--color-amber-600) 14%, transparent);
+}

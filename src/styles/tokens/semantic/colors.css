@@ -1,0 +1,27 @@
+@theme {
+  --color-canvas: var(--color-canvas-value);
+  --color-surface: var(--color-surface-value);
+  --color-surface-muted: var(--color-surface-muted-value);
+
+  --color-foreground: var(--color-foreground-value);
+  --color-muted: var(--color-muted-value);
+  --color-subtle: var(--color-subtle-value);
+
+  --color-border: var(--color-border-value);
+  --color-border-strong: var(--color-border-strong-value);
+
+  --color-brand: var(--color-brand-value);
+  --color-brand-hover: var(--color-brand-hover-value);
+  --color-brand-soft: var(--color-brand-soft-value);
+  --color-brand-foreground: var(--color-brand-foreground-value);
+  --color-page-glow: var(--color-page-glow-value);
+
+  --color-danger: var(--color-danger-value);
+  --color-danger-soft: var(--color-danger-soft-value);
+
+  --color-success: var(--color-success-value);
+  --color-success-soft: var(--color-success-soft-value);
+
+  --color-warning: var(--color-warning-value);
+  --color-warning-soft: var(--color-warning-soft-value);
+}
