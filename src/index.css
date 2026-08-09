@@ -1,6 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Literata:opsz,wght@7..72,500;7..72,600&display=swap');
 @import "tailwindcss";
 @plugin "tailwindcss-react-aria-components";
 @import "./styles/tokens/index.css";
+@import "./App.css";
 
 #root {
   min-height: 100svh;
