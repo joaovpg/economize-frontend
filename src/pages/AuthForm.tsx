@@ -5,9 +5,11 @@ import { CheckCircleIcon } from "@phosphor-icons/react/dist/csr/CheckCircle";
 import { EyeIcon } from "@phosphor-icons/react/dist/csr/Eye";
 import { EyeSlashIcon } from "@phosphor-icons/react/dist/csr/EyeSlash";
 import { TrendUpIcon } from "@phosphor-icons/react/dist/csr/TrendUp";
+import { isHTTPError } from "ky";
 import { useForm, type UseFormRegister } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
+import { api } from "../lib/api";
 
 type AuthMode = "login" | "cadastro";
 
@@ -82,12 +84,13 @@ function SuccessIcon() {
 function AuthPage({ mode }: { mode: AuthMode }) {
   const isLogin = mode === "login";
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [timezone, setTimezone] = useState("detectando...");
   const navigate = useNavigate();
   const schema = isLogin ? loginSchema : cadastroSchema;
   const {
-    formState: { errors },
+    formState: { errors, isSubmitting },
     handleSubmit,
     register,
   } = useForm<AuthFormData>({
@@ -105,7 +108,32 @@ function AuthPage({ mode }: { mode: AuthMode }) {
 
   const handleModeChange = (nextMode: AuthMode) => {
     setSubmitted(false);
+    setSubmitError(null);
     navigate(nextMode === "login" ? "/login" : "/cadastro");
+  };
+
+  const handleFormSubmit = async (data: AuthFormData) => {
+    setSubmitError(null);
+
+    if (isLogin) {
+      try {
+        await api.post("autenticacao/login", {
+          json: {
+            email: data.email,
+            senha: data.senha,
+          },
+        });
+      } catch (error) {
+        setSubmitError(
+          isHTTPError(error)
+            ? "O servidor recusou o login. Confira seus dados e tente novamente."
+            : "Não foi possível conectar ao servidor. Confira sua conexão e tente novamente.",
+        );
+        return;
+      }
+    }
+
+    setSubmitted(true);
   };
 
   const title = isLogin
@@ -144,9 +172,11 @@ function AuthPage({ mode }: { mode: AuthMode }) {
             <div className="success-message" role="status" aria-live="polite">
               <SuccessIcon />
               <div>
-                <h2>{isLogin ? "Entrada validada." : "Cadastro validado."}</h2>
+                <h2>{isLogin ? "Login recebido." : "Cadastro validado."}</h2>
                 <p>
-                  Esta é uma demonstração local. Nenhum dado foi enviado ao servidor.
+                  {isLogin
+                    ? "O servidor respondeu à tentativa de login."
+                    : "Esta é uma demonstração local. Nenhum dado foi enviado ao servidor."}
                 </p>
               </div>
               <button
@@ -160,7 +190,7 @@ function AuthPage({ mode }: { mode: AuthMode }) {
           ) : (
             <form
               className="auth-form"
-              onSubmit={handleSubmit(() => setSubmitted(true))}
+              onSubmit={handleSubmit(handleFormSubmit)}
               noValidate
             >
               {!isLogin && (
@@ -227,8 +257,13 @@ function AuthPage({ mode }: { mode: AuthMode }) {
                   </Link>
                 </div>
               )}
-              <button className="primary-button" type="submit">
-                {isLogin ? "Entrar" : "Criar minha conta"}
+              {submitError && (
+                <p className="field-error" role="alert">
+                  {submitError}
+                </p>
+              )}
+              <button className="primary-button" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Enviando..." : isLogin ? "Entrar" : "Criar minha conta"}
                 <ArrowIcon />
               </button>
               <p className="form-legal">
