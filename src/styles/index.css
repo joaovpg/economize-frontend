@@ -1,0 +1,10 @@
+@import "tailwindcss";
+@import "./tokens/index.css";
+
+#root {
+  min-height: 100svh;
+}
+
+body {
+  margin: 0;
+}
