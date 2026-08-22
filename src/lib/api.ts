@@ -10,10 +10,7 @@ export const api = ky.create({
   hooks: {
     afterResponse: [
       async ({ response }) => {
-        if (
-          response.status === UNAUTHORIZED &&
-          !PUBLIC_ROUTES.includes(window.location.pathname)
-        ) {
+        if (response.status === UNAUTHORIZED && !PUBLIC_ROUTES.includes(window.location.pathname)) {
           window.location.replace("/login");
         }
       },

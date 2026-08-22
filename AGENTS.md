@@ -1,6 +1,7 @@
 ## Agent skills
 
 This repository is the React frontend for `Economize`, an application for recording and controlling expenses.
+
 - User-facing UI copy, labels, validation messages, and documentation for the product must use Brazilian Portuguese (`pt-BR`).
 - Follow Brazilian conventions for displayed currency, dates, and numbers.
 

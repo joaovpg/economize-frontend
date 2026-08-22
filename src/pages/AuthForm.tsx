@@ -1,14 +1,15 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/csr/ArrowRight";
 import { CheckCircleIcon } from "@phosphor-icons/react/dist/csr/CheckCircle";
-import { EyeIcon } from "@phosphor-icons/react/dist/csr/Eye";
-import { EyeSlashIcon } from "@phosphor-icons/react/dist/csr/EyeSlash";
 import { TrendUpIcon } from "@phosphor-icons/react/dist/csr/TrendUp";
 import { isHTTPError } from "ky";
-import { useForm, type UseFormRegister } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
+
+import { TextField } from "../components/TextField";
 import { api } from "../lib/api";
 
 type AuthMode = "login" | "cadastro";
@@ -27,11 +28,7 @@ const loginSchema = z.object({ email: emailSchema, senha: passwordSchema });
 
 const cadastroSchema = z
   .object({
-    nome: z
-      .string()
-      .trim()
-      .min(1, "Digite seu nome.")
-      .max(120, "Use até 120 caracteres."),
+    nome: z.string().trim().min(1, "Digite seu nome.").max(120, "Use até 120 caracteres."),
     email: emailSchema,
     senha: passwordSchema
       .min(8, "A senha deve ter entre 8 e 128 caracteres.")
@@ -58,10 +55,7 @@ type ProblemDetails = {
 function getFieldName(field: string | undefined): keyof AuthFormData | null {
   const name = field?.split("#").pop()?.split("/").pop();
 
-  return name === "nome" ||
-    name === "email" ||
-    name === "senha" ||
-    name === "confirmacao"
+  return name === "nome" || name === "email" || name === "senha" || name === "confirmacao"
     ? name
     : null;
 }
@@ -81,14 +75,6 @@ function ArrowIcon() {
   return <ArrowRightIcon aria-hidden="true" size={16} weight="bold" />;
 }
 
-function PasswordVisibilityIcon({ visible }: { visible: boolean }) {
-  return visible ? (
-    <EyeIcon aria-hidden="true" size={19} />
-  ) : (
-    <EyeSlashIcon aria-hidden="true" size={19} />
-  );
-}
-
 function SuccessIcon() {
   return (
     <span
@@ -104,7 +90,6 @@ function AuthPage({ mode }: { mode: AuthMode }) {
   const isLogin = mode === "login";
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
   const [timezone, setTimezone] = useState("detectando...");
   const navigate = useNavigate();
   const schema = isLogin ? loginSchema : cadastroSchema;
@@ -143,9 +128,7 @@ function AuthPage({ mode }: { mode: AuthMode }) {
         navigate("/dashboard", { replace: true });
       } catch (error) {
         if (!isHTTPError(error)) {
-          setSubmitError(
-            "Não foi possível conectar ao servidor. Tente novamente.",
-          );
+          setSubmitError("Não foi possível conectar ao servidor. Tente novamente.");
           return;
         }
         if (error.response.status === 401) {
@@ -153,9 +136,7 @@ function AuthPage({ mode }: { mode: AuthMode }) {
           return;
         }
         try {
-          const problem = (await error.response
-            .clone()
-            .json()) as ProblemDetails;
+          const problem = (await error.response.clone().json()) as ProblemDetails;
           let hasFieldError = false;
           for (const violation of problem.violations ?? []) {
             const field = getFieldName(violation.field);
@@ -165,9 +146,7 @@ function AuthPage({ mode }: { mode: AuthMode }) {
             }
           }
           if (!hasFieldError || problem.detail) {
-            setSubmitError(
-              problem.detail ?? "Não foi possível entrar. Tente novamente.",
-            );
+            setSubmitError(problem.detail ?? "Não foi possível entrar. Tente novamente.");
           }
         } catch {
           setSubmitError("Não foi possível entrar. Tente novamente.");
@@ -178,9 +157,7 @@ function AuthPage({ mode }: { mode: AuthMode }) {
     setSubmitted(true);
   };
 
-  const title = isLogin
-    ? "Bom te ver por aqui."
-    : "Comece a organizar sua vida financeira.";
+  const title = isLogin ? "Bom te ver por aqui." : "Comece a organizar sua vida financeira.";
   const description = isLogin
     ? "Entre para continuar acompanhando suas escolhas."
     : "Um espaço simples para registrar o que importa e gastar com mais clareza.";
@@ -205,11 +182,9 @@ function AuthPage({ mode }: { mode: AuthMode }) {
           <div
             className={`flex max-w-36 flex-col items-end gap-1.5 pt-1 text-right text-[0.84rem] leading-normal text-muted sm:max-w-40 ${isLogin ? "hidden sm:flex" : ""}`}
           >
-            <span>
-              {isLogin ? "Ainda não tem uma conta?" : "Já tem uma conta?"}
-            </span>
+            <span>{isLogin ? "Ainda não tem uma conta?" : "Já tem uma conta?"}</span>
             <button
-              className="cursor-pointer rounded-sm border-0 bg-transparent p-0 font-inherit font-bold text-brand outline-none hover:text-brand-hover hover:underline hover:underline-offset-3 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+              className="font-inherit cursor-pointer rounded-sm border-0 bg-transparent p-0 font-bold text-brand outline-none hover:text-brand-hover hover:underline hover:underline-offset-3 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
               type="button"
               onClick={() => handleModeChange(isLogin ? "cadastro" : "login")}
             >
@@ -218,11 +193,9 @@ function AuthPage({ mode }: { mode: AuthMode }) {
           </div>
         </header>
 
-        <div
-          className={`w-full ${isLogin ? "mt-16 sm:mt-20" : "mt-14 sm:mt-20 lg:mt-24"}`}
-        >
+        <div className={`w-full ${isLogin ? "mt-16 sm:mt-20" : "mt-14 sm:mt-20 lg:mt-24"}`}>
           <h1
-            className={`m-0 font-semibold leading-[1.2] text-foreground ${isLogin ? "max-w-none text-center font-ui text-[1.65rem] tracking-[-0.03em] sm:text-[1.85rem]" : "max-w-[15ch] font-serif text-[2.15rem] tracking-[-0.04em] sm:text-[2.7rem]"}`}
+            className={`m-0 leading-[1.2] font-semibold text-foreground ${isLogin ? "max-w-none text-center font-ui text-[1.65rem] tracking-[-0.03em] sm:text-[1.85rem]" : "max-w-[15ch] font-serif text-[2.15rem] tracking-[-0.04em] sm:text-[2.7rem]"}`}
             id="auth-title"
           >
             {title}
@@ -234,9 +207,8 @@ function AuthPage({ mode }: { mode: AuthMode }) {
           </p>
 
           {submitted ? (
-            <div
+            <output
               className="mt-10 grid grid-cols-[auto_1fr] gap-3.5 rounded-xl border border-success bg-success-soft p-4.5 shadow-[0_10px_30px_color-mix(in_oklch,var(--color-success)_8%,transparent)]"
-              role="status"
               aria-live="polite"
             >
               <SuccessIcon />
@@ -252,12 +224,12 @@ function AuthPage({ mode }: { mode: AuthMode }) {
               </div>
               <button
                 type="button"
-                className="col-start-2 justify-self-start rounded-sm border-0 bg-transparent p-0 text-[0.78rem] font-inherit font-bold text-brand outline-none hover:text-brand-hover hover:underline hover:underline-offset-3 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-success-soft"
+                className="font-inherit col-start-2 justify-self-start rounded-sm border-0 bg-transparent p-0 text-[0.78rem] font-bold text-brand outline-none hover:text-brand-hover hover:underline hover:underline-offset-3 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-success-soft"
                 onClick={() => setSubmitted(false)}
               >
                 Voltar ao formulário
               </button>
-            </div>
+            </output>
           ) : (
             <form
               className={`mt-8 grid ${isLogin ? "gap-4" : "gap-4.5"}`}
@@ -265,64 +237,57 @@ function AuthPage({ mode }: { mode: AuthMode }) {
               noValidate
             >
               {!isLogin && (
-                <Field
-                  register={register}
-                  name="nome"
+                <TextField
                   label="Nome completo"
-                  placeholder="Como você gosta de ser chamado?"
-                  autoComplete="name"
-                  error={errors.nome?.message}
+                  inputProps={{
+                    ...register("nome"),
+                    autoComplete: "name",
+                    maxLength: 120,
+                    placeholder: "Como você gosta de ser chamado?",
+                  }}
+                  errorMessage={errors.nome?.message}
                 />
               )}
-              <Field
-                register={register}
-                name="email"
+              <TextField
                 label="E-mail"
-                placeholder="voce@exemplo.com"
-                type="email"
-                autoComplete="email"
-                error={errors.email?.message}
+                inputProps={{
+                  ...register("email"),
+                  autoComplete: "email",
+                  maxLength: 320,
+                  placeholder: "voce@exemplo.com",
+                  type: "email",
+                }}
+                errorMessage={errors.email?.message}
               />
-              <Field
-                register={register}
-                name="senha"
+              <TextField
                 label="Senha"
-                placeholder={
-                  isLogin ? "Digite sua senha" : "Crie uma senha segura"
-                }
-                type={showPassword ? "text" : "password"}
-                autoComplete={isLogin ? "current-password" : "new-password"}
-                error={errors.senha?.message}
-                suffix={
-                  <button
-                    type="button"
-                    className="grid size-11 shrink-0 place-items-center rounded-[0.625rem] border-0 bg-transparent p-0 text-subtle outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset"
-                    aria-label={
-                      showPassword ? "Ocultar senha" : "Mostrar senha"
-                    }
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    <PasswordVisibilityIcon visible={showPassword} />
-                  </button>
-                }
+                description={!isLogin ? "Use entre 8 e 128 caracteres." : undefined}
+                inputProps={{
+                  ...register("senha"),
+                  type: "password",
+                  autoComplete: isLogin ? "current-password" : "new-password",
+                  maxLength: 128,
+                  placeholder: isLogin ? "Digite sua senha" : "Crie uma senha segura",
+                }}
+                errorMessage={errors.senha?.message}
               />
               {!isLogin && (
-                <Field
-                  register={register}
-                  name="confirmacao"
+                <TextField
                   label="Confirme sua senha"
-                  placeholder="Repita sua senha"
-                  type="password"
-                  autoComplete="new-password"
-                  error={errors.confirmacao?.message}
+                  description="Digite a senha novamente para confirmar."
+                  inputProps={{
+                    ...register("confirmacao"),
+                    type: "password",
+                    autoComplete: "new-password",
+                    maxLength: 128,
+                    placeholder: "Repita sua senha",
+                  }}
+                  errorMessage={errors.confirmacao?.message}
                 />
               )}
               {!isLogin && (
                 <div className="-mt-0.5 flex items-center gap-2.5 text-[0.78rem] text-muted">
-                  <span
-                    className="size-1.75 shrink-0 rounded-full bg-brand"
-                    aria-hidden="true"
-                  />
+                  <span className="size-1.75 shrink-0 rounded-full bg-brand" aria-hidden="true" />
                   <span>
                     Fuso horário detectado: <strong>{timezone}</strong>
                   </span>
@@ -349,89 +314,23 @@ function AuthPage({ mode }: { mode: AuthMode }) {
                 </p>
               )}
               <button
-                className="mt-1 flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-brand px-4 py-3 font-inherit text-[0.88rem] font-bold text-brand-foreground outline-none transition hover:bg-brand-hover focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:opacity-90 disabled:cursor-wait disabled:opacity-60 motion-reduce:transition-none"
+                className="font-inherit mt-1 flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-brand px-4 py-3 text-[0.88rem] font-bold text-brand-foreground transition outline-none hover:bg-brand-hover focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:opacity-90 disabled:cursor-wait disabled:opacity-60 motion-reduce:transition-none"
                 type="submit"
                 disabled={isSubmitting}
                 aria-busy={isSubmitting}
               >
-                {isSubmitting
-                  ? "Enviando..."
-                  : isLogin
-                    ? "Entrar"
-                    : "Criar minha conta"}
+                {isSubmitting ? "Enviando..." : isLogin ? "Entrar" : "Criar minha conta"}
                 <ArrowIcon />
               </button>
               <p className="m-[0.0625rem_0_0] text-center text-[0.72rem] leading-normal text-subtle">
-                Ao continuar, você concorda com uma experiência de controle
-                financeiro mais consciente.
+                Ao continuar, você concorda com uma experiência de controle financeiro mais
+                consciente.
               </p>
             </form>
           )}
         </div>
       </section>
     </main>
-  );
-}
-
-function Field({
-  register,
-  name,
-  label,
-  placeholder,
-  type = "text",
-  autoComplete,
-  error,
-  suffix,
-}: {
-  register: UseFormRegister<AuthFormData>;
-  name: keyof AuthFormData;
-  label: string;
-  placeholder: string;
-  type?: string;
-  autoComplete?: string;
-  error?: string;
-  suffix?: ReactNode;
-}) {
-  const errorId = `${name}-error`;
-
-  return (
-    <div className="grid gap-2">
-      <label
-        className="text-[0.84rem] font-semibold text-foreground"
-        htmlFor={name}
-      >
-        {label}
-      </label>
-      <div
-        className={`flex min-h-11 items-center rounded-md border bg-surface transition motion-reduce:transition-none ${error ? "border-danger focus-within:shadow-[0_0_0_3px_color-mix(in_oklch,var(--color-danger)_16%,transparent)]" : "border-border-strong focus-within:border-brand focus-within:shadow-[0_0_0_3px_color-mix(in_oklch,var(--color-brand)_14%,transparent)]"}`}
-      >
-        <input
-          {...register(name)}
-          id={name}
-          type={type}
-          placeholder={placeholder}
-          autoComplete={autoComplete}
-          className="min-w-0 w-full border-0 bg-transparent px-3 py-2.5 text-[0.9rem] text-foreground outline-none placeholder:text-subtle"
-          maxLength={
-            name === "nome"
-              ? 120
-              : name === "email"
-                ? 320
-                : name === "senha" || name === "confirmacao"
-                  ? 128
-                  : undefined
-          }
-          aria-invalid={Boolean(error)}
-          aria-describedby={error ? errorId : undefined}
-        />
-        {suffix}
-      </div>
-      {error && (
-        <p className="m-0 text-[0.78rem] text-danger" id={errorId} role="alert">
-          {error}
-        </p>
-      )}
-    </div>
   );
 }
 
