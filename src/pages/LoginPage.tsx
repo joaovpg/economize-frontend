@@ -121,7 +121,7 @@ function LoginPage() {
 
   return (
     <>
-      <div>
+      <div className="self-start">
         <span className="mb-7 block h-1 w-10 rounded-full bg-brand" aria-hidden="true" />
         <h1 className="m-0 max-w-[11ch] text-page-title text-foreground" id="auth-title">
           Vamos deixar isso simples.
@@ -155,30 +155,32 @@ function LoginPage() {
           </output>
         ) : (
           <form className="grid gap-3" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-            <TextField
-              label="E-mail"
-              name={emailField.name}
-              onBlur={emailField.onBlur}
-              onInput={emailField.onChange}
-              inputRef={emailField.ref}
-              autoComplete="email"
-              maxLength={320}
-              placeholder="voce@exemplo.com"
-              type="email"
-              errorMessage={errors.email?.message}
-            />
-            <TextField
-              label="Senha"
-              name={senhaField.name}
-              onBlur={senhaField.onBlur}
-              onInput={senhaField.onChange}
-              inputRef={senhaField.ref}
-              type="password"
-              autoComplete="current-password"
-              maxLength={128}
-              placeholder="Digite sua senha"
-              errorMessage={errors.senha?.message}
-            />
+            <div className="grid gap-1">
+              <TextField
+                label="E-mail"
+                name={emailField.name}
+                onBlur={emailField.onBlur}
+                onInput={emailField.onChange}
+                inputRef={emailField.ref}
+                autoComplete="email"
+                maxLength={320}
+                placeholder="voce@exemplo.com"
+                type="email"
+                errorMessage={errors.email?.message}
+              />
+              <TextField
+                label="Senha"
+                name={senhaField.name}
+                onBlur={senhaField.onBlur}
+                onInput={senhaField.onChange}
+                inputRef={senhaField.ref}
+                type="password"
+                autoComplete="current-password"
+                maxLength={128}
+                placeholder="Digite sua senha"
+                errorMessage={errors.senha?.message}
+              />
+            </div>
             <div className="-mt-1 flex justify-end text-[0.8rem]">
               <Link className="font-bold" variant="link">
                 Esqueci minha senha

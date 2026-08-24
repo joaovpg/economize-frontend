@@ -109,55 +109,57 @@ function RegisterPage() {
           </output>
         ) : (
           <form className="grid gap-3.5" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-            <TextField
-              label="Nome completo"
-              name={nomeField.name}
-              onBlur={nomeField.onBlur}
-              onInput={nomeField.onChange}
-              inputRef={nomeField.ref}
-              autoComplete="name"
-              maxLength={120}
-              placeholder="Como você gosta de ser chamado?"
-              errorMessage={errors.nome?.message}
-            />
-            <TextField
-              label="E-mail"
-              name={emailField.name}
-              onBlur={emailField.onBlur}
-              onInput={emailField.onChange}
-              inputRef={emailField.ref}
-              autoComplete="email"
-              maxLength={320}
-              placeholder="voce@exemplo.com"
-              type="email"
-              errorMessage={errors.email?.message}
-            />
-            <TextField
-              label="Senha"
-              description="Use entre 8 e 128 caracteres."
-              name={senhaField.name}
-              onBlur={senhaField.onBlur}
-              onInput={senhaField.onChange}
-              inputRef={senhaField.ref}
-              type="password"
-              autoComplete="new-password"
-              maxLength={128}
-              placeholder="Crie uma senha segura"
-              errorMessage={errors.senha?.message}
-            />
-            <TextField
-              label="Confirme sua senha"
-              description="Digite a senha novamente para confirmar."
-              name={confirmacaoField.name}
-              onBlur={confirmacaoField.onBlur}
-              onInput={confirmacaoField.onChange}
-              inputRef={confirmacaoField.ref}
-              type="password"
-              autoComplete="new-password"
-              maxLength={128}
-              placeholder="Repita sua senha"
-              errorMessage={errors.confirmacao?.message}
-            />
+            <div className="grid gap-1">
+              <TextField
+                label="Nome completo"
+                name={nomeField.name}
+                onBlur={nomeField.onBlur}
+                onInput={nomeField.onChange}
+                inputRef={nomeField.ref}
+                autoComplete="name"
+                maxLength={120}
+                placeholder="Como você gosta de ser chamado?"
+                errorMessage={errors.nome?.message}
+              />
+              <TextField
+                label="E-mail"
+                name={emailField.name}
+                onBlur={emailField.onBlur}
+                onInput={emailField.onChange}
+                inputRef={emailField.ref}
+                autoComplete="email"
+                maxLength={320}
+                placeholder="voce@exemplo.com"
+                type="email"
+                errorMessage={errors.email?.message}
+              />
+              <TextField
+                label="Senha"
+                description="Use entre 8 e 128 caracteres."
+                name={senhaField.name}
+                onBlur={senhaField.onBlur}
+                onInput={senhaField.onChange}
+                inputRef={senhaField.ref}
+                type="password"
+                autoComplete="new-password"
+                maxLength={128}
+                placeholder="Crie uma senha segura"
+                errorMessage={errors.senha?.message}
+              />
+              <TextField
+                label="Confirme sua senha"
+                description="Digite a senha novamente para confirmar."
+                name={confirmacaoField.name}
+                onBlur={confirmacaoField.onBlur}
+                onInput={confirmacaoField.onChange}
+                inputRef={confirmacaoField.ref}
+                type="password"
+                autoComplete="new-password"
+                maxLength={128}
+                placeholder="Repita sua senha"
+                errorMessage={errors.confirmacao?.message}
+              />
+            </div>
             <div className="-mt-0.5 flex items-center gap-2.5 text-[0.78rem] text-muted">
               <span className="size-1.75 shrink-0 rounded-full bg-brand" aria-hidden="true" />
               <span>

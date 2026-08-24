@@ -38,6 +38,10 @@
   @apply font-ui text-xs leading-[1.4] font-normal;
 }
 
+@utility text-validation {
+  @apply font-ui text-xs leading-4 font-normal;
+}
+
 @utility text-meta {
   @apply font-mono text-[0.8125rem] leading-normal font-normal tracking-mono;
 }
