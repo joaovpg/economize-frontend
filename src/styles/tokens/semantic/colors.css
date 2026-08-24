@@ -12,11 +12,16 @@
 
   --color-brand: var(--color-brand-value);
   --color-brand-hover: var(--color-brand-hover-value);
+  --color-brand-pressed: var(--color-brand-pressed-value);
   --color-brand-soft: var(--color-brand-soft-value);
   --color-brand-foreground: var(--color-brand-foreground-value);
   --color-page-glow: var(--color-page-glow-value);
 
+  --color-surface-strong: var(--color-surface-strong-value);
+
   --color-danger: var(--color-danger-value);
+  --color-danger-hover: var(--color-danger-hover-value);
+  --color-danger-pressed: var(--color-danger-pressed-value);
   --color-danger-soft: var(--color-danger-soft-value);
 
   --color-success: var(--color-success-value);

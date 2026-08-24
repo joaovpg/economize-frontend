@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, type Ref } from "react";
 import {
   FieldError,
   Input,
   Label,
   Text,
   TextField as AriaTextField,
-  type InputProps,
   type TextFieldProps as AriaTextFieldProps,
 } from "react-aria-components";
 
@@ -13,13 +12,19 @@ import { EyeIcon } from "@phosphor-icons/react/dist/csr/Eye";
 import { EyeSlashIcon } from "@phosphor-icons/react/dist/csr/EyeSlash";
 import { tv } from "tailwind-variants";
 
+import { Button } from "./Button";
+
 const control = tv({
   base: "flex min-h-11 items-center rounded-md border bg-surface transition motion-reduce:transition-none",
   variants: {
     invalid: {
-      true: "border-danger focus-within:shadow-[0_0_0_3px_color-mix(in_oklch,var(--color-danger)_16%,transparent)]",
+      true: "border-danger has-[input:focus]:shadow-[0_0_0_3px_color-mix(in_oklch,var(--color-danger)_16%,transparent)]",
       false:
-        "border-border-strong focus-within:border-brand focus-within:shadow-[0_0_0_3px_color-mix(in_oklch,var(--color-brand)_14%,transparent)]",
+        "border-border-strong hover:border-foreground/30 has-[input:focus]:border-brand has-[input:focus]:shadow-[0_0_0_3px_color-mix(in_oklch,var(--color-brand)_14%,transparent)]",
+    },
+    disabled: {
+      true: "cursor-not-allowed border-border bg-surface-muted opacity-70",
+      false: "",
     },
   },
 });
@@ -27,8 +32,9 @@ const control = tv({
 /**
  * Props do campo de texto do Economize.
  *
- * O componente segue a composição de TextField do React Aria e mantém as propriedades específicas
- * do input agrupadas em `inputProps`.
+ * O componente segue a composição de TextField do React Aria. As propriedades do input, como
+ * `name`, `type` e `placeholder`, são recebidas pelo próprio TextField e encaminhadas ao Input pelo
+ * contexto do React Aria.
  *
  * @example
  *   ```tsx
@@ -36,7 +42,8 @@ const control = tv({
  *     label="Senha"
  *     description="Use entre 8 e 128 caracteres."
  *     errorMessage={errorMessage}
- *     inputProps={{ type: "password", autoComplete: "new-password" }}
+ *     type="password"
+ *     autoComplete="new-password"
  *   />;
  *   ```;
  *
@@ -49,8 +56,10 @@ export type TextFieldProps = Omit<AriaTextFieldProps, "children"> & {
   description?: string;
   /** Mensagem de validação exibida na área reservada abaixo do input. */
   errorMessage?: string;
-  /** Propriedades nativas e do React Aria encaminhadas ao elemento input. */
-  inputProps?: InputProps;
+  /** Texto exibido dentro do input quando ele está vazio. */
+  placeholder?: string;
+  /** Referência encaminhada ao elemento input pelo contexto do React Aria. */
+  inputRef?: Ref<HTMLInputElement>;
 };
 
 /**
@@ -63,45 +72,70 @@ export function TextField({
   label,
   description,
   errorMessage,
-  inputProps,
+  placeholder,
+  inputRef,
+  type = "text",
+  isDisabled = false,
   ...textFieldProps
 }: TextFieldProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const isPassword = inputProps?.type === "password";
-  const inputType = isPassword && isPasswordVisible ? "text" : inputProps?.type;
+  const isPassword = type === "password";
+  const hasError = Boolean(errorMessage);
+  const inputType = isPassword && isPasswordVisible ? "text" : type;
 
   return (
-    <AriaTextField {...textFieldProps} isInvalid={Boolean(errorMessage)} className="grid gap-2">
-      <Label className="text-[0.84rem] font-semibold text-foreground">{label}</Label>
-      {description && (
-        <Text slot="description" className="-mt-1 text-[0.78rem] leading-normal text-muted">
-          {description}
-        </Text>
-      )}
-      <div className={control({ invalid: Boolean(errorMessage) })}>
-        <Input
-          {...inputProps}
-          type={inputType}
-          className="w-full min-w-0 border-0 bg-transparent px-3 py-2.5 text-[0.9rem] text-foreground outline-none placeholder:text-subtle"
-        />
-        {isPassword && (
-          <button
-            type="button"
-            className="grid size-11 shrink-0 place-items-center rounded-[0.625rem] border-0 bg-transparent p-0 text-subtle outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset"
-            aria-label={isPasswordVisible ? "Ocultar senha" : "Exibir senha"}
-            aria-pressed={isPasswordVisible}
-            onClick={() => setIsPasswordVisible((visible) => !visible)}
-          >
-            {isPasswordVisible ? (
-              <EyeIcon aria-hidden="true" size={19} />
-            ) : (
-              <EyeSlashIcon aria-hidden="true" size={19} />
-            )}
-          </button>
+    <AriaTextField
+      {...textFieldProps}
+      isInvalid={hasError}
+      isDisabled={isDisabled}
+      type={inputType}
+      className="grid gap-2"
+    >
+      <div className="flex flex-col gap-1">
+        <Label className="text-label text-foreground">{label}</Label>
+        {description && (
+          <Text slot="description" className="text-caption text-muted">
+            {description}
+          </Text>
         )}
       </div>
-      <div className="min-h-4.5">
-        <FieldError className="m-0 text-[0.78rem] text-danger">{errorMessage}</FieldError>
+      <div className="flex flex-col gap-1">
+        <div
+          className={control({
+            invalid: hasError,
+            disabled: isDisabled,
+          })}
+        >
+          <Input
+            ref={inputRef}
+            placeholder={placeholder}
+            className="w-full min-w-0 border-0 bg-transparent px-3 py-2.5 text-[0.9rem] text-foreground caret-brand outline-none placeholder:text-subtle"
+          />
+          {isPassword && (
+            <Button
+              type="button"
+              className="mr-1 rounded-[0.625rem] text-subtle"
+              variant="ghost"
+              size="sm"
+              isIconOnly
+              aria-label={isPasswordVisible ? "Ocultar senha" : "Exibir senha"}
+              aria-pressed={isPasswordVisible}
+              isDisabled={isDisabled}
+              onPress={() => setIsPasswordVisible((visible) => !visible)}
+            >
+              {isPasswordVisible ? (
+                <EyeIcon aria-hidden="true" size={19} />
+              ) : (
+                <EyeSlashIcon aria-hidden="true" size={19} />
+              )}
+            </Button>
+          )}
+        </div>
+        <div className="min-h-4">
+          <FieldError className="block font-ui text-xs leading-4 font-normal text-danger">
+            {errorMessage}
+          </FieldError>
+        </div>
       </div>
     </AriaTextField>
   );

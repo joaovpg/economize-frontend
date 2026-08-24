@@ -14,11 +14,16 @@
 
   --color-brand-value: var(--color-teal-300);
   --color-brand-hover-value: var(--color-teal-200);
+  --color-brand-pressed-value: var(--color-teal-100);
   --color-brand-soft-value: color-mix(in oklch, var(--color-teal-500) 12%, transparent);
   --color-brand-foreground-value: var(--color-teal-950);
   --color-page-glow-value: color-mix(in oklch, var(--color-teal-400) 12%, transparent);
 
+  --color-surface-strong-value: var(--color-slate-700);
+
   --color-danger-value: var(--color-red-100);
+  --color-danger-hover-value: color-mix(in oklch, var(--color-red-100) 90%, var(--color-red-600));
+  --color-danger-pressed-value: color-mix(in oklch, var(--color-red-100) 76%, var(--color-red-600));
   --color-danger-soft-value: color-mix(in oklch, var(--color-red-600) 14%, transparent);
 
   --color-success-value: var(--color-green-100);
