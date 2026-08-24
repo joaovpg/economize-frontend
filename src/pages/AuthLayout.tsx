@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import { Link as RouterLink, Outlet, useLocation } from "react-router-dom";
 
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/csr/ArrowRight";
 import { TrendUpIcon } from "@phosphor-icons/react/dist/csr/TrendUp";
 
 import { Link } from "../components/Link";
+import LoadingPage from "./LoadingPage";
 
 function LogoMark() {
   return (
@@ -20,6 +22,9 @@ function AuthLayout() {
   const { pathname } = useLocation();
   const isLogin = pathname === "/login";
   const alternatePath = isLogin ? "/cadastro" : "/login";
+  const contentMinHeight = isLogin
+    ? "min-h-[38rem] lg:min-h-[24rem]"
+    : "min-h-[52rem] lg:min-h-[37rem]";
 
   return (
     <main className="grid min-h-svh place-items-center bg-canvas px-5 py-8 sm:px-8 lg:px-16 lg:py-12">
@@ -59,9 +64,13 @@ function AuthLayout() {
           </Link>
         </header>
 
-        <div className="lg:grid lg:grid-cols-[1fr_20rem] lg:items-end lg:gap-24">
-          <Outlet />
-        </div>
+        <Suspense fallback={<LoadingPage className={contentMinHeight} />}>
+          <div
+            className={`lg:grid lg:grid-cols-[1fr_20rem] lg:items-end lg:gap-24 ${contentMinHeight}`}
+          >
+            <Outlet />
+          </div>
+        </Suspense>
       </section>
     </main>
   );
