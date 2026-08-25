@@ -18,7 +18,7 @@ This repository is the React frontend for `Economize`, an application for record
 
 - `src/main.tsx` is the browser entrypoint and renders `src/App.tsx`.
 - `src/` contains the application code; `public/` contains static assets served from the site root.
-- Vite is configured with the React Compiler through `@rolldown/plugin-babel`; do not disable or bypass that setup without a concrete reason.
+- Vite is configured with the React Compiler natively through Oxc (`oxc-transform-react`); do not disable or bypass that setup without a concrete reason.
 - TypeScript checks both app and Vite config code with `noUnusedLocals`, `noUnusedParameters`, `erasableSyntaxOnly`, and `noFallthroughCasesInSwitch`.
 
 ### Issue tracker
