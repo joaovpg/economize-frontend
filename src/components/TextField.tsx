@@ -30,27 +30,30 @@ const control = tv({
   },
 });
 
-const fieldCopyStyles = tv({
-  slots: {
-    label: "text-label",
-    description: "mb-1 text-caption",
-  },
-  variants: {
-    disabled: {
-      true: {
-        label: "text-subtle",
-        description: "text-subtle",
-      },
-      false: {
-        label: "text-foreground",
-        description: "text-muted",
+const fieldCopyStyles = tv(
+  {
+    slots: {
+      label: "text-label",
+      description: "mb-1 text-caption",
+    },
+    variants: {
+      disabled: {
+        true: {
+          label: "text-subtle",
+          description: "text-subtle",
+        },
+        false: {
+          label: "text-foreground",
+          description: "text-muted",
+        },
       },
     },
+    defaultVariants: {
+      disabled: false,
+    },
   },
-  defaultVariants: {
-    disabled: false,
-  },
-});
+  { twMerge: false },
+);
 
 const inputStyles = tv({
   base: "min-w-0 flex-1 border-0 bg-transparent py-2.5 font-ui text-sm leading-5 caret-brand outline-none placeholder:text-subtle",

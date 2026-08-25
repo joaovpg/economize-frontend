@@ -5,8 +5,9 @@ import {
   type LinkProps as AriaLinkProps,
   type LinkRenderProps,
 } from "react-aria-components";
+import { Link as RouterLink } from "react-router-dom";
 
-import { buttonStyles, type ButtonStyleProps } from "./buttonStyles";
+import { buttonStyles, type ButtonStyleProps } from "./Button/buttonStyles";
 import { IconSlot } from "./IconSlot";
 
 export type LinkProps = Omit<AriaLinkProps, "className"> &
@@ -61,7 +62,19 @@ export function Link({
   );
 
   return (
-    <AriaLink {...linkProps} ref={ref} className={resolvedClassName}>
+    <AriaLink
+      {...linkProps}
+      ref={ref}
+      className={resolvedClassName}
+      render={(props) => {
+        if (!("href" in props)) {
+          return <span {...props} />;
+        }
+
+        const { href, ...routerProps } = props;
+        return <RouterLink {...routerProps} to={href} />;
+      }}
+    >
       {resolvedChildren}
     </AriaLink>
   );

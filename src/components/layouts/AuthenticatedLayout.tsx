@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Outlet } from "react-router-dom";
 
-import LoadingPage from "./LoadingPage";
+import LoadingPage from "../../pages/LoadingPage";
 
 function AuthenticatedLayout() {
   return (

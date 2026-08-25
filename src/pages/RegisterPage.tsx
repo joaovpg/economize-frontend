@@ -72,7 +72,10 @@ function RegisterPage() {
   };
 
   return (
-    <>
+    <section
+      className="lg:grid lg:grid-cols-[1fr_20rem] lg:items-end lg:gap-24"
+      aria-labelledby="auth-title"
+    >
       <div>
         <span className="mb-7 block h-1 w-10 rounded-full bg-brand" aria-hidden="true" />
         <h1 className="m-0 max-w-[11ch] text-page-title text-foreground" id="auth-title">
@@ -182,7 +185,7 @@ function RegisterPage() {
           </form>
         )}
       </div>
-    </>
+    </section>
   );
 }
 

@@ -1,8 +1,8 @@
 import { lazy } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
-import AuthenticatedLayout from "./pages/AuthenticatedLayout";
-import AuthLayout from "./pages/AuthLayout";
+import AuthenticatedLayout from "./components/layouts/AuthenticatedLayout";
+import AuthLayout from "./components/layouts/AuthLayout";
 
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));

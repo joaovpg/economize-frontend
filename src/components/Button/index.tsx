@@ -7,8 +7,8 @@ import {
   type ButtonRenderProps,
 } from "react-aria-components";
 
+import { IconSlot } from "../IconSlot";
 import { buttonStyles, type ButtonStyleProps } from "./buttonStyles";
-import { IconSlot } from "./IconSlot";
 
 const pendingIndicator = (
   <span className="sr-only" aria-hidden="true">
