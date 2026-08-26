@@ -54,9 +54,9 @@ export function Link({
     children,
     (content: ReactNode, _renderProps: LinkRenderProps) => (
       <>
-        {!isIconOnly && <IconSlot>{leadingIcon}</IconSlot>}
+        {!isIconOnly && leadingIcon && <IconSlot>{leadingIcon}</IconSlot>}
         {isIconOnly ? <IconSlot>{content}</IconSlot> : content}
-        {!isIconOnly && <IconSlot>{trailingIcon}</IconSlot>}
+        {!isIconOnly && trailingIcon && <IconSlot>{trailingIcon}</IconSlot>}
       </>
     ),
   );

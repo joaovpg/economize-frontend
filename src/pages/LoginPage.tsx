@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/csr/ArrowRight";
 import { CheckCircleIcon } from "@phosphor-icons/react/dist/csr/CheckCircle";
-import { LockKeyIcon } from "@phosphor-icons/react/dist/csr/LockKey";
 import { isHTTPError } from "ky";
 import { z } from "zod";
 
@@ -120,36 +119,33 @@ function LoginPage() {
   };
 
   return (
-    <section
-      className="lg:grid lg:grid-cols-[1fr_20rem] lg:items-end lg:gap-24"
-      aria-labelledby="auth-title"
-    >
-      <div className="self-start">
-        <span className="mb-7 block h-1 w-10 rounded-full bg-brand" aria-hidden="true" />
-        <h1 className="m-0 max-w-[11ch] text-page-title text-foreground" id="auth-title">
+    <section className="auth-grid" aria-labelledby="auth-title">
+      <div className="auth-copy flex flex-col gap-5">
+        <span className="auth-accent" aria-hidden="true" />
+        <h1 className="m-0 max-w-[11ch] text-display-hero text-balance" id="auth-title">
           Vamos deixar isso simples.
         </h1>
-        <p className="mt-5 max-w-[32ch] text-body-small text-muted">
-          Entre para ver onde seu dinheiro está indo.
+        <p className="m-0 max-w-[35ch] text-body text-pretty text-muted">
+          Entre para acompanhar sua vida financeira com clareza. Sem destaque chamativo, sem ruído,
+          sem promessas exageradas.
         </p>
       </div>
 
-      <div className="mt-10 lg:mt-0">
+      <div>
         {submitted ? (
-          <output
-            className="grid grid-cols-[auto_1fr] gap-3.5 rounded-xl border border-success bg-success-soft p-4.5 shadow-[0_10px_30px_color-mix(in_oklch,var(--color-success)_8%,transparent)]"
-            aria-live="polite"
-          >
+          <output className="auth-success-card" aria-live="polite">
             <SuccessIcon />
-            <div>
-              <h2 className="m-0 mt-0.5 mb-1.5 text-[0.95rem] text-foreground">Login recebido.</h2>
-              <p className="m-0 text-[0.8rem] leading-normal text-muted">
+            <div className="flex flex-col gap-1.5">
+              <h2 className="m-0 text-title-compact text-foreground">
+                Login recebido.
+              </h2>
+              <p className="m-0 text-caption text-muted">
                 O servidor respondeu à tentativa de login.
               </p>
             </div>
             <Button
               type="button"
-              className="col-start-2 justify-self-start p-0 text-[0.78rem]"
+              className="col-start-2 justify-self-start"
               variant="link"
               onPress={() => setSubmitted(false)}
             >
@@ -157,41 +153,39 @@ function LoginPage() {
             </Button>
           </output>
         ) : (
-          <form className="grid gap-3" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-            <div className="grid gap-1">
-              <TextField
-                label="E-mail"
-                name={emailField.name}
-                onBlur={emailField.onBlur}
-                onInput={emailField.onChange}
-                inputRef={emailField.ref}
-                autoComplete="email"
-                maxLength={320}
-                placeholder="voce@exemplo.com"
-                type="email"
-                errorMessage={errors.email?.message}
-              />
-              <TextField
-                label="Senha"
-                name={senhaField.name}
-                onBlur={senhaField.onBlur}
-                onInput={senhaField.onChange}
-                inputRef={senhaField.ref}
-                type="password"
-                autoComplete="current-password"
-                maxLength={128}
-                placeholder="Digite sua senha"
-                errorMessage={errors.senha?.message}
-              />
-            </div>
-            <div className="-mt-1 flex justify-end text-[0.8rem]">
+          <form className="auth-form-card" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
+            <TextField
+              label="E-mail"
+              name={emailField.name}
+              onBlur={emailField.onBlur}
+              onInput={emailField.onChange}
+              inputRef={emailField.ref}
+              autoComplete="email"
+              maxLength={320}
+              placeholder="voce@exemplo.com"
+              type="email"
+              errorMessage={errors.email?.message}
+            />
+            <TextField
+              label="Senha"
+              name={senhaField.name}
+              onBlur={senhaField.onBlur}
+              onInput={senhaField.onChange}
+              inputRef={senhaField.ref}
+              type="password"
+              autoComplete="current-password"
+              maxLength={128}
+              placeholder="Digite sua senha"
+              errorMessage={errors.senha?.message}
+            />
+            <div className="flex justify-end">
               <Link className="font-bold" variant="link">
                 Esqueci minha senha
               </Link>
             </div>
             {submitError && (
               <p
-                className="m-0 rounded-md bg-danger-soft px-3 py-2 text-[0.78rem] leading-normal text-danger"
+                className="m-0 rounded-md bg-danger-soft px-3 py-2 text-validation text-danger"
                 role="alert"
                 aria-live="assertive"
               >
@@ -199,7 +193,7 @@ function LoginPage() {
               </p>
             )}
             <Button
-              className="mt-1 w-full"
+              className="w-full"
               variant="primary"
               type="submit"
               isPending={isSubmitting}
@@ -207,15 +201,12 @@ function LoginPage() {
             >
               {isSubmitting ? "Enviando..." : "Entrar"}
             </Button>
-            <p className="m-[0.0625rem_0_0] text-center text-[0.72rem] leading-normal text-subtle">
+            <p className="m-0 text-center text-caption text-subtle">
               Ao continuar, você concorda com uma experiência de controle financeiro mais
               consciente.
             </p>
           </form>
         )}
-        <p className="mt-8 flex items-center justify-center gap-1.5 text-caption text-subtle">
-          <LockKeyIcon aria-hidden="true" size={13} /> Seus dados ficam protegidos.
-        </p>
       </div>
     </section>
   );

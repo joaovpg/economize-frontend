@@ -1,41 +1,45 @@
 @utility text-display-hero {
-  @apply font-display text-[clamp(2.75rem,7vw,4rem)] leading-[1.08] font-semibold tracking-display;
+  @apply font-display text-[clamp(2.875rem,5vw,3.625rem)] leading-tight font-semibold tracking-display;
 }
 
 @utility text-page-title {
-  @apply font-display text-[clamp(2rem,4vw,3rem)] leading-[1.12] font-semibold tracking-display;
+  @apply font-display text-[clamp(2rem,4vw,3rem)] leading-tight font-semibold tracking-display;
 }
 
 @utility text-section-title {
-  @apply font-display text-3xl leading-snug font-semibold tracking-heading;
+  @apply font-display text-2xl leading-8 font-semibold tracking-heading;
 }
 
 @utility text-card-title {
-  @apply font-display text-2xl leading-snug font-semibold tracking-heading;
+  @apply font-display text-xl leading-7 font-semibold tracking-heading;
+}
+
+@utility text-title-compact {
+  @apply font-ui text-md leading-6 font-semibold;
 }
 
 @utility text-body-large {
-  @apply font-ui text-lg leading-relaxed font-normal;
+  @apply font-ui text-lg leading-7 font-normal;
 }
 
 @utility text-body {
-  @apply font-ui text-md leading-[1.65] font-normal;
+  @apply font-ui text-md leading-6 font-normal;
 }
 
 @utility text-body-small {
-  @apply font-ui text-sm leading-normal font-normal;
+  @apply font-ui text-sm leading-5 font-normal;
 }
 
 @utility text-label {
-  @apply font-ui text-sm leading-[1.4] font-medium;
+  @apply font-ui text-sm leading-5 font-semibold;
 }
 
 @utility text-button {
-  @apply font-ui text-sm leading-[1.2] font-semibold;
+  @apply font-ui text-sm leading-5 font-semibold;
 }
 
 @utility text-caption {
-  @apply font-ui text-xs leading-[1.4] font-normal;
+  @apply font-ui text-xs leading-4 font-normal;
 }
 
 @utility text-validation {

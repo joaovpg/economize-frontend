@@ -82,9 +82,13 @@ export function Button({
           <PendingSpinner />
         ) : (
           <>
-            {renderProps.isPending ? <PendingSpinner /> : <IconSlot>{leadingIcon}</IconSlot>}
+            {renderProps.isPending ? (
+              <PendingSpinner />
+            ) : (
+              leadingIcon && <IconSlot>{leadingIcon}</IconSlot>
+            )}
             {isIconOnly ? <IconSlot>{content}</IconSlot> : content}
-            {!isIconOnly && <IconSlot>{trailingIcon}</IconSlot>}
+            {!isIconOnly && trailingIcon && <IconSlot>{trailingIcon}</IconSlot>}
           </>
         )}
         {renderProps.isPending && <PendingProgress />}

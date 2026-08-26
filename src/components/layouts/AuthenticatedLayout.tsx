@@ -5,7 +5,7 @@ import LoadingPage from "../../pages/LoadingPage";
 
 function AuthenticatedLayout() {
   return (
-    <div className="min-h-svh bg-canvas px-5 py-8 text-foreground">
+    <div className="app-background min-h-svh px-5 py-8 text-foreground">
       <Suspense fallback={<LoadingPage />}>
         <Outlet />
       </Suspense>

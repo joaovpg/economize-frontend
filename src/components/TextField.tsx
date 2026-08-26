@@ -16,7 +16,7 @@ import { Button } from "./Button";
 import { IconSlot } from "./IconSlot";
 
 const control = tv({
-  base: "flex h-11 min-h-11 min-w-0 items-center gap-2 rounded-lg border bg-surface px-3.5 font-ui text-subtle transition-[background-color,border-color,outline-color] motion-reduce:transition-none",
+  base: "flex h-12 min-h-12 min-w-0 items-center gap-2.5 rounded-xl border bg-[linear-gradient(180deg,rgb(255_255_255_/_0.7),#fffdf8)] px-3.5 font-ui text-subtle transition-[background-color,border-color,outline-color] motion-reduce:transition-none",
   variants: {
     invalid: {
       true: "border-danger focus-within:!border-danger focus-within:outline-danger focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
@@ -34,7 +34,7 @@ const fieldCopyStyles = tv(
   {
     slots: {
       label: "text-label",
-      description: "mb-1 text-caption",
+      description: "-mt-1 text-caption",
     },
     variants: {
       disabled: {
@@ -55,21 +55,24 @@ const fieldCopyStyles = tv(
   { twMerge: false },
 );
 
-const inputStyles = tv({
-  base: "min-w-0 flex-1 border-0 bg-transparent py-2.5 font-ui text-sm leading-5 caret-brand outline-none placeholder:text-subtle",
-  variants: {
-    disabled: {
-      true: "text-subtle",
-      false: "text-foreground",
+const inputStyles = tv(
+  {
+    base: "min-w-0 flex-1 border-0 bg-transparent text-body-small caret-brand outline-none placeholder:text-subtle",
+    variants: {
+      disabled: {
+        true: "text-subtle",
+        false: "text-foreground",
+      },
+    },
+    defaultVariants: {
+      disabled: false,
     },
   },
-  defaultVariants: {
-    disabled: false,
-  },
-});
+  { twMerge: false },
+);
 
 const passwordToggleStyles = tv({
-  base: "rounded-md text-subtle data-focus-visible:!outline-offset-0",
+  base: "!h-8 !min-h-8 !w-8 !min-w-8 rounded-lg text-subtle data-focus-visible:!outline-offset-0",
   variants: {
     invalid: {
       true: "data-focus-visible:outline-danger",

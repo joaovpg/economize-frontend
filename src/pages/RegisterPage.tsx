@@ -72,38 +72,33 @@ function RegisterPage() {
   };
 
   return (
-    <section
-      className="lg:grid lg:grid-cols-[1fr_20rem] lg:items-end lg:gap-24"
-      aria-labelledby="auth-title"
-    >
-      <div>
-        <span className="mb-7 block h-1 w-10 rounded-full bg-brand" aria-hidden="true" />
-        <h1 className="m-0 max-w-[11ch] text-page-title text-foreground" id="auth-title">
-          Comece a organizar sua vida financeira.
+    <section className="auth-grid items-start" aria-labelledby="auth-title">
+      <div className="auth-copy flex flex-col gap-5 pt-5.5 max-[56.25rem]:pt-0">
+        <span className="auth-accent" aria-hidden="true" />
+        <h1 className="m-0 max-w-[11ch] text-display-hero text-balance" id="auth-title">
+          Crie sua conta.
         </h1>
-        <p className="mt-5 max-w-[32ch] text-body-small text-muted">
-          Um espaço simples para registrar o que importa e gastar com mais clareza.
+        <p className="m-0 max-w-[35ch] text-body text-pretty text-muted">
+          Cadastro direto, com campos fáceis de ler e sem elementos competindo com a tarefa
+          principal.
         </p>
       </div>
 
-      <div className="mt-10 lg:mt-0">
+      <div>
         {submitted ? (
-          <output
-            className="grid grid-cols-[auto_1fr] gap-3.5 rounded-xl border border-success bg-success-soft p-4.5 shadow-[0_10px_30px_color-mix(in_oklch,var(--color-success)_8%,transparent)]"
-            aria-live="polite"
-          >
+          <output className="auth-success-card" aria-live="polite">
             <SuccessIcon />
-            <div>
-              <h2 className="m-0 mt-0.5 mb-1.5 text-[0.95rem] text-foreground">
+            <div className="flex flex-col gap-1.5">
+              <h2 className="m-0 text-title-compact text-foreground">
                 Cadastro validado.
               </h2>
-              <p className="m-0 text-[0.8rem] leading-normal text-muted">
+              <p className="m-0 text-caption text-muted">
                 Esta é uma demonstração local. Nenhum dado foi enviado ao servidor.
               </p>
             </div>
             <Button
               type="button"
-              className="col-start-2 justify-self-start p-0 text-[0.78rem]"
+              className="col-start-2 justify-self-start"
               variant="link"
               onPress={() => setSubmitted(false)}
             >
@@ -111,66 +106,60 @@ function RegisterPage() {
             </Button>
           </output>
         ) : (
-          <form className="grid gap-3.5" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-            <div className="grid gap-1">
-              <TextField
-                label="Nome completo"
-                name={nomeField.name}
-                onBlur={nomeField.onBlur}
-                onInput={nomeField.onChange}
-                inputRef={nomeField.ref}
-                autoComplete="name"
-                maxLength={120}
-                placeholder="Como você gosta de ser chamado?"
-                errorMessage={errors.nome?.message}
-              />
-              <TextField
-                label="E-mail"
-                name={emailField.name}
-                onBlur={emailField.onBlur}
-                onInput={emailField.onChange}
-                inputRef={emailField.ref}
-                autoComplete="email"
-                maxLength={320}
-                placeholder="voce@exemplo.com"
-                type="email"
-                errorMessage={errors.email?.message}
-              />
-              <TextField
-                label="Senha"
-                description="Use entre 8 e 128 caracteres."
-                name={senhaField.name}
-                onBlur={senhaField.onBlur}
-                onInput={senhaField.onChange}
-                inputRef={senhaField.ref}
-                type="password"
-                autoComplete="new-password"
-                maxLength={128}
-                placeholder="Crie uma senha segura"
-                errorMessage={errors.senha?.message}
-              />
-              <TextField
-                label="Confirme sua senha"
-                description="Digite a senha novamente para confirmar."
-                name={confirmacaoField.name}
-                onBlur={confirmacaoField.onBlur}
-                onInput={confirmacaoField.onChange}
-                inputRef={confirmacaoField.ref}
-                type="password"
-                autoComplete="new-password"
-                maxLength={128}
-                placeholder="Repita sua senha"
-                errorMessage={errors.confirmacao?.message}
-              />
-            </div>
-            <div className="-mt-0.5 flex items-center gap-2.5 text-[0.78rem] text-muted">
-              <span className="size-1.75 shrink-0 rounded-full bg-brand" aria-hidden="true" />
-              <span>
-                Fuso horário detectado: <strong>{timezone}</strong>
-              </span>
-            </div>
+          <form className="auth-form-card" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
+            <TextField
+              label="Nome completo"
+              name={nomeField.name}
+              onBlur={nomeField.onBlur}
+              onInput={nomeField.onChange}
+              inputRef={nomeField.ref}
+              autoComplete="name"
+              maxLength={120}
+              placeholder="Como você gosta de ser chamado?"
+              errorMessage={errors.nome?.message}
+            />
+            <TextField
+              label="E-mail"
+              name={emailField.name}
+              onBlur={emailField.onBlur}
+              onInput={emailField.onChange}
+              inputRef={emailField.ref}
+              autoComplete="email"
+              maxLength={320}
+              placeholder="voce@exemplo.com"
+              type="email"
+              errorMessage={errors.email?.message}
+            />
+            <TextField
+              label="Senha"
+              description="Use entre 8 e 128 caracteres."
+              name={senhaField.name}
+              onBlur={senhaField.onBlur}
+              onInput={senhaField.onChange}
+              inputRef={senhaField.ref}
+              type="password"
+              autoComplete="new-password"
+              maxLength={128}
+              placeholder="Crie uma senha segura"
+              errorMessage={errors.senha?.message}
+            />
+            <TextField
+              label="Confirme sua senha"
+              name={confirmacaoField.name}
+              onBlur={confirmacaoField.onBlur}
+              onInput={confirmacaoField.onChange}
+              inputRef={confirmacaoField.ref}
+              type="password"
+              autoComplete="new-password"
+              maxLength={128}
+              placeholder="Repita sua senha"
+              errorMessage={errors.confirmacao?.message}
+            />
+            <p className="m-0 flex items-center gap-2.25 text-caption text-pretty text-muted before:size-1.75 before:flex-none before:shrink-0 before:rounded-full before:bg-brand before:content-['']">
+              Fuso horário detectado: <strong>{timezone}</strong>
+            </p>
             <Button
-              className="mt-1 w-full"
+              className="w-full"
               variant="primary"
               type="submit"
               isPending={isSubmitting}
@@ -178,7 +167,7 @@ function RegisterPage() {
             >
               {isSubmitting ? "Enviando..." : "Criar minha conta"}
             </Button>
-            <p className="m-[0.0625rem_0_0] text-center text-[0.72rem] leading-normal text-subtle">
+            <p className="m-0 text-center text-caption text-subtle">
               Ao continuar, você concorda com uma experiência de controle financeiro mais
               consciente.
             </p>
