@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { Button } from "../components/Button";
 import { TextField } from "../components/TextField";
+import { authCardStyles, authCopyStyles, authGridStyles } from "./authStyles";
 
 const emailSchema = z
   .email("Digite um e-mail válido.")
@@ -72,9 +73,12 @@ function RegisterPage() {
   };
 
   return (
-    <section className="auth-grid items-start" aria-labelledby="auth-title">
-      <div className="auth-copy flex flex-col gap-5 pt-5.5 max-[56.25rem]:pt-0">
-        <span className="auth-accent" aria-hidden="true" />
+    <section className={authGridStyles({ align: "start" })} aria-labelledby="auth-title">
+      <div className={authCopyStyles({ registration: true })}>
+        <span
+          className="block h-1 w-10 rounded-full bg-linear-to-r from-brand to-teal-200"
+          aria-hidden="true"
+        />
         <h1 className="m-0 max-w-[11ch] text-display-hero text-balance" id="auth-title">
           Crie sua conta.
         </h1>
@@ -86,12 +90,10 @@ function RegisterPage() {
 
       <div>
         {submitted ? (
-          <output className="auth-success-card" aria-live="polite">
+          <output className={authCardStyles({ state: "success" })} aria-live="polite">
             <SuccessIcon />
             <div className="flex flex-col gap-1.5">
-              <h2 className="m-0 text-title-compact text-foreground">
-                Cadastro validado.
-              </h2>
+              <h2 className="m-0 text-title-compact text-foreground">Cadastro validado.</h2>
               <p className="m-0 text-caption text-muted">
                 Esta é uma demonstração local. Nenhum dado foi enviado ao servidor.
               </p>
@@ -106,7 +108,11 @@ function RegisterPage() {
             </Button>
           </output>
         ) : (
-          <form className="auth-form-card" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
+          <form
+            className={authCardStyles({ state: "form" })}
+            onSubmit={handleSubmit(handleFormSubmit)}
+            noValidate
+          >
             <TextField
               label="Nome completo"
               name={nomeField.name}

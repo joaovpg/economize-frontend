@@ -12,6 +12,7 @@ import { Button } from "../components/Button";
 import { Link } from "../components/Link";
 import { TextField } from "../components/TextField";
 import { api } from "../lib/api";
+import { authCardStyles, authCopyStyles, authGridStyles } from "./authStyles";
 
 const emailSchema = z
   .email("Digite um e-mail válido.")
@@ -82,7 +83,7 @@ function LoginPage() {
       await api.post("autenticacao/login", {
         json: { email: data.email, senha: data.senha },
       });
-      await navigate("/dashboard", { replace: true });
+      await navigate("/summary", { replace: true });
     } catch (error) {
       if (!isHTTPError(error)) {
         setSubmitError("Não foi possível conectar ao servidor. Tente novamente.");
@@ -119,9 +120,12 @@ function LoginPage() {
   };
 
   return (
-    <section className="auth-grid" aria-labelledby="auth-title">
-      <div className="auth-copy flex flex-col gap-5">
-        <span className="auth-accent" aria-hidden="true" />
+    <section className={authGridStyles()} aria-labelledby="auth-title">
+      <div className={authCopyStyles()}>
+        <span
+          className="block h-1 w-10 rounded-full bg-linear-to-r from-brand to-teal-200"
+          aria-hidden="true"
+        />
         <h1 className="m-0 max-w-[11ch] text-display-hero text-balance" id="auth-title">
           Vamos deixar isso simples.
         </h1>
@@ -133,12 +137,10 @@ function LoginPage() {
 
       <div>
         {submitted ? (
-          <output className="auth-success-card" aria-live="polite">
+          <output className={authCardStyles({ state: "success" })} aria-live="polite">
             <SuccessIcon />
             <div className="flex flex-col gap-1.5">
-              <h2 className="m-0 text-title-compact text-foreground">
-                Login recebido.
-              </h2>
+              <h2 className="m-0 text-title-compact text-foreground">Login recebido.</h2>
               <p className="m-0 text-caption text-muted">
                 O servidor respondeu à tentativa de login.
               </p>
@@ -153,7 +155,11 @@ function LoginPage() {
             </Button>
           </output>
         ) : (
-          <form className="auth-form-card" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
+          <form
+            className={authCardStyles({ state: "form" })}
+            onSubmit={handleSubmit(handleFormSubmit)}
+            noValidate
+          >
             <TextField
               label="E-mail"
               name={emailField.name}

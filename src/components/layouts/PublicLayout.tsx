@@ -18,14 +18,14 @@ function LogoMark() {
   );
 }
 
-function AuthLayout() {
+function PublicLayout() {
   const { pathname } = useLocation();
   const isLogin = pathname === "/login";
   const alternatePath = isLogin ? "/cadastro" : "/login";
   const linkTitle = isLogin ? "Criar conta" : "Entrar";
 
   return (
-    <div className="app-background relative isolate grid min-h-svh place-items-center overflow-hidden px-5 py-8 text-foreground md:px-8 lg:py-13">
+    <div className="app-background relative isolate grid min-h-svh place-items-center overflow-hidden bg-canvas px-5 py-8 text-foreground md:px-8 lg:py-13">
       <div className="relative z-1 grid w-full max-w-260 gap-13.5 lg:gap-23">
         <header className="flex items-center justify-between gap-6">
           <Link
@@ -55,4 +55,4 @@ function AuthLayout() {
   );
 }
 
-export default AuthLayout;
+export default PublicLayout;

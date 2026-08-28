@@ -1,30 +1,27 @@
-# Issue tracker: Local Markdown
+# Issue tracker local
 
-Issues and specs (you may know a spec as a PRD) for this repo live as markdown files in `.scratch/`.
+As issues e especificações deste repositório ficam em arquivos Markdown dentro de `.scratch/`.
 
-## Conventions
+## Estrutura
 
-- One feature per directory: `.scratch/<feature-slug>/`
-- The spec is `.scratch/<feature-slug>/spec.md`
-- Implementation issues are one file per ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` — never a single combined tickets file
-- Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
-- Comments and conversation history append to the bottom of the file under a `## Comments` heading
+- Use um diretório por feature: `.scratch/<feature-slug>/`.
+- Salve a especificação em `.scratch/<feature-slug>/spec.md`.
+- Salve cada issue de implementação em `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, com numeração iniciada em `01`. Não reúna tickets distintos em um único arquivo.
+- Registre o estado em uma linha `Status:` próxima ao início da issue, usando os valores do [guia de rótulos](triage-labels.md).
+- Acrescente comentários e histórico da conversa ao final do arquivo, sob o título `## Comments`.
 
-## When a skill says "publish to the issue tracker"
+## Operações solicitadas por skills
 
-Create a new file under `.scratch/<feature-slug>/` (creating the directory if needed).
+- Quando uma skill pedir para publicar no issue tracker, crie um arquivo em `.scratch/<feature-slug>/`, criando o diretório quando necessário.
+- Quando uma skill pedir a issue relevante, leia o caminho ou o número informado pelo usuário.
 
-## When a skill says "fetch the relevant ticket"
+## Operações de wayfinding
 
-Read the file at the referenced path. The user will normally pass the path or the issue number directly.
+O mapa possui um arquivo filho para cada ticket:
 
-## Wayfinding operations
-
-Used by `/wayfinder`. The **map** is a file with one **child** file per ticket.
-
-- **Map**: `.scratch/<effort>/map.md` — the Notes / Decisions-so-far / Fog body.
-- **Child ticket**: `.scratch/<effort>/issues/NN-<slug>.md`, numbered from `01`, with the question in the body. A `Type:` line records the ticket type (`research`/`prototype`/`grilling`/`task`); a `Status:` line records `claimed`/`resolved`.
-- **Blocking**: a `Blocked by: NN, NN` line near the top. A ticket is unblocked when every file it lists is `resolved`.
-- **Frontier**: scan `.scratch/<effort>/issues/` for files that are open, unblocked, and unclaimed; first by number wins.
-- **Claim**: set `Status: claimed` and save before any work.
-- **Resolve**: append the answer under an `## Answer` heading, set `Status: resolved`, then append a context pointer (gist + link) to the map's Decisions-so-far in `map.md`.
+- **Mapa:** `.scratch/<effort>/map.md`, com `Notes`, `Decisions-so-far` e `Fog`.
+- **Ticket filho:** `.scratch/<effort>/issues/NN-<slug>.md`, numerado a partir de `01`, com a pergunta no corpo. A linha `Type:` usa `research`, `prototype`, `grilling` ou `task`; a linha `Status:` usa `claimed` ou `resolved`.
+- **Bloqueio:** a linha `Blocked by: NN, NN` fica próxima ao início. O ticket é desbloqueado quando todos os arquivos listados estão com `Status: resolved`.
+- **Fronteira:** examine `.scratch/<effort>/issues/` e selecione o primeiro número entre os tickets abertos, desbloqueados e não reivindicados.
+- **Reivindicação:** defina `Status: claimed` e salve antes de iniciar o trabalho.
+- **Resolução:** acrescente a resposta sob `## Answer`, defina `Status: resolved` e adicione em `Decisions-so-far`, no `map.md`, um resumo com link para o contexto.

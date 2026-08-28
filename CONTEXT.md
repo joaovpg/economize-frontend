@@ -2,9 +2,12 @@
 
 ## Autenticação
 
-- **Pessoa não autenticada**: visitante sem uma sessão válida no frontend.
-- **Pessoa autenticada**: visitante associado a uma sessão válida, com acesso às rotas privadas.
-- **Sessão**: estado que informa se a pessoa está carregando, não autenticada ou autenticada.
+- **Pessoa não autenticada**: visitante sem uma sessão válida reconhecida pelo servidor.
+- **Pessoa autenticada**: visitante associado a uma sessão válida reconhecida pelo servidor, com
+  acesso às rotas privadas.
+- **Sessão**: vínculo de autenticação gerenciado pelo servidor. A validade da sessão é confirmada
+  pelas respostas da API; quando ela deixa de ser válida, operações privadas são recusadas e a
+  pessoa é direcionada ao login.
 
 ## Navegação
 

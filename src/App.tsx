@@ -1,10 +1,11 @@
 import { lazy } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
-import AuthenticatedLayout from "./components/layouts/AuthenticatedLayout";
-import AuthLayout from "./components/layouts/AuthLayout";
+import PrivateLayout from "./components/layouts/PrivateLayout";
+import PublicLayout from "./components/layouts/PublicLayout";
 
-const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const SummaryPage = lazy(() => import("./pages/SummaryPage"));
+const ComingSoonPage = lazy(() => import("./pages/ComingSoonPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
@@ -13,14 +14,33 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<AuthLayout />}>
+        <Route element={<PublicLayout />}>
           <Route path="login" element={<LoginPage />} />
           <Route path="cadastro" element={<RegisterPage />} />
         </Route>
 
-        <Route element={<AuthenticatedLayout />}>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
+        <Route element={<PrivateLayout />}>
+          <Route path="/" element={<Navigate to="/summary" replace />} />
+          <Route path="/dashboard" element={<Navigate to="/summary" replace />} />
+          <Route path="/summary" element={<SummaryPage />} />
+          <Route
+            path="/transactions"
+            element={
+              <ComingSoonPage
+                title="Transações"
+                description="Acompanhe e organize todos os seus movimentos em um só lugar."
+              />
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ComingSoonPage
+                title="Perfil"
+                description="As configurações da sua conta estarão disponíveis em breve."
+              />
+            }
+          />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

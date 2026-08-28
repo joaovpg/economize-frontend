@@ -1,13 +1,13 @@
-# Triage Labels
+# Rótulos de triagem
 
-The skills speak in terms of five canonical triage roles. This file maps those roles to the actual label strings used in this repo's issue tracker.
+As skills usam cinco papéis canônicos de triagem. Como os nomes já são os valores aceitos pelo issue tracker local, preserve-os em inglês.
 
-| Label in mattpocock/skills | Label in our tracker | Meaning                                  |
-| -------------------------- | -------------------- | ---------------------------------------- |
-| `needs-triage`             | `needs-triage`       | Maintainer needs to evaluate this issue  |
-| `needs-info`               | `needs-info`         | Waiting on reporter for more information |
-| `ready-for-agent`          | `ready-for-agent`    | Fully specified, ready for an AFK agent  |
-| `ready-for-human`          | `ready-for-human`    | Requires human implementation            |
-| `wontfix`                  | `wontfix`            | Will not be actioned                     |
+| Papel canônico    | Valor no tracker  | Significado                               |
+| ----------------- | ----------------- | ----------------------------------------- |
+| `needs-triage`    | `needs-triage`    | Precisa de avaliação por um mantenedor    |
+| `needs-info`      | `needs-info`      | Aguarda mais informações do autor         |
+| `ready-for-agent` | `ready-for-agent` | Está especificada e pronta para um agente |
+| `ready-for-human` | `ready-for-human` | Exige implementação humana                |
+| `wontfix`         | `wontfix`         | Não será implementada                     |
 
-When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from this table.
+Quando uma skill mencionar um papel, use o valor correspondente desta tabela.

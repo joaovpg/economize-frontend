@@ -1,5 +1,7 @@
 import { tv } from "tailwind-variants";
 
+import type { VariantProps } from "tailwind-variants";
+
 export const buttonStyles = tv(
   {
     base: "inline-flex h-[var(--button-height)] min-w-max cursor-pointer select-none items-center justify-center gap-2 whitespace-nowrap rounded-[10px] border border-transparent px-[var(--button-padding-x)] py-0 text-button no-underline shadow-none outline-none transition-[background-color] duration-150 ease-out data-disabled:cursor-not-allowed data-pending:cursor-wait data-focus-visible:outline-solid data-focus-visible:outline-2 data-focus-visible:outline-offset-2 motion-reduce:transition-none [&>svg]:size-4.5 [&>svg]:shrink-0",
@@ -34,14 +36,4 @@ export const buttonStyles = tv(
   { twMerge: false },
 );
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "link";
-export type ButtonSize = "sm" | "md" | "lg";
-
-export type ButtonStyleProps = {
-  /** Variante visual compartilhada por Button e Link. */
-  variant?: ButtonVariant;
-  /** Tamanho do controle. */
-  size?: ButtonSize;
-  /** Troca o padding por um quadrado com a altura do tamanho escolhido. */
-  isIconOnly?: boolean;
-};
+export type ButtonStyleProps = VariantProps<typeof buttonStyles>;

@@ -7,7 +7,7 @@
 
   --color-foreground-value: var(--color-slate-900);
   --color-muted-value: var(--color-slate-600);
-  --color-subtle-value: var(--color-slate-500);
+  --color-subtle-value: var(--color-slate-600);
 
   --color-border-value: var(--color-slate-200);
   --color-border-strong-value: var(--color-slate-300);
@@ -21,7 +21,7 @@
 
   --color-surface-strong-value: var(--color-slate-200);
 
-  --color-danger-value: var(--color-red-600);
+  --color-danger-value: var(--color-red-700);
   --color-danger-hover-value: var(--color-red-700);
   --color-danger-pressed-value: color-mix(
     in oklch,
@@ -30,9 +30,9 @@
   );
   --color-danger-soft-value: var(--color-red-50);
 
-  --color-success-value: var(--color-green-600);
+  --color-success-value: var(--color-green-700);
   --color-success-soft-value: var(--color-green-50);
 
-  --color-warning-value: var(--color-amber-600);
+  --color-warning-value: var(--color-amber-700);
   --color-warning-soft-value: var(--color-amber-50);
 }
