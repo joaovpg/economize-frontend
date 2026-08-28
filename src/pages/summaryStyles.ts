@@ -54,8 +54,7 @@ export const summaryStyles = {
   ledgerDivider: "my-1.5 mb-2 h-px bg-border-strong",
   ledgerTotal:
     "flex items-baseline justify-between gap-4 text-caption text-muted max-[28rem]:gap-3",
-  ledgerTotalValue:
-    "whitespace-nowrap font-ui text-3xl font-bold leading-none tracking-[-0.045em] text-foreground tabular-nums",
+  ledgerTotalValue: "whitespace-nowrap text-metric text-foreground tabular-nums",
   contentGrid:
     "grid grid-cols-[minmax(0,1.05fr)_minmax(18rem,0.95fr)] gap-4 max-[48rem]:grid-cols-1",
   cardHeading: "flex items-baseline justify-between gap-4",
@@ -73,7 +72,7 @@ export const summaryStyles = {
     "flex min-w-0 items-center justify-between gap-4 rounded-[0.875rem] border border-border bg-[color-mix(in_oklch,var(--color-surface)_48%,transparent)] px-3 py-[0.6875rem] max-[28rem]:items-start max-[28rem]:flex-col",
   movementCopy: "min-w-0",
   movementPrimary: "block truncate font-ui text-caption font-bold text-foreground",
-  movementSecondary: "mt-0.75 block truncate font-ui text-xs text-subtle",
+  movementSecondary: "mt-0.75 block truncate text-caption text-subtle",
   demoNote: "m-0 mt-4 text-caption text-subtle",
   selectRoot: "min-w-0",
   selectValue: "min-w-0 flex-1 truncate",
@@ -124,13 +123,13 @@ export const summarySelectTriggerStyles = tv({
       filter:
         "min-h-[2.625rem] w-full rounded-xl bg-[color-mix(in_oklch,var(--color-surface)_70%,transparent)] px-3",
       header:
-        "min-h-[2.625rem] rounded-full bg-[color-mix(in_oklch,var(--color-surface)_68%,transparent)] px-3.5 font-ui text-xs leading-4 font-semibold max-[48rem]:flex-1 max-[48rem]:justify-center",
+        "min-h-[2.625rem] rounded-full bg-[color-mix(in_oklch,var(--color-surface)_68%,transparent)] px-3.5 text-caption-strong max-[48rem]:flex-1 max-[48rem]:justify-center",
     },
   },
 });
 
 export const summaryStatusStyles = tv({
-  base: "inline-flex flex-none items-center rounded-full border px-2 py-1 font-ui text-xs leading-4 font-semibold tabular-nums whitespace-nowrap",
+  base: "inline-flex flex-none items-center rounded-full border px-2 py-1 text-caption-strong tabular-nums whitespace-nowrap",
   variants: {
     kind: {
       income:

@@ -7,7 +7,7 @@ export const privateLayoutStyles = {
   topbar:
     "flex items-center justify-between gap-4.5 border-b border-border bg-[color-mix(in_oklch,var(--color-canvas)_76%,transparent)] px-6 py-4.5 backdrop-blur-[14px] max-[60rem]:px-5 max-[48rem]:grid max-[48rem]:grid-cols-[minmax(0,1fr)_auto] max-[48rem]:gap-3.5 max-[48rem]:p-4",
   brand:
-    "gap-2.5 !text-foreground font-ui text-md font-bold tracking-[-0.025em] no-underline whitespace-nowrap",
+    "gap-2.5 !text-foreground text-title-compact font-bold tracking-[-0.025em] no-underline whitespace-nowrap",
   brandMark:
     "grid size-7.75 place-items-center rounded-[10px] bg-brand text-brand-foreground shadow-[0_12px_28px_color-mix(in_oklch,var(--color-brand)_18%,transparent)]",
   nav: "flex items-center justify-center gap-1.5 rounded-full border border-border bg-[color-mix(in_oklch,var(--color-surface)_58%,transparent)] p-1 max-[48rem]:col-span-2 max-[48rem]:w-full max-[48rem]:justify-start max-[48rem]:overflow-x-auto",

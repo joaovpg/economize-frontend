@@ -1,21 +1,18 @@
-# Instruções para agentes
+# Economize frontend
 
-O Economize é um frontend React para registrar e controlar receitas, despesas, contas, categorias, recorrências e transferências.
+Frontend React do Economize, uma aplicação web para registrar, entender e controlar finanças pessoais.
 
-## Regras essenciais
+## Essencial
 
-- Use exclusivamente `pnpm`.
-- Antes de entregar uma mudança relevante, execute, nesta ordem, `pnpm fmt:check`, `pnpm lint` e `pnpm build`.
-- `pnpm build` é o gate de typecheck e produção: executa `tsc -b` e depois `vite build`.
+- Use `pnpm` como gerenciador de pacotes.
+- Antes de concluir uma alteração, execute, nesta ordem: `pnpm fmt:check`, `pnpm lint` e
+  `pnpm build`.
+- `pnpm build` é também a verificação de tipos: ele executa `tsc -b` antes do build do Vite.
+- O projeto ainda não possui script ou framework de testes; não declare testes como executados.
 
-## Instruções por assunto
+## Instruções por contexto
 
-Consulte somente os guias aplicáveis à tarefa:
-
-- [Convenções de projeto](docs/agents/project-conventions.md): dependências, bibliotecas adotadas e organização do código.
-- [Texto e formatos do produto](docs/agents/product-content.md): idioma, terminologia e convenções brasileiras de exibição.
-- [Estilos e design system](docs/agents/styling.md): Tailwind CSS, `tailwind-variants`, tokens e CSS customizado.
-- [Validação e comandos](docs/agents/validation.md): ferramentas, scripts auxiliares e política de testes.
-- [Contexto e documentação](docs/agents/workflow.md): quando consultar produto, domínio, design, ADRs e especificações.
-- [Issue tracker local](docs/agents/issue-tracker.md): estrutura e operação das issues em Markdown.
-- [Índice completo e estrutura de `docs/`](docs/agents/README.md).
+- [Desenvolvimento e validação](docs/agent-guidelines/development.md)
+- [Arquitetura frontend](docs/agent-guidelines/frontend-architecture.md)
+- [Interface e estilos](docs/agent-guidelines/ui-and-styling.md)
+- [Decisões arquiteturais aceitas](docs/adr/)

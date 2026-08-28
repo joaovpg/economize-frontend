@@ -18,6 +18,10 @@
   @apply font-ui text-md leading-6 font-semibold;
 }
 
+@utility text-metric {
+  @apply font-ui text-3xl leading-none font-bold tracking-metric;
+}
+
 @utility text-body-large {
   @apply font-ui text-lg leading-7 font-normal;
 }
@@ -40,6 +44,10 @@
 
 @utility text-caption {
   @apply font-ui text-xs leading-4 font-normal;
+}
+
+@utility text-caption-strong {
+  @apply font-ui text-xs leading-4 font-semibold;
 }
 
 @utility text-validation {

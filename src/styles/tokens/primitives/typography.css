@@ -25,5 +25,6 @@
   /* Letter spacing */
   --tracking-display: -0.035em;
   --tracking-heading: -0.02em;
+  --tracking-metric: -0.03em;
   --tracking-mono: -0.01em;
 }
