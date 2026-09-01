@@ -1,7 +1,42 @@
 # Economize
 
-Frontend React do Economize, uma aplicação web para registrar, entender e controlar receitas,
-despesas, contas, categorias, recorrências e transferências.
+Frontend React do Economize, uma aplicação web para controle financeiro.
+
+## Sobre o projeto
+
+Projeto pessoal para registro e acompanhamento de gastos. A aplicação permite gerenciar transações, transferências, transações recorrentes, categorias e contas financeiras.
+
+## Tecnologias
+
+- React
+- TypeScript
+- Vite
+- Ky
+- React Hook Form
+- Zod
+
+## Requisitos
+
+- Node.js
+- pnpm
+
+## Configuração
+
+Configure a URL da API por meio da variável de ambiente:
+
+```env
+VITE_API_URL= // URL PARA API
+```
+
+## Scripts
+
+| Comando          | Descrição                                           |
+| ---------------- | --------------------------------------------------- |
+| `pnpm dev`       | Inicia o servidor de desenvolvimento                |
+| `pnpm build`     | Compila o código para produção                      |
+| `pnpm lint`      | Verifica o código em busca de erros                 |
+| `pnpm fmt:check` | Verifica a formatação do código                     |
+| `pnpm preview`   | Inicia o servidor local com a aplicação em produção |
 
 ## Desenvolvimento
 
@@ -14,7 +49,7 @@ pnpm dev
 
 O servidor Vite oferece atualização automática durante o desenvolvimento.
 
-## Verificações
+## Verificações antes de entregar
 
 Execute os comandos abaixo na ordem indicada antes de entregar uma alteração:
 
@@ -27,9 +62,7 @@ pnpm build
 `pnpm preview` disponibiliza o build de produção localmente e deve ser executado somente depois de
 `pnpm build`.
 
-O projeto usa Oxfmt para formatação, Oxlint para lint e TypeScript com Vite para o build. O React
-Compiler está habilitado pela configuração nativa do Oxc. Ainda não há framework ou script de testes
-configurado neste repositório.
+O projeto usa Oxfmt para formatação, Oxlint para lint e TypeScript com Vite para o build. O React Compiler está habilitado pela configuração nativa do Oxc. Ainda não há framework ou script de testes configurado neste repositório.
 
 ## Organização
 
@@ -39,5 +72,6 @@ configurado neste repositório.
 - `src/styles/tokens/` contém os tokens visuais do projeto.
 - `public/` contém arquivos servidos diretamente pela raiz do site.
 
-As rotas públicas são `/login` e `/cadastro`. As demais rotas são privadas por padrão e dependem da
-sessão reconhecida pela API.
+## Status
+
+Em desenvolvimento.
