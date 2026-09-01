@@ -4,13 +4,15 @@ Frontend React do Economize, uma aplicação web para controle financeiro.
 
 ## Sobre o projeto
 
-Projeto pessoal para registro e acompanhamento de gastos. A aplicação permite gerenciar transações, transferências, transações recorrentes, categorias e contas financeiras.
+Projeto pessoal para registro e acompanhamento de gastos. O objetivo é permitir o gerenciamento de transações, transferências, transações recorrentes, categorias e contas financeiras.
 
 ## Tecnologias
 
 - React
 - TypeScript
 - Vite
+- React Router
+- Tailwind CSS
 - Ky
 - React Hook Form
 - Zod
@@ -22,10 +24,10 @@ Projeto pessoal para registro e acompanhamento de gastos. A aplicação permite 
 
 ## Configuração
 
-Configure a URL da API por meio da variável de ambiente:
+Copie o arquivo `.env.example` para `.env` e preencha a URL da API:
 
 ```env
-VITE_API_URL= // URL PARA API
+VITE_API_URL=
 ```
 
 ## Scripts
