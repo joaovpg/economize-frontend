@@ -1,18 +1,25 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/csr/ArrowRight";
 import { CheckCircleIcon } from "@phosphor-icons/react/dist/csr/CheckCircle";
+import { createFileRoute } from "@tanstack/react-router";
+import { getRouteApi } from "@tanstack/react-router";
 import { isHTTPError } from "ky";
 import { z } from "zod";
 
-import { Button } from "../components/Button";
-import { Link } from "../components/Link";
-import { TextField } from "../components/TextField";
-import { api } from "../lib/api";
-import { authCardStyles, authCopyStyles, authGridStyles } from "./authStyles";
+import { Button } from "../../components/Button";
+import { RouteError, RoutePending } from "../../components/RouteStates";
+import { TextField } from "../../components/TextField";
+import { api } from "../../lib/api";
+import { authGridStyles, authCopyStyles, authCardStyles } from "./authStyles";
+
+export const Route = createFileRoute("/_public/login")({
+  component: LoginPage,
+  errorComponent: RouteError,
+  pendingComponent: RoutePending,
+});
 
 const emailSchema = z
   .email("Digite um e-mail válido.")
@@ -43,6 +50,8 @@ type LoginFormData = {
   senha: string;
 };
 
+const loginRoute = getRouteApi("/_public/login");
+
 function getFieldName(field: string | undefined): keyof LoginFormData | null {
   const name = field?.split("#").pop()?.split("/").pop();
 
@@ -63,7 +72,7 @@ function SuccessIcon() {
 function LoginPage() {
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const navigate = loginRoute.useNavigate();
   const {
     formState: { errors, isSubmitting },
     handleSubmit,
@@ -83,7 +92,7 @@ function LoginPage() {
       await api.post("autenticacao/login", {
         json: { email: data.email, senha: data.senha },
       });
-      await navigate("/summary", { replace: true });
+      await navigate({ replace: true, to: "/summary" });
     } catch (error) {
       if (!isHTTPError(error)) {
         setSubmitError("Não foi possível conectar ao servidor. Tente novamente.");
@@ -185,9 +194,9 @@ function LoginPage() {
               errorMessage={errors.senha?.message}
             />
             <div className="flex justify-end">
-              <Link className="font-bold" variant="link">
+              <Button className="font-bold" type="button" variant="link">
                 Esqueci minha senha
-              </Link>
+              </Button>
             </div>
             {submitError && (
               <p
@@ -217,5 +226,3 @@ function LoginPage() {
     </section>
   );
 }
-
-export default LoginPage;

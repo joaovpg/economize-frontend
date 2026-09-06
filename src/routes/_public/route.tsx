@@ -1,11 +1,18 @@
 import { Suspense } from "react";
-import { Outlet, useLocation } from "react-router-dom";
 
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/csr/ArrowRight";
 import { TrendUpIcon } from "@phosphor-icons/react/dist/csr/TrendUp";
+import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 
-import LoadingPage from "../../pages/LoadingPage";
-import { Link } from "../Link";
+import { Link } from "../../components/Link";
+import LoadingPage from "../../components/LoadingPage";
+import { RouteError, RoutePending } from "../../components/RouteStates";
+
+export const Route = createFileRoute("/_public")({
+  component: PublicLayout,
+  errorComponent: RouteError,
+  pendingComponent: RoutePending,
+});
 
 function LogoMark() {
   return (
@@ -30,7 +37,8 @@ function PublicLayout() {
         <header className="flex items-center justify-between gap-6">
           <Link
             className="gap-2.5 p-0 font-bold tracking-tight"
-            href="/login"
+            preload="intent"
+            to="/login"
             aria-label="Economize, ir para login"
           >
             <LogoMark />
@@ -38,8 +46,9 @@ function PublicLayout() {
           </Link>
           <Link
             className="gap-1.5 font-bold [&>span>svg]:size-4"
+            preload="intent"
+            to={alternatePath}
             variant="link"
-            href={alternatePath}
             trailingIcon={<ArrowRightIcon aria-hidden="true" weight="bold" />}
           >
             {linkTitle}
@@ -54,5 +63,3 @@ function PublicLayout() {
     </div>
   );
 }
-
-export default PublicLayout;

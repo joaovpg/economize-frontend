@@ -23,10 +23,25 @@ import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/csr/MagnifyingGl
 import { MinusIcon } from "@phosphor-icons/react/dist/csr/Minus";
 import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
 import { XIcon } from "@phosphor-icons/react/dist/csr/X";
+import { createFileRoute, notFound } from "@tanstack/react-router";
+import { getRouteApi } from "@tanstack/react-router";
 import { z } from "zod";
 
-import { Button } from "../components/Button";
-import { Link } from "../components/Link";
+import { Button } from "../../components/Button";
+import { Link } from "../../components/Link";
+import { RouteError, RoutePending } from "../../components/RouteStates";
+import {
+  accountFilterOptions,
+  getSummaryData,
+  accountOptions,
+  categoryOptions,
+  monthOptions,
+  summaryMonthValues,
+  summarySearchSchema,
+  type CategoryExpense,
+  type SummaryMonth,
+  type SummaryData,
+} from "../../lib/summary";
 import {
   summaryCheckboxIndicatorStyles,
   summaryCheckboxStyles,
@@ -36,121 +51,9 @@ import {
   summaryStyles,
 } from "./summaryStyles";
 
-type Movement = {
-  account: string;
-  category: string;
-  description: string;
-  filterCategory: string;
-  kind: "income" | "expense";
-  value: number;
-};
-
-type CategoryExpense = {
-  amount: number;
-  name: string;
-  share: number;
-};
-
-type SummaryData = {
-  categoryExpenses: CategoryExpense[];
-  income: number;
-  monthLabel: string;
-  movements: Movement[];
-  previousBalance: number;
-  expenses: number;
-};
-
 type CategoryBarStyle = CSSProperties & {
   "--category-share": string;
 };
-
-const summaryByMonth: Record<string, SummaryData> = {
-  "2026-08": {
-    monthLabel: "Agosto 2026",
-    previousBalance: 1240,
-    income: 7850,
-    expenses: 5420,
-    categoryExpenses: [
-      { name: "Moradia", amount: 1950, share: 88 },
-      { name: "Mercado", amount: 1120, share: 62 },
-      { name: "Transporte", amount: 720, share: 42 },
-      { name: "Lazer", amount: 480, share: 35 },
-    ],
-    movements: [
-      {
-        description: "Aluguel",
-        category: "Moradia",
-        filterCategory: "Moradia",
-        account: "Nubank",
-        kind: "expense",
-        value: 1850,
-      },
-      {
-        description: "Salário",
-        category: "Receita",
-        filterCategory: "Receita",
-        account: "Banco Inter",
-        kind: "income",
-        value: 7500,
-      },
-      {
-        description: "Mercado",
-        category: "Alimentação",
-        filterCategory: "Mercado",
-        account: "C6 Crédito",
-        kind: "expense",
-        value: 312.4,
-      },
-    ],
-  },
-  "2026-07": {
-    monthLabel: "Julho 2026",
-    previousBalance: 980,
-    income: 7200,
-    expenses: 4890,
-    categoryExpenses: [
-      { name: "Moradia", amount: 1850, share: 86 },
-      { name: "Mercado", amount: 980, share: 58 },
-      { name: "Transporte", amount: 680, share: 40 },
-      { name: "Lazer", amount: 390, share: 31 },
-    ],
-    movements: [
-      {
-        description: "Aluguel",
-        category: "Moradia",
-        filterCategory: "Moradia",
-        account: "Nubank",
-        kind: "expense",
-        value: 1850,
-      },
-      {
-        description: "Salário",
-        category: "Receita",
-        filterCategory: "Receita",
-        account: "Banco Inter",
-        kind: "income",
-        value: 7200,
-      },
-      {
-        description: "Supermercado",
-        category: "Alimentação",
-        filterCategory: "Mercado",
-        account: "C6 Crédito",
-        kind: "expense",
-        value: 286.7,
-      },
-    ],
-  },
-};
-
-const categoryOptions = ["Moradia", "Mercado", "Transporte", "Lazer"];
-const accountOptions = ["Nubank", "Banco Inter", "C6 Crédito"];
-const defaultCategories: string[] = [];
-const defaultAccounts = ["Todas as contas"];
-const monthOptions = Object.entries(summaryByMonth).map(([value, data]) => ({
-  label: data.monthLabel,
-  value,
-}));
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
@@ -171,14 +74,16 @@ function getCategoryBarStyle(share: number): CategoryBarStyle {
 }
 
 const summaryFilterSchema = z.object({
-  accounts: z.array(z.string()),
-  categories: z.array(z.string()),
+  accounts: z.array(z.enum(accountFilterOptions)),
+  categories: z.array(z.enum(categoryOptions)),
   includePreviousBalance: z.boolean(),
-  month: z.string(),
+  month: z.enum(summaryMonthValues),
   search: z.string(),
 });
 
 type SummaryFilterFormData = z.infer<typeof summaryFilterSchema>;
+
+const summaryRoute = getRouteApi("/_private/summary");
 
 type SummaryCheckboxProps = {
   children: ReactNode;
@@ -221,9 +126,9 @@ function SummaryCheckbox({
 
 type SummaryMonthSelectProps = {
   label: string;
-  onChange: (value: string) => void;
+  onChange: (value: SummaryMonth) => void;
   placement: "filter" | "header";
-  value: string;
+  value: SummaryMonth;
 };
 
 function SummaryMonthSelect({ label, onChange, placement, value }: SummaryMonthSelectProps) {
@@ -233,7 +138,11 @@ function SummaryMonthSelect({ label, onChange, placement, value }: SummaryMonthS
       className={summaryStyles.selectRoot}
       onSelectionChange={(key) => {
         if (typeof key === "string") {
-          onChange(key);
+          const month = monthOptions.find((option) => option.value === key)?.value;
+
+          if (month) {
+            onChange(month);
+          }
         }
       }}
       selectedKey={value}
@@ -273,30 +182,39 @@ function calculateCategoryShares(categories: CategoryExpense[]) {
   }));
 }
 
-function SummaryPage() {
-  const [appliedAccounts, setAppliedAccounts] = useState(defaultAccounts);
-  const [appliedCategories, setAppliedCategories] = useState(defaultCategories);
-  const [appliedSearchTerm, setAppliedSearchTerm] = useState("");
+type SummaryPageProps = {
+  data: SummaryData;
+};
+
+function SummaryPage({ data }: SummaryPageProps) {
+  const search = summaryRoute.useSearch();
+  const navigate = summaryRoute.useNavigate();
+  const summary = data;
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [isLedgerExpanded, setIsLedgerExpanded] = useState(true);
   const filterTriggerRef = useRef<HTMLButtonElement>(null);
   const wasFiltersOpenRef = useRef(false);
-  const { control, handleSubmit, register, setFocus, setValue } = useForm<SummaryFilterFormData>({
-    defaultValues: {
-      accounts: defaultAccounts,
-      categories: defaultCategories,
-      includePreviousBalance: true,
-      month: "2026-08",
-      search: "",
-    },
-    resolver: zodResolver(summaryFilterSchema),
-  });
+  const { control, handleSubmit, register, reset, setFocus, setValue } =
+    useForm<SummaryFilterFormData>({
+      defaultValues: {
+        accounts: search.accounts,
+        categories: search.categories,
+        includePreviousBalance: search.includePreviousBalance,
+        month: search.month,
+        search: search.q,
+      },
+      resolver: zodResolver(summaryFilterSchema),
+    });
+  const appliedAccounts = search.accounts;
+  const appliedCategories = search.categories;
+  const appliedSearchTerm = search.q;
+  const includePreviousBalance = search.includePreviousBalance;
+  const isLedgerExpanded = search.ledgerExpanded;
   const selectedAccounts = useWatch({ control, name: "accounts" }) ?? [];
   const selectedCategories = useWatch({ control, name: "categories" }) ?? [];
-  const selectedMonth = useWatch({ control, name: "month" }) ?? "2026-08";
-  const includePreviousBalance = useWatch({ control, name: "includePreviousBalance" }) ?? true;
+  const selectedIncludePreviousBalance =
+    useWatch({ control, name: "includePreviousBalance" }) ?? search.includePreviousBalance;
+  const selectedMonth = useWatch({ control, name: "month" }) ?? search.month;
   const searchField = register("search");
-  const summary = summaryByMonth[selectedMonth];
   const activeFilterCount =
     1 +
     Number(appliedSearchTerm.trim().length > 0) +
@@ -317,7 +235,8 @@ function SummaryPage() {
         value.toLocaleLowerCase("pt-BR").includes(normalizedSearchTerm),
       );
     const matchesCategory =
-      appliedCategories.length === 0 || appliedCategories.includes(movement.filterCategory);
+      appliedCategories.length === 0 ||
+      appliedCategories.some((category) => category === movement.filterCategory);
     const matchesAccount =
       appliedAccounts.length === 0 ||
       allAccountsSelected ||
@@ -357,6 +276,23 @@ function SummaryPage() {
     ledgerIncome - ledgerExpenses + (includePreviousBalance ? summary.previousBalance : 0);
 
   useEffect(() => {
+    reset({
+      accounts: search.accounts,
+      categories: search.categories,
+      includePreviousBalance: search.includePreviousBalance,
+      month: search.month,
+      search: search.q,
+    });
+  }, [
+    reset,
+    search.accounts,
+    search.categories,
+    search.includePreviousBalance,
+    search.month,
+    search.q,
+  ]);
+
+  useEffect(() => {
     if (isFiltersOpen) {
       setFocus("search");
     } else if (wasFiltersOpenRef.current) {
@@ -365,7 +301,7 @@ function SummaryPage() {
     wasFiltersOpenRef.current = isFiltersOpen;
   }, [isFiltersOpen, setFocus]);
 
-  const toggleCategory = (category: string) => {
+  const toggleCategory = (category: (typeof categoryOptions)[number]) => {
     const nextCategories = selectedCategories.includes(category)
       ? selectedCategories.filter((item) => item !== category)
       : [...selectedCategories, category];
@@ -373,7 +309,7 @@ function SummaryPage() {
     setValue("categories", nextCategories, { shouldDirty: true });
   };
 
-  const toggleAccount = (account: string) => {
+  const toggleAccount = (account: (typeof accountFilterOptions)[number]) => {
     if (account === "Todas as contas") {
       setValue("accounts", selectedAccounts.includes(account) ? [] : [account], {
         shouldDirty: true,
@@ -393,16 +329,56 @@ function SummaryPage() {
     setValue("search", "", { shouldDirty: true });
     setValue("categories", [], { shouldDirty: true });
     setValue("accounts", [], { shouldDirty: true });
-    setAppliedSearchTerm("");
-    setAppliedCategories([]);
-    setAppliedAccounts([]);
+    void navigate({
+      search: (current) => ({
+        ...current,
+        accounts: [],
+        categories: [],
+        q: "",
+      }),
+    });
   };
 
-  const handleApplyFilters = (data: SummaryFilterFormData) => {
-    setAppliedSearchTerm(data.search);
-    setAppliedCategories(data.categories);
-    setAppliedAccounts(data.accounts);
+  const handleApplyFilters = (formData: SummaryFilterFormData) => {
+    void navigate({
+      search: (current) => ({
+        ...current,
+        accounts: formData.accounts,
+        categories: formData.categories,
+        includePreviousBalance: formData.includePreviousBalance,
+        month: formData.month,
+        q: formData.search.trim(),
+      }),
+    });
     setIsFiltersOpen(false);
+  };
+
+  const handleHeaderMonthChange = (month: SummaryMonth) => {
+    setValue("month", month, { shouldDirty: true });
+    void navigate({
+      search: (current) => ({
+        ...current,
+        month,
+      }),
+    });
+  };
+
+  const handleLedgerToggle = () => {
+    void navigate({
+      search: (current) => ({
+        ...current,
+        ledgerExpanded: !current.ledgerExpanded,
+      }),
+    });
+  };
+
+  const handleLedgerPreviousBalanceChange = (selected: boolean) => {
+    void navigate({
+      search: (current) => ({
+        ...current,
+        includePreviousBalance: selected,
+      }),
+    });
   };
 
   const handleCloseFilters = () => {
@@ -536,7 +512,7 @@ function SummaryPage() {
                 value={selectedMonth}
               />
               <SummaryCheckbox
-                isSelected={includePreviousBalance}
+                isSelected={selectedIncludePreviousBalance}
                 onChange={(isSelected) =>
                   setValue("includePreviousBalance", isSelected, { shouldDirty: true })
                 }
@@ -567,9 +543,9 @@ function SummaryPage() {
             <div className={summaryStyles.pageActions}>
               <SummaryMonthSelect
                 label="Mês do resumo"
-                onChange={(value) => setValue("month", value, { shouldDirty: true })}
+                onChange={handleHeaderMonthChange}
                 placement="header"
-                value={selectedMonth}
+                value={search.month}
               />
               <Button
                 className={summaryStyles.filterTrigger}
@@ -620,7 +596,7 @@ function SummaryPage() {
                   size="sm"
                   isIconOnly
                   aria-label={isLedgerExpanded ? "Recolher resumo" : "Expandir resumo"}
-                  onPress={() => setIsLedgerExpanded((expanded) => !expanded)}
+                  onPress={handleLedgerToggle}
                 >
                   {isLedgerExpanded ? (
                     <MinusIcon aria-hidden="true" />
@@ -646,9 +622,7 @@ function SummaryPage() {
               <div className={summaryStyles.ledgerBody}>
                 <SummaryCheckbox
                   isSelected={includePreviousBalance}
-                  onChange={(isSelected) =>
-                    setValue("includePreviousBalance", isSelected, { shouldDirty: true })
-                  }
+                  onChange={handleLedgerPreviousBalanceChange}
                   placement="ledger"
                 >
                   Incluir saldo anterior
@@ -722,7 +696,12 @@ function SummaryPage() {
                 <h2 className={summaryStyles.cardTitle} id="movements-title">
                   Últimos movimentos
                 </h2>
-                <Link className={summaryStyles.cardAction} href="/transactions" variant="link">
+                <Link
+                  className={summaryStyles.cardAction}
+                  preload="intent"
+                  to="/transactions"
+                  variant="link"
+                >
                   Ver todos
                 </Link>
               </div>
@@ -730,9 +709,15 @@ function SummaryPage() {
                 {visibleMovements.map((movement) => (
                   <li className={summaryStyles.movementItem} key={movement.description}>
                     <div className={summaryStyles.movementCopy}>
-                      <strong className={summaryStyles.movementPrimary}>
+                      <Link
+                        className={summaryStyles.movementPrimary}
+                        preload="intent"
+                        to="/transactions/$transactionId"
+                        params={{ transactionId: movement.id }}
+                        variant="link"
+                      >
                         {movement.description}
-                      </strong>
+                      </Link>
                       <span className={summaryStyles.movementSecondary}>
                         {movement.category} · {movement.account}
                       </span>
@@ -760,4 +745,26 @@ function SummaryPage() {
   );
 }
 
-export default SummaryPage;
+export const Route = createFileRoute("/_private/summary")({
+  validateSearch: summarySearchSchema,
+  loaderDeps: ({ search }) => ({ month: search.month }),
+  loader: async ({ deps }) => {
+    const summary = await getSummaryData(deps.month);
+
+    if (!summary) {
+      throw notFound();
+    }
+
+    return summary;
+  },
+  component: SummaryPageRoute,
+  errorComponent: RouteError,
+  pendingComponent: RoutePending,
+  preloadStaleTime: 30_000,
+});
+
+function SummaryPageRoute() {
+  const summary = Route.useLoaderData();
+
+  return <SummaryPage data={summary} />;
+}

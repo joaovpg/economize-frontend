@@ -4,7 +4,8 @@ Consulte este guia ao alterar rotas, layouts, carregamento de páginas ou integr
 
 ## Organização
 
-- `src/pages/` contém páginas e estados de rota.
+- `src/routes/` contém os módulos de rota e as telas específicas de cada rota. Arquivos e diretórios
+  com prefixo `-` são auxiliares colocalizados e ficam fora da árvore gerada pelo TanStack Router.
 - `src/components/` contém componentes reutilizáveis e layouts compartilhados.
 - `src/lib/` contém integrações, incluindo o cliente HTTP baseado em Ky.
 - `src/styles/tokens/` contém os tokens visuais.
@@ -12,9 +13,11 @@ Consulte este guia ao alterar rotas, layouts, carregamento de páginas ou integr
 
 ## Rotas e carregamento
 
-- Carregue páginas de rota com `React.lazy` diretamente em `src/App.tsx`.
-- Mantenha `PublicLayout` e `PrivateLayout` síncronos; cada layout hospeda seu limite de
-  `Suspense` e usa `LoadingPage` como fallback.
+- Use o roteamento baseado em arquivos do TanStack Router. Cada arquivo de rota deve declarar seu
+  path, params, search params, loaders e boundaries com `createFileRoute`.
+- Mantenha `PublicLayout` e `PrivateLayout` síncronos; cada layout hospeda seu `Outlet` e o limite
+  de `Suspense` usado pelo code splitting automático.
+- Configure o preloading por intenção e o code splitting automático no plugin do TanStack Router.
 - Trate `/login` e `/cadastro` como rotas públicas. As demais rotas pertencem ao layout privado.
 - Não adicione um guard de sessão ao `PrivateLayout`: a API valida a sessão e o frontend reage a
   respostas `401`.

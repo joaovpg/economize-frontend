@@ -36,7 +36,8 @@
     "react/only-export-components": [
       "warn",
       {
-        "allowConstantExport": true
+        "allowConstantExport": true,
+        "customHOCs": ["createFileRoute", "createRootRouteWithContext", "createRootRoute"]
       }
     ],
     "import/no-unassigned-import": "off",

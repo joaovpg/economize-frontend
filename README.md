@@ -11,7 +11,7 @@ Projeto pessoal para registro e acompanhamento de gastos. O objetivo é permitir
 - React
 - TypeScript
 - Vite
-- React Router
+- TanStack Router (rotas baseadas em arquivos)
 - Tailwind CSS
 - Ky
 - React Hook Form
@@ -68,11 +68,20 @@ O projeto usa Oxfmt para formatação, Oxlint para lint e TypeScript com Vite pa
 
 ## Organização
 
-- `src/pages/` contém páginas e estados de rota.
+- `src/routes/` contém as rotas tipadas, seus loaders e as telas colocalizadas; arquivos e diretórios
+  com prefixo `-` são auxiliares ignorados pelo gerador.
+- `src/routeTree.gen.ts` é gerado pelo plugin do TanStack Router e não deve ser editado manualmente.
 - `src/components/` contém componentes reutilizáveis e layouts compartilhados.
 - `src/lib/` contém integrações, incluindo o cliente HTTP baseado em Ky.
 - `src/styles/tokens/` contém os tokens visuais do projeto.
 - `public/` contém arquivos servidos diretamente pela raiz do site.
+
+## Roteamento
+
+O plugin do TanStack Router gera a árvore de rotas durante o desenvolvimento e o build. O roteador
+usa preloading por intenção, boundaries de carregamento/erro e code splitting automático por rota.
+O resumo mantém mês, filtros e estado de expansão do ledger na URL para que a visão possa ser
+compartilhada e restaurada diretamente.
 
 ## Status
 

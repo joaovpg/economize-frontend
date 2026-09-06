@@ -4,11 +4,19 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/csr/ArrowRight";
 import { CheckCircleIcon } from "@phosphor-icons/react/dist/csr/CheckCircle";
+import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
-import { Button } from "../components/Button";
-import { TextField } from "../components/TextField";
-import { authCardStyles, authCopyStyles, authGridStyles } from "./authStyles";
+import { Button } from "../../components/Button";
+import { RouteError, RoutePending } from "../../components/RouteStates";
+import { TextField } from "../../components/TextField";
+import { authGridStyles, authCopyStyles, authCardStyles } from "./authStyles";
+
+export const Route = createFileRoute("/_public/cadastro")({
+  component: RegisterPage,
+  errorComponent: RouteError,
+  pendingComponent: RoutePending,
+});
 
 const emailSchema = z
   .email("Digite um e-mail válido.")
@@ -183,5 +191,3 @@ function RegisterPage() {
     </section>
   );
 }
-
-export default RegisterPage;

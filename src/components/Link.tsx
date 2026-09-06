@@ -1,81 +1,58 @@
-import { type ReactNode, type Ref } from "react";
-import {
-  Link as AriaLink,
-  composeRenderProps,
-  type LinkProps as AriaLinkProps,
-  type LinkRenderProps,
-} from "react-aria-components";
-import { Link as RouterLink } from "react-router-dom";
+import { forwardRef, type ReactNode } from "react";
+
+import { createLink } from "@tanstack/react-router";
 
 import { buttonStyles, type ButtonStyleProps } from "./Button/buttonStyles";
 import { IconSlot } from "./IconSlot";
 
-export type LinkProps = Omit<AriaLinkProps, "className"> &
+type StyledLinkProps = Omit<React.ComponentPropsWithoutRef<"a">, "children" | "className"> &
   ButtonStyleProps & {
-    className?: AriaLinkProps["className"];
-    ref?: Ref<HTMLAnchorElement>;
+    className?: string;
+    children?: ReactNode;
     /** Ícone decorativo exibido antes do conteúdo visível. */
     leadingIcon?: ReactNode;
     /** Ícone decorativo exibido depois do conteúdo visível. */
     trailingIcon?: ReactNode;
   };
 
-/**
- * Link de navegação do Economize, com as mesmas variantes visuais do Button.
- *
- * Use `href` para navegação nativa ou `render` para delegar a navegação ao roteador da aplicação. O
- * componente preserva a semântica de link mesmo quando recebe uma variante visual de botão.
- *
- * @see https://react-aria.adobe.com/Link
- */
-export function Link({
-  children,
-  className,
-  isIconOnly = false,
-  leadingIcon,
-  size = "md",
-  trailingIcon,
-  variant = "link",
-  ref,
-  ...linkProps
-}: LinkProps) {
-  const resolvedClassName = composeRenderProps(
+function StyledLink(
+  {
+    children,
     className,
-    (userClassName: string | undefined, _renderProps: LinkRenderProps) =>
-      buttonStyles({
-        className: userClassName,
+    isIconOnly = false,
+    leadingIcon,
+    size = "md",
+    trailingIcon,
+    variant = "link",
+    ...linkProps
+  }: StyledLinkProps,
+  ref: React.ForwardedRef<HTMLAnchorElement>,
+) {
+  return (
+    <a
+      {...linkProps}
+      ref={ref}
+      className={buttonStyles({
+        className,
         isIconOnly,
         size,
         variant,
-      }),
-  );
-
-  const resolvedChildren = composeRenderProps(
-    children,
-    (content: ReactNode, _renderProps: LinkRenderProps) => (
-      <>
-        {!isIconOnly && leadingIcon && <IconSlot>{leadingIcon}</IconSlot>}
-        {isIconOnly ? <IconSlot>{content}</IconSlot> : content}
-        {!isIconOnly && trailingIcon && <IconSlot>{trailingIcon}</IconSlot>}
-      </>
-    ),
-  );
-
-  return (
-    <AriaLink
-      {...linkProps}
-      ref={ref}
-      className={resolvedClassName}
-      render={(props) => {
-        if (!("href" in props)) {
-          return <span {...props} />;
-        }
-
-        const { href, ...routerProps } = props;
-        return <RouterLink {...routerProps} to={href} />;
-      }}
+      })}
     >
-      {resolvedChildren}
-    </AriaLink>
+      {!isIconOnly && leadingIcon && <IconSlot>{leadingIcon}</IconSlot>}
+      {isIconOnly ? <IconSlot>{children}</IconSlot> : children}
+      {!isIconOnly && trailingIcon && <IconSlot>{trailingIcon}</IconSlot>}
+    </a>
   );
 }
+
+const StyledLinkWithRef = forwardRef(StyledLink);
+
+/**
+ * Link visual do Economize sobre o link do TanStack Router.
+ *
+ * O `createLink` mantém `to`, `params`, `search` e `preload` ligados à árvore de rotas gerada. Isso
+ * faz com que links internos e seus parâmetros sejam verificados pelo TypeScript no ponto de uso. O
+ * Router também adiciona o preloading por intenção configurado em `src/router.tsx`.
+ */
+export const Link = createLink(StyledLinkWithRef);
