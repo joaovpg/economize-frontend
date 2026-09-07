@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/csr/ArrowRight";
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { Link } from "../../components/Link";
 import LoadingPage from "../../components/LoadingPage";

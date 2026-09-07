@@ -72,7 +72,7 @@ const inputStyles = tv(
 );
 
 const passwordToggleStyles = tv({
-  base: "!h-8 !min-h-8 !w-8 !min-w-8 rounded-lg text-subtle data-focus-visible:!outline-offset-0",
+  base: "![--button-height:2rem] rounded-lg text-subtle data-focus-visible:!outline-offset-0",
   variants: {
     invalid: {
       true: "data-focus-visible:outline-danger",
@@ -195,9 +195,9 @@ export function TextField({
             onPress={() => setIsPasswordVisible((visible) => !visible)}
           >
             {isPasswordVisible ? (
-              <EyeIcon aria-hidden="true" size={19} />
+              <EyeIcon aria-hidden="true" size={18} />
             ) : (
-              <EyeSlashIcon aria-hidden="true" size={19} />
+              <EyeSlashIcon aria-hidden="true" size={18} />
             )}
           </Button>
         ) : (
