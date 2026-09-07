@@ -9,10 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SplatRouteImport } from './routes/$'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as PrivateRouteRouteImport } from './routes/_private/route'
 import { Route as PublicRouteRouteImport } from './routes/_public/route'
-import { Route as PrivateDashboardRouteImport } from './routes/_private/dashboard'
 import { Route as PrivateProfileRouteImport } from './routes/_private/profile'
 import { Route as PrivateSummaryRouteImport } from './routes/_private/summary'
 import { Route as PrivateTransactionsRouteImport } from './routes/_private/transactions'
@@ -20,9 +19,9 @@ import { Route as PublicCadastroRouteImport } from './routes/_public/cadastro'
 import { Route as PublicLoginRouteImport } from './routes/_public/login'
 import { Route as PrivateTransactionsTransactionIdRouteImport } from './routes/_private/transactions.$transactionId'
 
-const SplatRoute = SplatRouteImport.update({
-  id: '/$',
-  path: '/$',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivateRouteRoute = PrivateRouteRouteImport.update({
@@ -32,11 +31,6 @@ const PrivateRouteRoute = PrivateRouteRouteImport.update({
 const PublicRouteRoute = PublicRouteRouteImport.update({
   id: '/_public',
   getParentRoute: () => rootRouteImport,
-} as any)
-const PrivateDashboardRoute = PrivateDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => PrivateRouteRoute,
 } as any)
 const PrivateProfileRoute = PrivateProfileRouteImport.update({
   id: '/profile',
@@ -71,9 +65,7 @@ const PrivateTransactionsTransactionIdRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof PublicRouteRouteWithChildren
-  '/$': typeof SplatRoute
-  '/dashboard': typeof PrivateDashboardRoute
+  '/': typeof IndexRoute
   '/profile': typeof PrivateProfileRoute
   '/summary': typeof PrivateSummaryRoute
   '/transactions': typeof PrivateTransactionsRouteWithChildren
@@ -82,9 +74,7 @@ export interface FileRoutesByFullPath {
   '/transactions/$transactionId': typeof PrivateTransactionsTransactionIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof PublicRouteRouteWithChildren
-  '/$': typeof SplatRoute
-  '/dashboard': typeof PrivateDashboardRoute
+  '/': typeof IndexRoute
   '/profile': typeof PrivateProfileRoute
   '/summary': typeof PrivateSummaryRoute
   '/transactions': typeof PrivateTransactionsRouteWithChildren
@@ -94,10 +84,9 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_private': typeof PrivateRouteRouteWithChildren
   '/_public': typeof PublicRouteRouteWithChildren
-  '/$': typeof SplatRoute
-  '/_private/dashboard': typeof PrivateDashboardRoute
   '/_private/profile': typeof PrivateProfileRoute
   '/_private/summary': typeof PrivateSummaryRoute
   '/_private/transactions': typeof PrivateTransactionsRouteWithChildren
@@ -109,8 +98,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/$'
-    | '/dashboard'
     | '/profile'
     | '/summary'
     | '/transactions'
@@ -120,8 +107,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/$'
-    | '/dashboard'
     | '/profile'
     | '/summary'
     | '/transactions'
@@ -130,10 +115,9 @@ export interface FileRouteTypes {
     | '/transactions/$transactionId'
   id:
     | '__root__'
+    | '/'
     | '/_private'
     | '/_public'
-    | '/$'
-    | '/_private/dashboard'
     | '/_private/profile'
     | '/_private/summary'
     | '/_private/transactions'
@@ -143,18 +127,18 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   PrivateRouteRoute: typeof PrivateRouteRouteWithChildren
   PublicRouteRoute: typeof PublicRouteRouteWithChildren
-  SplatRoute: typeof SplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/$': {
-      id: '/$'
-      path: '/$'
-      fullPath: '/$'
-      preLoaderRoute: typeof SplatRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_private': {
@@ -170,13 +154,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof PublicRouteRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_private/dashboard': {
-      id: '/_private/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof PrivateDashboardRouteImport
-      parentRoute: typeof PrivateRouteRoute
     }
     '/_private/profile': {
       id: '/_private/profile'
@@ -235,14 +212,12 @@ const PrivateTransactionsRouteWithChildren =
   PrivateTransactionsRoute._addFileChildren(PrivateTransactionsRouteChildren)
 
 interface PrivateRouteRouteChildren {
-  PrivateDashboardRoute: typeof PrivateDashboardRoute
   PrivateProfileRoute: typeof PrivateProfileRoute
   PrivateSummaryRoute: typeof PrivateSummaryRoute
   PrivateTransactionsRoute: typeof PrivateTransactionsRouteWithChildren
 }
 
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
-  PrivateDashboardRoute: PrivateDashboardRoute,
   PrivateProfileRoute: PrivateProfileRoute,
   PrivateSummaryRoute: PrivateSummaryRoute,
   PrivateTransactionsRoute: PrivateTransactionsRouteWithChildren,
@@ -267,9 +242,9 @@ const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   PrivateRouteRoute: PrivateRouteRouteWithChildren,
   PublicRouteRoute: PublicRouteRouteWithChildren,
-  SplatRoute: SplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

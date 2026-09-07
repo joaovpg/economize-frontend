@@ -1,4 +1,4 @@
-import { TrendUpIcon } from "@phosphor-icons/react/dist/icons/TrendUp";
+import { TrendUpIcon } from "@phosphor-icons/react/dist/csr/TrendUp";
 
 export default function LogoMark() {
   return (

@@ -10,10 +10,11 @@ import { isHTTPError } from "ky";
 import { z } from "zod";
 
 import { Button } from "../../components/Button";
+import { Card, CardBody, CardFooter } from "../../components/Card";
 import { RouteError, RoutePending } from "../../components/RouteStates";
 import { TextField } from "../../components/TextField";
 import { api } from "../../lib/api";
-import { authGridStyles, authCopyStyles, authCardStyles } from "./authStyles";
+import { authGridStyles, authCopyStyles } from "./authStyles";
 
 export const Route = createFileRoute("/_public/login")({
   component: LoginPage,
@@ -146,81 +147,85 @@ function LoginPage() {
 
       <div>
         {submitted ? (
-          <output className={authCardStyles({ state: "success" })} aria-live="polite">
-            <SuccessIcon />
-            <div className="flex flex-col gap-1.5">
-              <h2 className="m-0 text-title-compact text-foreground">Login recebido.</h2>
-              <p className="m-0 text-caption text-muted">
-                O servidor respondeu à tentativa de login.
-              </p>
-            </div>
-            <Button
-              type="button"
-              className="col-start-2 justify-self-start"
-              variant="link"
-              onPress={() => setSubmitted(false)}
-            >
-              Voltar ao formulário
-            </Button>
-          </output>
-        ) : (
-          <form
-            className={authCardStyles({ state: "form" })}
-            onSubmit={handleSubmit(handleFormSubmit)}
-            noValidate
-          >
-            <TextField
-              label="E-mail"
-              name={emailField.name}
-              onBlur={emailField.onBlur}
-              onInput={emailField.onChange}
-              inputRef={emailField.ref}
-              autoComplete="email"
-              maxLength={320}
-              placeholder="voce@exemplo.com"
-              type="email"
-              errorMessage={errors.email?.message}
-            />
-            <TextField
-              label="Senha"
-              name={senhaField.name}
-              onBlur={senhaField.onBlur}
-              onInput={senhaField.onChange}
-              inputRef={senhaField.ref}
-              type="password"
-              autoComplete="current-password"
-              maxLength={128}
-              placeholder="Digite sua senha"
-              errorMessage={errors.senha?.message}
-            />
-            <div className="flex justify-end">
-              <Button className="font-bold" type="button" variant="link">
-                Esqueci minha senha
-              </Button>
-            </div>
-            {submitError && (
-              <p
-                className="m-0 rounded-md bg-danger-soft px-3 py-2 text-validation text-danger"
-                role="alert"
-                aria-live="assertive"
+          <Card as="output" aria-live="polite">
+            <CardBody className="grid-cols-[auto_1fr] items-start">
+              <SuccessIcon />
+              <div className="flex flex-col gap-1.5">
+                <h2 className="m-0 text-title-compact text-foreground">Login recebido.</h2>
+                <p className="m-0 text-caption text-muted">
+                  O servidor respondeu à tentativa de login.
+                </p>
+              </div>
+            </CardBody>
+            <CardFooter>
+              <Button
+                type="button"
+                className="justify-self-start"
+                variant="link"
+                onPress={() => setSubmitted(false)}
               >
-                {submitError}
+                Voltar ao formulário
+              </Button>
+            </CardFooter>
+          </Card>
+        ) : (
+          <Card as="form" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
+            <CardBody>
+              <TextField
+                label="E-mail"
+                name={emailField.name}
+                onBlur={emailField.onBlur}
+                onInput={emailField.onChange}
+                inputRef={emailField.ref}
+                autoComplete="email"
+                maxLength={320}
+                placeholder="voce@exemplo.com"
+                type="email"
+                errorMessage={errors.email?.message}
+              />
+              <TextField
+                label="Senha"
+                name={senhaField.name}
+                onBlur={senhaField.onBlur}
+                onInput={senhaField.onChange}
+                inputRef={senhaField.ref}
+                type="password"
+                autoComplete="current-password"
+                maxLength={128}
+                placeholder="Digite sua senha"
+                errorMessage={errors.senha?.message}
+              />
+              <div className="flex justify-end">
+                <Button className="font-bold" type="button" variant="link">
+                  Esqueci minha senha
+                </Button>
+              </div>
+              {submitError && (
+                <p
+                  className="m-0 rounded-md bg-danger-soft px-3 py-2 text-validation text-danger"
+                  role="alert"
+                  aria-live="assertive"
+                >
+                  {submitError}
+                </p>
+              )}
+            </CardBody>
+            <CardFooter>
+              <Button
+                className="w-full"
+                variant="primary"
+                type="submit"
+                isPending={isSubmitting}
+                trailingIcon={<ArrowRightIcon aria-hidden="true" weight="bold" />}
+              >
+                {isSubmitting ? "Enviando..." : "Entrar"}
+              </Button>
+              <p className="m-0 text-center text-caption text-subtle">
+                Ao continuar, você concorda com uma experiência de controle financeiro mais
+                consciente.
               </p>
-            )}
-            <Button
-              className="w-full"
-              variant="primary"
-              type="submit"
-              isPending={isSubmitting}
-              trailingIcon={<ArrowRightIcon aria-hidden="true" weight="bold" />}
-            >
-              {isSubmitting ? "Enviando..." : "Entrar"}
-            </Button>
-            <p className="m-0 text-center text-caption text-subtle">
-              Ao continuar, você concorda com uma experiência de controle financeiro mais
-              consciente.
-            </p>
-          </form>
+            </CardFooter>
+          </Card>
         )}
       </div>
     </section>

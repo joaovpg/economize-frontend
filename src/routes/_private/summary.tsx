@@ -28,6 +28,7 @@ import { getRouteApi } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { Button } from "../../components/Button";
+import { Card, CardHeader, CardBody, CardFooter } from "../../components/Card";
 import { Link } from "../../components/Link";
 import { RouteError, RoutePending } from "../../components/RouteStates";
 import {
@@ -388,12 +389,13 @@ function SummaryPage({ data }: SummaryPageProps) {
   return (
     <main className={summaryStyles.page} aria-labelledby="summary-title">
       <div className={summaryStyles.layout}>
-        <aside
+        <Card
+          as="aside"
           className={summaryFiltersStyles({ open: isFiltersOpen })}
           id="summary-filters"
           aria-label="Filtros do resumo"
         >
-          <div className={summaryStyles.filtersHeader}>
+          <CardHeader>
             <div>
               <h2 className="m-0 text-title-compact">Filtros</h2>
               <p className={`${summaryStyles.filterCount} text-meta`}>
@@ -410,127 +412,136 @@ function SummaryPage({ data }: SummaryPageProps) {
             >
               <XIcon aria-hidden="true" />
             </Button>
-          </div>
+          </CardHeader>
 
           <form className={summaryStyles.filterForm} onSubmit={handleSubmit(handleApplyFilters)}>
-            <AriaTextField className={summaryStyles.filterGroup}>
-              <Label className={summaryStyles.filterLabel}>Buscar transação</Label>
-              <div className={summaryStyles.filterControl}>
-                <MagnifyingGlassIcon aria-hidden="true" />
-                <Input
-                  {...searchField}
-                  id="summary-search"
-                  className={summaryStyles.filterInput}
-                  placeholder="Nome, descrição..."
-                  type="search"
-                />
-              </div>
-            </AriaTextField>
+            <CardBody className="gap-5.5">
+              <AriaTextField className={summaryStyles.filterGroup}>
+                <Label className={summaryStyles.filterLabel}>Buscar transação</Label>
+                <div className={summaryStyles.filterControl}>
+                  <MagnifyingGlassIcon aria-hidden="true" />
+                  <Input
+                    {...searchField}
+                    id="summary-search"
+                    className={summaryStyles.filterInput}
+                    placeholder="Nome, descrição..."
+                    type="search"
+                  />
+                </div>
+              </AriaTextField>
 
-            <fieldset className={`${summaryStyles.filterGroup} ${summaryStyles.filterFieldset}`}>
-              <legend className={summaryStyles.filterLabel}>Categorias</legend>
-              <div className={summaryStyles.filterTree}>
-                <div className={`${summaryStyles.filterOption} ${summaryStyles.filterOptionGroup}`}>
-                  <span
-                    className={summaryStyles.filterBox}
-                    data-partial={someCategoriesSelected || undefined}
+              <fieldset className={`${summaryStyles.filterGroup} ${summaryStyles.filterFieldset}`}>
+                <legend className={summaryStyles.filterLabel}>Categorias</legend>
+                <div className={summaryStyles.filterTree}>
+                  <div
+                    className={`${summaryStyles.filterOption} ${summaryStyles.filterOptionGroup}`}
                   >
-                    {allCategoriesSelected ? (
-                      <CheckIcon aria-hidden="true" weight="bold" />
-                    ) : someCategoriesSelected ? (
-                      <MinusIcon aria-hidden="true" weight="bold" />
-                    ) : null}
-                  </span>
-                  <span>Despesas</span>
-                  <CaretDownIcon className={summaryStyles.filterCaret} aria-hidden="true" />
-                </div>
-                <div className={summaryStyles.filterChildren}>
-                  {categoryOptions.map((category) => (
-                    <SummaryCheckbox
-                      key={category}
-                      isSelected={selectedCategories.includes(category)}
-                      onChange={() => toggleCategory(category)}
+                    <span
+                      className={summaryStyles.filterBox}
+                      data-partial={someCategoriesSelected || undefined}
                     >
-                      {category}
-                    </SummaryCheckbox>
-                  ))}
+                      {allCategoriesSelected ? (
+                        <CheckIcon aria-hidden="true" weight="bold" />
+                      ) : someCategoriesSelected ? (
+                        <MinusIcon aria-hidden="true" weight="bold" />
+                      ) : null}
+                    </span>
+                    <span>Despesas</span>
+                    <CaretDownIcon className={summaryStyles.filterCaret} aria-hidden="true" />
+                  </div>
+                  <div className={summaryStyles.filterChildren}>
+                    {categoryOptions.map((category) => (
+                      <SummaryCheckbox
+                        key={category}
+                        isSelected={selectedCategories.includes(category)}
+                        onChange={() => toggleCategory(category)}
+                      >
+                        {category}
+                      </SummaryCheckbox>
+                    ))}
+                  </div>
+                  <div
+                    className={`${summaryStyles.filterOption} ${summaryStyles.filterOptionGroup}`}
+                  >
+                    <span className={summaryStyles.filterBox} />
+                    <span>Receitas</span>
+                    <CaretDownIcon className={summaryStyles.filterCaret} aria-hidden="true" />
+                  </div>
                 </div>
-                <div className={`${summaryStyles.filterOption} ${summaryStyles.filterOptionGroup}`}>
-                  <span className={summaryStyles.filterBox} />
-                  <span>Receitas</span>
-                  <CaretDownIcon className={summaryStyles.filterCaret} aria-hidden="true" />
-                </div>
-              </div>
-            </fieldset>
+              </fieldset>
 
-            <fieldset className={`${summaryStyles.filterGroup} ${summaryStyles.filterFieldset}`}>
-              <legend className={summaryStyles.filterLabel}>Contas</legend>
-              <div className={summaryStyles.filterTree}>
-                <SummaryCheckbox
-                  isSelected={selectedAccounts.includes("Todas as contas")}
-                  onChange={() => toggleAccount("Todas as contas")}
-                >
-                  Todas as contas
-                </SummaryCheckbox>
-                <div className={`${summaryStyles.filterOption} ${summaryStyles.filterOptionGroup}`}>
-                  <span className={summaryStyles.filterBox} />
-                  <span>Bancos</span>
-                  <CaretDownIcon className={summaryStyles.filterCaret} aria-hidden="true" />
-                </div>
-                <div className={summaryStyles.filterChildren}>
-                  {accountOptions.slice(0, 2).map((account) => (
-                    <SummaryCheckbox
-                      key={account}
-                      isSelected={selectedAccounts.includes(account)}
-                      onChange={() => toggleAccount(account)}
-                    >
-                      {account}
-                    </SummaryCheckbox>
-                  ))}
-                </div>
-                <div className={`${summaryStyles.filterOption} ${summaryStyles.filterOptionGroup}`}>
-                  <span className={summaryStyles.filterBox} />
-                  <span>Cartões</span>
-                  <CaretDownIcon className={summaryStyles.filterCaret} aria-hidden="true" />
-                </div>
-                <div className={summaryStyles.filterChildren}>
+              <fieldset className={`${summaryStyles.filterGroup} ${summaryStyles.filterFieldset}`}>
+                <legend className={summaryStyles.filterLabel}>Contas</legend>
+                <div className={summaryStyles.filterTree}>
                   <SummaryCheckbox
-                    isSelected={selectedAccounts.includes(accountOptions[2])}
-                    onChange={() => toggleAccount(accountOptions[2])}
+                    isSelected={selectedAccounts.includes("Todas as contas")}
+                    onChange={() => toggleAccount("Todas as contas")}
                   >
-                    {accountOptions[2]}
+                    Todas as contas
                   </SummaryCheckbox>
+                  <div
+                    className={`${summaryStyles.filterOption} ${summaryStyles.filterOptionGroup}`}
+                  >
+                    <span className={summaryStyles.filterBox} />
+                    <span>Bancos</span>
+                    <CaretDownIcon className={summaryStyles.filterCaret} aria-hidden="true" />
+                  </div>
+                  <div className={summaryStyles.filterChildren}>
+                    {accountOptions.slice(0, 2).map((account) => (
+                      <SummaryCheckbox
+                        key={account}
+                        isSelected={selectedAccounts.includes(account)}
+                        onChange={() => toggleAccount(account)}
+                      >
+                        {account}
+                      </SummaryCheckbox>
+                    ))}
+                  </div>
+                  <div
+                    className={`${summaryStyles.filterOption} ${summaryStyles.filterOptionGroup}`}
+                  >
+                    <span className={summaryStyles.filterBox} />
+                    <span>Cartões</span>
+                    <CaretDownIcon className={summaryStyles.filterCaret} aria-hidden="true" />
+                  </div>
+                  <div className={summaryStyles.filterChildren}>
+                    <SummaryCheckbox
+                      isSelected={selectedAccounts.includes(accountOptions[2])}
+                      onChange={() => toggleAccount(accountOptions[2])}
+                    >
+                      {accountOptions[2]}
+                    </SummaryCheckbox>
+                  </div>
                 </div>
+              </fieldset>
+
+              <div className={summaryStyles.filterGroup}>
+                <SummaryMonthSelect
+                  label="Mês"
+                  onChange={(value) => setValue("month", value, { shouldDirty: true })}
+                  placement="filter"
+                  value={selectedMonth}
+                />
+                <SummaryCheckbox
+                  isSelected={selectedIncludePreviousBalance}
+                  onChange={(isSelected) =>
+                    setValue("includePreviousBalance", isSelected, { shouldDirty: true })
+                  }
+                >
+                  Incluir saldo anterior
+                </SummaryCheckbox>
               </div>
-            </fieldset>
-
-            <div className={summaryStyles.filterGroup}>
-              <SummaryMonthSelect
-                label="Mês"
-                onChange={(value) => setValue("month", value, { shouldDirty: true })}
-                placement="filter"
-                value={selectedMonth}
-              />
-              <SummaryCheckbox
-                isSelected={selectedIncludePreviousBalance}
-                onChange={(isSelected) =>
-                  setValue("includePreviousBalance", isSelected, { shouldDirty: true })
-                }
-              >
-                Incluir saldo anterior
-              </SummaryCheckbox>
-            </div>
-
-            <div className={summaryStyles.filterFooter}>
+            </CardBody>
+            <CardFooter className="grid-cols-2 gap-2">
               <Button variant="secondary" size="sm" type="button" onPress={handleClearFilters}>
                 Limpar
               </Button>
               <Button variant="primary" size="sm" type="submit">
                 Aplicar
               </Button>
-            </div>
+            </CardFooter>
           </form>
-        </aside>
+        </Card>
 
         <div className={summaryStyles.main}>
           <header className={summaryStyles.pageHead}>
@@ -585,8 +596,8 @@ function SummaryPage({ data }: SummaryPageProps) {
             </div>
           </section>
 
-          <section className={summaryStyles.ledgerCard} aria-labelledby="ledger-title">
-            <header className={summaryStyles.ledgerHeader}>
+          <Card as="section" className="mb-4" aria-labelledby="ledger-title">
+            <CardHeader className="items-center">
               <h2 className={summaryStyles.cardTitle} id="ledger-title">
                 Entradas e saídas
               </h2>
@@ -617,9 +628,9 @@ function SummaryPage({ data }: SummaryPageProps) {
                   </p>
                 </details>
               </div>
-            </header>
+            </CardHeader>
             {isLedgerExpanded && (
-              <div className={summaryStyles.ledgerBody}>
+              <CardBody className="gap-1.5">
                 <SummaryCheckbox
                   isSelected={includePreviousBalance}
                   onChange={handleLedgerPreviousBalanceChange}
@@ -654,45 +665,47 @@ function SummaryPage({ data }: SummaryPageProps) {
                     {formatCurrency(finalBalance)}
                   </strong>
                 </div>
-              </div>
+              </CardBody>
             )}
-          </section>
+          </Card>
 
           <div className={summaryStyles.contentGrid}>
-            <section className={summaryStyles.card} aria-labelledby="category-title">
-              <div className={summaryStyles.cardHeading}>
+            <Card as="section" aria-labelledby="category-title">
+              <CardHeader className="items-baseline">
                 <h2 className={summaryStyles.cardTitle} id="category-title">
                   Despesas por categoria
                 </h2>
                 <span className={`${summaryStyles.cardPeriod} text-meta`}>
                   {summary.monthLabel}
                 </span>
-              </div>
-              <ul className={summaryStyles.categoryChart} aria-label="Despesas por categoria">
-                {visibleCategoryExpenses.map((category) => (
-                  <li className={summaryStyles.categoryRow} key={category.name}>
-                    <div className={summaryStyles.categoryLabel}>
-                      <span>{category.name}</span>
-                      <strong className={summaryStyles.categoryValue}>
-                        {formatCurrency(category.amount)}
-                      </strong>
-                    </div>
-                    <div className={summaryStyles.categoryTrack} aria-hidden="true">
-                      <span
-                        className={summaryStyles.categoryBar}
-                        style={getCategoryBarStyle(category.share)}
-                      />
-                    </div>
-                  </li>
-                ))}
-                {visibleCategoryExpenses.length === 0 && (
-                  <li className={summaryStyles.emptyState}>Nenhuma categoria selecionada.</li>
-                )}
-              </ul>
-            </section>
+              </CardHeader>
+              <CardBody>
+                <ul className={summaryStyles.categoryChart} aria-label="Despesas por categoria">
+                  {visibleCategoryExpenses.map((category) => (
+                    <li className={summaryStyles.categoryRow} key={category.name}>
+                      <div className={summaryStyles.categoryLabel}>
+                        <span>{category.name}</span>
+                        <strong className={summaryStyles.categoryValue}>
+                          {formatCurrency(category.amount)}
+                        </strong>
+                      </div>
+                      <div className={summaryStyles.categoryTrack} aria-hidden="true">
+                        <span
+                          className={summaryStyles.categoryBar}
+                          style={getCategoryBarStyle(category.share)}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                  {visibleCategoryExpenses.length === 0 && (
+                    <li className={summaryStyles.emptyState}>Nenhuma categoria selecionada.</li>
+                  )}
+                </ul>
+              </CardBody>
+            </Card>
 
-            <section className={summaryStyles.card} aria-labelledby="movements-title">
-              <div className={summaryStyles.cardHeading}>
+            <Card as="section" aria-labelledby="movements-title">
+              <CardHeader className="items-baseline">
                 <h2 className={summaryStyles.cardTitle} id="movements-title">
                   Últimos movimentos
                 </h2>
@@ -704,38 +717,40 @@ function SummaryPage({ data }: SummaryPageProps) {
                 >
                   Ver todos
                 </Link>
-              </div>
-              <ul className={summaryStyles.movementList}>
-                {visibleMovements.map((movement) => (
-                  <li className={summaryStyles.movementItem} key={movement.description}>
-                    <div className={summaryStyles.movementCopy}>
-                      <Link
-                        className={summaryStyles.movementPrimary}
-                        preload="intent"
-                        to="/transactions/$transactionId"
-                        params={{ transactionId: movement.id }}
-                        variant="link"
-                      >
-                        {movement.description}
-                      </Link>
-                      <span className={summaryStyles.movementSecondary}>
-                        {movement.category} · {movement.account}
+              </CardHeader>
+              <CardBody>
+                <ul className={summaryStyles.movementList}>
+                  {visibleMovements.map((movement) => (
+                    <li className={summaryStyles.movementItem} key={movement.description}>
+                      <div className={summaryStyles.movementCopy}>
+                        <Link
+                          className={summaryStyles.movementPrimary}
+                          preload="intent"
+                          to="/transactions/$transactionId"
+                          params={{ transactionId: movement.id }}
+                          variant="link"
+                        >
+                          {movement.description}
+                        </Link>
+                        <span className={summaryStyles.movementSecondary}>
+                          {movement.category} · {movement.account}
+                        </span>
+                      </div>
+                      <span className={summaryStatusStyles({ kind: movement.kind })}>
+                        {formatSignedCurrency(
+                          movement.kind === "expense" ? -movement.value : movement.value,
+                        )}
                       </span>
-                    </div>
-                    <span className={summaryStatusStyles({ kind: movement.kind })}>
-                      {formatSignedCurrency(
-                        movement.kind === "expense" ? -movement.value : movement.value,
-                      )}
-                    </span>
-                  </li>
-                ))}
-                {visibleMovements.length === 0 && (
-                  <li className={summaryStyles.emptyState}>
-                    Nenhum movimento encontrado com esses filtros.
-                  </li>
-                )}
-              </ul>
-            </section>
+                    </li>
+                  ))}
+                  {visibleMovements.length === 0 && (
+                    <li className={summaryStyles.emptyState}>
+                      Nenhum movimento encontrado com esses filtros.
+                    </li>
+                  )}
+                </ul>
+              </CardBody>
+            </Card>
           </div>
 
           <p className={summaryStyles.demoNote}>Dados demonstrativos para composição da tela.</p>

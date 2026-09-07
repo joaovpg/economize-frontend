@@ -6,7 +6,7 @@ export const summaryStyles = {
   filtersHeader: "flex items-start justify-between gap-4",
   filterCount: "m-0 text-subtle",
   filterClose: "!hidden max-[48rem]:!inline-flex",
-  filterForm: "mt-5 grid gap-5.5",
+  filterForm: "grid gap-5.5",
   filterGroup: "grid gap-2.5",
   filterFieldset: "min-w-0 border-0 p-0",
   filterLabel: "m-0 text-caption font-bold uppercase tracking-[0.04em] text-muted",
@@ -34,11 +34,7 @@ export const summaryStyles = {
   filterChips: "flex flex-wrap gap-2",
   filterChip:
     "rounded-full border border-border bg-[color-mix(in_oklch,var(--color-surface)_60%,transparent)] px-2.5 py-1.5 text-caption text-muted",
-  ledgerCard:
-    "mb-4 min-w-0 overflow-visible rounded-2xl border border-border bg-[linear-gradient(180deg,color-mix(in_oklch,var(--color-surface)_78%,transparent),color-mix(in_oklch,var(--color-canvas)_92%,transparent))] shadow-card",
   card: "min-w-0 rounded-2xl border border-border bg-[linear-gradient(180deg,color-mix(in_oklch,var(--color-surface)_78%,transparent),color-mix(in_oklch,var(--color-canvas)_92%,transparent))] p-4.5 shadow-card",
-  ledgerHeader:
-    "flex min-h-[3.375rem] items-center justify-between gap-4 rounded-t-2xl border-b border-border bg-[color-mix(in_oklch,var(--color-surface-muted)_74%,transparent)] px-4 py-3",
   cardTitle: "m-0 text-title-compact font-bold text-foreground",
   ledgerTools: "flex items-center gap-1",
   ledgerHelp: "relative",
@@ -60,14 +56,14 @@ export const summaryStyles = {
   cardHeading: "flex items-baseline justify-between gap-4",
   cardPeriod: "text-subtle",
   cardAction: "text-caption",
-  categoryChart: "mt-5 grid list-none gap-3.5 p-0",
+  categoryChart: "m-0 grid list-none gap-3.5 p-0",
   emptyState: "rounded-xl border border-dashed border-border-strong p-3.5 text-caption text-muted",
   categoryRow: "grid gap-1.75",
   categoryLabel: "flex items-center justify-between gap-4 text-caption text-muted",
   categoryValue: "whitespace-nowrap text-subtle font-semibold tabular-nums",
   categoryTrack: "h-2.25 overflow-hidden rounded-full bg-surface-muted",
   categoryBar: "block h-full w-(--category-share) rounded-[inherit] bg-brand",
-  movementList: "mt-4 grid list-none gap-2.5 p-0",
+  movementList: "m-0 grid list-none gap-2.5 p-0",
   movementItem:
     "flex min-w-0 items-center justify-between gap-4 rounded-[0.875rem] border border-border bg-[color-mix(in_oklch,var(--color-surface)_48%,transparent)] px-3 py-[0.6875rem] max-[28rem]:items-start max-[28rem]:flex-col",
   movementCopy: "min-w-0",
@@ -84,11 +80,11 @@ export const summaryStyles = {
 } as const;
 
 export const summaryFiltersStyles = tv({
-  base: "sticky top-6 self-start m-[1.5rem_0_1.5rem_1.5rem] max-h-[calc(100svh-3rem)] overflow-auto rounded-2xl border border-border bg-[linear-gradient(180deg,color-mix(in_oklch,var(--color-surface)_78%,transparent),color-mix(in_oklch,var(--color-canvas)_94%,transparent))] p-5 shadow-card max-[48rem]:static max-[48rem]:m-[0_1rem_1rem] max-[48rem]:max-h-none max-[48rem]:hidden",
+  base: "sticky top-6 w-auto self-start m-[1.5rem_0_1.5rem_1.5rem] max-h-[calc(100svh-3rem)] overflow-auto max-[48rem]:static max-[48rem]:m-[0_1rem_1rem] max-[48rem]:max-h-none max-[48rem]:hidden",
   variants: {
     open: {
       false: "",
-      true: "max-[48rem]:!block",
+      true: "max-[48rem]:!grid",
     },
   },
 });
