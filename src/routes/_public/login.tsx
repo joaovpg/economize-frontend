@@ -209,8 +209,6 @@ function LoginPage() {
                   {submitError}
                 </p>
               )}
-            </CardBody>
-            <CardFooter>
               <Button
                 className="w-full"
                 variant="primary"
@@ -224,7 +222,7 @@ function LoginPage() {
                 Ao continuar, você concorda com uma experiência de controle financeiro mais
                 consciente.
               </p>
-            </CardFooter>
+            </CardBody>
           </Card>
         )}
       </div>

@@ -174,8 +174,6 @@ function RegisterPage() {
               <p className="m-0 flex items-center gap-2.25 text-caption text-pretty text-muted before:size-1.75 before:flex-none before:shrink-0 before:rounded-full before:bg-brand before:content-['']">
                 Fuso horário detectado: <strong>{timezone}</strong>
               </p>
-            </CardBody>
-            <CardFooter>
               <Button
                 className="w-full"
                 variant="primary"
@@ -189,7 +187,7 @@ function RegisterPage() {
                 Ao continuar, você concorda com uma experiência de controle financeiro mais
                 consciente.
               </p>
-            </CardFooter>
+            </CardBody>
           </Card>
         )}
       </div>

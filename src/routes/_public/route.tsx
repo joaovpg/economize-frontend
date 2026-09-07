@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/csr/ArrowRight";
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 import { Link } from "../../components/Link";
 import LoadingPage from "../../components/LoadingPage";
@@ -15,7 +16,9 @@ export const Route = createFileRoute("/_public")({
 });
 
 function PublicLayout() {
-  const isLogin = useLocation({ select: (location) => location.pathname === "/login" });
+  const pathname = useLocation({ select: (location) => location.pathname });
+  const reducedMotion = useReducedMotion();
+  const isLogin = pathname === "/login";
   const alternatePath = isLogin ? "/cadastro" : "/login";
   const linkTitle = isLogin ? "Criar conta" : "Entrar";
 
@@ -41,7 +44,20 @@ function PublicLayout() {
         </header>
         <main className="flex w-full min-w-0 flex-1 flex-col justify-center">
           <Suspense fallback={<LoadingPage />}>
-            <Outlet />
+            <AnimatePresence initial={false}>
+              <motion.div
+                key={pathname}
+                initial={{ opacity: 0, x: reducedMotion ? 0 : isLogin ? -16 : 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{
+                  duration: reducedMotion ? 0.12 : 0.25,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                className="w-full min-w-0"
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
           </Suspense>
         </main>
       </div>
