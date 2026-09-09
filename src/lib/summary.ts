@@ -1,9 +1,31 @@
 import { z } from "zod";
 
 export const categoryOptions = ["Moradia", "Mercado", "Transporte", "Lazer"] as const;
+export const categoryFilterOptions = [
+  "Aluguel",
+  "Mercado",
+  "Transporte",
+  "Lazer",
+  "Receita",
+] as const;
 export const accountOptions = ["Nubank", "Banco Inter", "C6 Crédito"] as const;
 export const accountFilterOptions = ["Todas as contas", ...accountOptions] as const;
 export const summaryMonthValues = ["2026-08", "2026-07"] as const;
+
+export type CategoryFilterValue = (typeof categoryFilterOptions)[number];
+type CategorySearchValue = CategoryFilterValue | "Moradia";
+
+const categorySearchOptions = [...categoryFilterOptions, "Moradia"] as const;
+
+function normalizeCategoryFilters(
+  categories: readonly CategorySearchValue[],
+): CategoryFilterValue[] {
+  const normalizedCategories: CategoryFilterValue[] = categories.map((category) =>
+    category === "Moradia" ? "Aluguel" : category,
+  );
+
+  return [...new Set(normalizedCategories)];
+}
 
 export const monthOptions = [
   { label: "Agosto 2026", value: "2026-08" },
@@ -15,7 +37,11 @@ export const summarySearchSchema = z.object({
     .array(z.enum(accountFilterOptions))
     .catch(["Todas as contas"])
     .default(["Todas as contas"]),
-  categories: z.array(z.enum(categoryOptions)).catch([]).default([]),
+  categories: z
+    .array(z.enum(categorySearchOptions))
+    .transform(normalizeCategoryFilters)
+    .catch([])
+    .default([]),
   includePreviousBalance: z.boolean().catch(true).default(true),
   ledgerExpanded: z.boolean().catch(true).default(true),
   month: z.enum(summaryMonthValues).catch("2026-08").default("2026-08"),
@@ -29,7 +55,7 @@ export type Movement = {
   account: (typeof accountOptions)[number];
   category: string;
   description: string;
-  filterCategory: string;
+  filterCategory: CategoryFilterValue;
   id: string;
   kind: "income" | "expense";
   value: number;
@@ -70,8 +96,8 @@ const summaryByMonth: Record<SummaryMonth, SummaryData> = {
       {
         id: "rent-august",
         description: "Aluguel",
-        category: "Moradia",
-        filterCategory: "Moradia",
+        category: "Aluguel",
+        filterCategory: "Aluguel",
         account: "Nubank",
         kind: "expense",
         value: 1850,
@@ -111,8 +137,8 @@ const summaryByMonth: Record<SummaryMonth, SummaryData> = {
       {
         id: "rent-july",
         description: "Aluguel",
-        category: "Moradia",
-        filterCategory: "Moradia",
+        category: "Aluguel",
+        filterCategory: "Aluguel",
         account: "Nubank",
         kind: "expense",
         value: 1850,

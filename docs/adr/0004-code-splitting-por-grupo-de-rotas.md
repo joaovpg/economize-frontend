@@ -1,4 +1,4 @@
-# ADR-0004: Code Splitting Por Grupo De Rotas
+# ADR-0004: TanStack Router e code splitting automático por rota
 
 ## Status
 
@@ -12,23 +12,11 @@ ambos precisam de um estado de carregamento enquanto seus módulos são obtidos 
 
 ## Decisão
 
-O TanStack Router será usado com roteamento baseado em arquivos e `autoCodeSplitting` habilitado
-no plugin do Vite. Cada arquivo de rota declara seu componente, loaders e boundaries; telas e
-estilos específicos podem ser colocalizados em arquivos ou diretórios prefixados com `-`, que não
-entram na árvore gerada. O roteador usa preloading por intenção para obter o código e os dados de
-uma rota quando o usuário demonstra interesse nela.
+Adotamos TanStack Router em substituição ao React Router, com rotas baseadas em arquivos, code splitting automático e preloading por intenção para reduzir o carregamento antecipado de telas. Os grupos público e privado compartilham a experiência de carregamento por seus layouts. A validação da sessão permanece sob responsabilidade da API, independente da organização visual.
 
-Os layouts permanecerão síncronos para hospedar seus próprios limites de `Suspense`:
-`PublicLayout` para as rotas públicas e `PrivateLayout` para a área privada. Ambos envolverão o
-`Outlet` com `LoadingPage` como fallback. O layout privado será apenas um shell com `Outlet`, sem
-adicionar um guard de sessão, pois a validade da sessão é responsabilidade do backend e o frontend
-reage a respostas `401`.
+As convenções de implementação ficam no [guia de arquitetura](../agent-guidelines/frontend-architecture.md).
 
 ## Consequências
 
-- O bundle inicial mantém o roteador, os layouts, o fallback e as dependências necessárias para iniciar a aplicação.
-- Login, cadastro, resumo, detalhes de transação e 404 são baixados conforme suas rotas são
-  renderizadas ou pré-carregadas.
-- A experiência de carregamento é consistente entre os dois grupos de rotas.
-- Os layouts permanecem visíveis enquanto as telas lazy das rotas são carregadas.
-- A autenticação continuará podendo ser integrada depois sem precisar mudar a divisão dos chunks.
+- O splitting é automático por rota; os grupos organizam layouts e não exigem um único chunk por grupo. Layouts síncronos também podem ter seus componentes carregados sob demanda.
+- O componente 404 é importado estaticamente pela raiz; esta decisão não prevê um chunk lazy específico para ele. A composição exata dos chunks deve ser verificada no build.

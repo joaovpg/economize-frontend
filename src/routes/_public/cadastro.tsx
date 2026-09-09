@@ -5,27 +5,16 @@ import { ArrowRightIcon } from "@phosphor-icons/react/dist/csr/ArrowRight";
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
+import { AuthConsent } from "../../components/AuthConsent";
 import { Button } from "../../components/Button";
 import { Card, CardBody } from "../../components/Card";
-import { RouteError, RoutePending } from "../../components/RouteStates";
 import { TextField } from "../../components/TextField";
-import { authGridStyles, authCopyStyles } from "./authStyles";
+import { emailSchema, passwordSchema } from "../../lib/auth";
+import { authGridStyles, authCopyStyles } from "./-authStyles";
 
 export const Route = createFileRoute("/_public/cadastro")({
   component: RegisterPage,
-  errorComponent: RouteError,
-  pendingComponent: RoutePending,
 });
-
-const emailSchema = z
-  .email("Digite um e-mail válido.")
-  .min(1, "Digite seu e-mail.")
-  .max(320, "Use até 320 caracteres.");
-
-const passwordSchema = z
-  .string()
-  .min(1, "Digite sua senha.")
-  .refine((value) => value.trim().length > 0, "Digite sua senha.");
 
 const cadastroSchema = z
   .object({
@@ -141,9 +130,7 @@ function RegisterPage() {
           >
             {isSubmitting ? "Enviando..." : "Criar minha conta"}
           </Button>
-          <p className="m-0 text-center text-caption text-subtle">
-            Ao continuar, você concorda com uma experiência de controle financeiro mais consciente.
-          </p>
+          <AuthConsent />
         </CardBody>
       </Card>
     </section>

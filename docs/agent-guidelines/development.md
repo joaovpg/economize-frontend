@@ -1,21 +1,20 @@
 # Desenvolvimento e validação
 
-Consulte este guia ao instalar dependências, executar o projeto ou validar uma alteração.
-
 ## Comandos
 
-- Instale dependências com `pnpm install`.
-- Inicie o servidor Vite com `pnpm dev`.
-- Formate arquivos com `pnpm fmt`; confirme a formatação com `pnpm fmt:check`.
-- Execute o lint com `pnpm lint`; use `pnpm lint:fix` somente quando quiser aplicar correções
-  automáticas.
-- Gere e verifique o build de produção com `pnpm build`.
+- Consulte os scripts em [package.json](../../package.json) para executar o projeto ou aplicar formatação e correções de lint.
 - Use `pnpm preview` somente depois de um `pnpm build` bem-sucedido.
+- Siga a sequência de validação do [AGENTS.md](../../AGENTS.md#essencial) e informe o resultado de cada verificação, incluindo falhas preexistentes ou comandos não concluídos.
+- Ao adicionar um script de testes, atualize esse fluxo de validação.
 
 ## Ferramentas
 
 - Oxfmt define a formatação e a ordenação de imports em `.oxfmtrc.json`.
 - Oxlint define as regras de lint em `.oxlintrc.json`.
 - As configurações `tsconfig*.json` são a fonte de verdade para as restrições de TypeScript.
-- Não há script de testes configurado. Ao adicionar um, atualize também o fluxo de validação
-  documentado no `AGENTS.md` raiz.
+
+## Ambiente e arquivos gerados
+
+- Configure `VITE_API_URL` no ambiente para as chamadas do cliente HTTP em `src/lib/api.ts`.
+- `src/routeTree.gen.ts` é gerado pelo plugin do TanStack Router durante `pnpm dev` e
+  `pnpm build`. Altere os módulos de rota e deixe o plugin atualizar a árvore; não a edite à mão.

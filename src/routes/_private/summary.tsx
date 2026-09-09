@@ -1,7 +1,6 @@
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
 import {
   Button as AriaButton,
-  Checkbox,
   Input,
   Label,
   ListBox,
@@ -16,7 +15,6 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarBlankIcon } from "@phosphor-icons/react/dist/csr/CalendarBlank";
 import { CaretDownIcon } from "@phosphor-icons/react/dist/csr/CaretDown";
-import { CheckIcon } from "@phosphor-icons/react/dist/csr/Check";
 import { FunnelIcon } from "@phosphor-icons/react/dist/csr/Funnel";
 import { InfoIcon } from "@phosphor-icons/react/dist/csr/Info";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/csr/MagnifyingGlass";
@@ -29,60 +27,89 @@ import { z } from "zod";
 
 import { Button } from "../../components/Button";
 import { Card, CardHeader, CardBody, CardFooter } from "../../components/Card";
+import { Checkbox } from "../../components/Checkbox";
+import { FilterTree, type FilterTreeItem } from "../../components/FilterTree";
 import { Link } from "../../components/Link";
-import { RouteError, RoutePending } from "../../components/RouteStates";
+import { formatCurrency, formatSignedCurrency } from "../../lib/formatters";
 import {
   accountFilterOptions,
   getSummaryData,
   accountOptions,
   categoryOptions,
+  categoryFilterOptions,
   monthOptions,
   summaryMonthValues,
   summarySearchSchema,
   type CategoryExpense,
+  type CategoryFilterValue,
   type SummaryMonth,
   type SummaryData,
 } from "../../lib/summary";
 import {
-  summaryCheckboxIndicatorStyles,
-  summaryCheckboxStyles,
   summaryFiltersStyles,
   summarySelectTriggerStyles,
   summaryStatusStyles,
   summaryStyles,
-} from "./summaryStyles";
+} from "./-summaryStyles";
 
 type CategoryBarStyle = CSSProperties & {
   "--category-share": string;
 };
 
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  currency: "BRL",
-  minimumFractionDigits: 2,
-  style: "currency",
-});
-
-function formatCurrency(value: number) {
-  return currencyFormatter.format(value);
-}
-
-function formatSignedCurrency(value: number) {
-  return value >= 0 ? `+ ${formatCurrency(value)}` : `− ${formatCurrency(Math.abs(value))}`;
-}
-
 function getCategoryBarStyle(share: number): CategoryBarStyle {
   return { "--category-share": `${share}%` };
 }
 
+function getCategoryFilterLabel(category: CategoryFilterValue) {
+  return category === "Receita" ? "Receitas" : category;
+}
+
+function getCategoryExpenseName(filterCategory: CategoryFilterValue) {
+  return filterCategory === "Aluguel" ? "Moradia" : filterCategory;
+}
+
 const summaryFilterSchema = z.object({
   accounts: z.array(z.enum(accountFilterOptions)),
-  categories: z.array(z.enum(categoryOptions)),
+  categories: z.array(z.enum(categoryFilterOptions)),
   includePreviousBalance: z.boolean(),
   month: z.enum(summaryMonthValues),
   search: z.string(),
 });
 
 type SummaryFilterFormData = z.infer<typeof summaryFilterSchema>;
+
+type AccountFilterValue = (typeof accountFilterOptions)[number];
+
+const categoryFilterItems: readonly FilterTreeItem<CategoryFilterValue>[] = [
+  {
+    children: categoryOptions.map((category) =>
+      category === "Moradia"
+        ? {
+            children: [{ id: "Aluguel", label: "Aluguel" }],
+            id: "moradia",
+            label: category,
+          }
+        : { id: category, label: category },
+    ),
+    id: "despesas",
+    label: "Despesas",
+  },
+  { id: "Receita", label: "Receitas" },
+];
+
+const accountFilterItems: readonly FilterTreeItem<AccountFilterValue>[] = [
+  { id: "Todas as contas", label: "Todas as contas" },
+  {
+    children: accountOptions.slice(0, 2).map((account) => ({ id: account, label: account })),
+    id: "bancos",
+    label: "Bancos",
+  },
+  {
+    children: [{ id: accountOptions[2], label: accountOptions[2] }],
+    id: "cartoes",
+    label: "Cartões",
+  },
+];
 
 const summaryRoute = getRouteApi("/_private/summary");
 
@@ -101,26 +128,11 @@ function SummaryCheckbox({
 }: SummaryCheckboxProps) {
   return (
     <Checkbox
-      className={summaryCheckboxStyles({ placement })}
       isSelected={isSelected}
       onChange={onChange}
+      size={placement === "ledger" ? "compact" : "default"}
     >
-      {({ isIndeterminate, isSelected: selected }) => {
-        const isChecked = selected || isIndeterminate;
-
-        return (
-          <>
-            <span className={summaryCheckboxIndicatorStyles({ selected: isChecked })}>
-              {isIndeterminate ? (
-                <MinusIcon aria-hidden="true" weight="bold" />
-              ) : isChecked ? (
-                <CheckIcon aria-hidden="true" weight="bold" />
-              ) : null}
-            </span>
-            <span>{children}</span>
-          </>
-        );
-      }}
+      {children}
     </Checkbox>
   );
 }
@@ -216,17 +228,15 @@ function SummaryPage({ data }: SummaryPageProps) {
     useWatch({ control, name: "includePreviousBalance" }) ?? search.includePreviousBalance;
   const selectedMonth = useWatch({ control, name: "month" }) ?? search.month;
   const searchField = register("search");
+  const allAccountsSelected = appliedAccounts.includes("Todas as contas");
+  const hasAccountFilter = appliedAccounts.length > 0 && !allAccountsSelected;
   const activeFilterCount =
     1 +
     Number(appliedSearchTerm.trim().length > 0) +
     Number(appliedCategories.length > 0) +
-    Number(appliedAccounts.length > 0);
-  const allCategoriesSelected = selectedCategories.length === categoryOptions.length;
-  const someCategoriesSelected = selectedCategories.length > 0 && !allCategoriesSelected;
+    Number(hasAccountFilter);
   const normalizedSearchTerm = appliedSearchTerm.trim().toLocaleLowerCase("pt-BR");
-  const allAccountsSelected = appliedAccounts.includes("Todas as contas");
-  const hasTransactionFilter =
-    normalizedSearchTerm.length > 0 || appliedAccounts.length === 0 || !allAccountsSelected;
+  const hasTransactionFilter = normalizedSearchTerm.length > 0 || hasAccountFilter;
   const hasCategoryFilter = appliedCategories.length > 0;
   const hasMovementFilter = hasTransactionFilter || hasCategoryFilter;
   const visibleMovements = summary.movements.filter((movement) => {
@@ -252,7 +262,8 @@ function SummaryPage({ data }: SummaryPageProps) {
             const amount = visibleMovements
               .filter(
                 (movement) =>
-                  movement.kind === "expense" && movement.filterCategory === category.name,
+                  movement.kind === "expense" &&
+                  getCategoryExpenseName(movement.filterCategory) === category.name,
               )
               .reduce((total, movement) => total + movement.value, 0);
 
@@ -261,7 +272,11 @@ function SummaryPage({ data }: SummaryPageProps) {
           .filter((category) => category.amount > 0),
       )
     : summary.categoryExpenses.filter(
-        (category) => appliedCategories.length === 0 || appliedCategories.includes(category.name),
+        (category) =>
+          appliedCategories.length === 0 ||
+          appliedCategories.some(
+            (filterCategory) => getCategoryExpenseName(filterCategory) === category.name,
+          ),
       );
   const ledgerIncome = hasMovementFilter
     ? visibleMovements
@@ -302,38 +317,31 @@ function SummaryPage({ data }: SummaryPageProps) {
     wasFiltersOpenRef.current = isFiltersOpen;
   }, [isFiltersOpen, setFocus]);
 
-  const toggleCategory = (category: (typeof categoryOptions)[number]) => {
-    const nextCategories = selectedCategories.includes(category)
-      ? selectedCategories.filter((item) => item !== category)
-      : [...selectedCategories, category];
+  const handleAccountTreeSelectionChange = (nextAccounts: AccountFilterValue[]) => {
+    const allAccountsKey = "Todas as contas" as const;
+    const individualAccounts = nextAccounts.filter((account) => account !== allAccountsKey);
+    const hadAllAccountsSelected = selectedAccounts.includes(allAccountsKey);
+    const hasAllAccountsSelected = nextAccounts.includes(allAccountsKey);
 
-    setValue("categories", nextCategories, { shouldDirty: true });
-  };
+    const normalizedAccounts = hasAllAccountsSelected
+      ? hadAllAccountsSelected
+        ? individualAccounts.length > 0
+          ? individualAccounts
+          : [allAccountsKey]
+        : [allAccountsKey]
+      : individualAccounts;
 
-  const toggleAccount = (account: (typeof accountFilterOptions)[number]) => {
-    if (account === "Todas as contas") {
-      setValue("accounts", selectedAccounts.includes(account) ? [] : [account], {
-        shouldDirty: true,
-      });
-      return;
-    }
-
-    const withoutAll = selectedAccounts.filter((item) => item !== "Todas as contas");
-    const nextAccounts = withoutAll.includes(account)
-      ? withoutAll.filter((item) => item !== account)
-      : [...withoutAll, account];
-
-    setValue("accounts", nextAccounts, { shouldDirty: true });
+    setValue("accounts", normalizedAccounts, { shouldDirty: true });
   };
 
   const handleClearFilters = () => {
     setValue("search", "", { shouldDirty: true });
     setValue("categories", [], { shouldDirty: true });
-    setValue("accounts", [], { shouldDirty: true });
+    setValue("accounts", ["Todas as contas"], { shouldDirty: true });
     void navigate({
       search: (current) => ({
         ...current,
-        accounts: [],
+        accounts: ["Todas as contas"],
         categories: [],
         q: "",
       }),
@@ -432,87 +440,24 @@ function SummaryPage({ data }: SummaryPageProps) {
 
               <fieldset className={`${summaryStyles.filterGroup} ${summaryStyles.filterFieldset}`}>
                 <legend className={summaryStyles.filterLabel}>Categorias</legend>
-                <div className={summaryStyles.filterTree}>
-                  <div
-                    className={`${summaryStyles.filterOption} ${summaryStyles.filterOptionGroup}`}
-                  >
-                    <span
-                      className={summaryStyles.filterBox}
-                      data-partial={someCategoriesSelected || undefined}
-                    >
-                      {allCategoriesSelected ? (
-                        <CheckIcon aria-hidden="true" weight="bold" />
-                      ) : someCategoriesSelected ? (
-                        <MinusIcon aria-hidden="true" weight="bold" />
-                      ) : null}
-                    </span>
-                    <span>Despesas</span>
-                    <CaretDownIcon className={summaryStyles.filterCaret} aria-hidden="true" />
-                  </div>
-                  <div className={summaryStyles.filterChildren}>
-                    {categoryOptions.map((category) => (
-                      <SummaryCheckbox
-                        key={category}
-                        isSelected={selectedCategories.includes(category)}
-                        onChange={() => toggleCategory(category)}
-                      >
-                        {category}
-                      </SummaryCheckbox>
-                    ))}
-                  </div>
-                  <div
-                    className={`${summaryStyles.filterOption} ${summaryStyles.filterOptionGroup}`}
-                  >
-                    <span className={summaryStyles.filterBox} />
-                    <span>Receitas</span>
-                    <CaretDownIcon className={summaryStyles.filterCaret} aria-hidden="true" />
-                  </div>
-                </div>
+                <FilterTree
+                  ariaLabel="Categorias"
+                  items={categoryFilterItems}
+                  onSelectionChange={(categories) =>
+                    setValue("categories", categories, { shouldDirty: true })
+                  }
+                  selectedKeys={selectedCategories}
+                />
               </fieldset>
 
               <fieldset className={`${summaryStyles.filterGroup} ${summaryStyles.filterFieldset}`}>
                 <legend className={summaryStyles.filterLabel}>Contas</legend>
-                <div className={summaryStyles.filterTree}>
-                  <SummaryCheckbox
-                    isSelected={selectedAccounts.includes("Todas as contas")}
-                    onChange={() => toggleAccount("Todas as contas")}
-                  >
-                    Todas as contas
-                  </SummaryCheckbox>
-                  <div
-                    className={`${summaryStyles.filterOption} ${summaryStyles.filterOptionGroup}`}
-                  >
-                    <span className={summaryStyles.filterBox} />
-                    <span>Bancos</span>
-                    <CaretDownIcon className={summaryStyles.filterCaret} aria-hidden="true" />
-                  </div>
-                  <div className={summaryStyles.filterChildren}>
-                    {accountOptions.slice(0, 2).map((account) => (
-                      <SummaryCheckbox
-                        key={account}
-                        isSelected={selectedAccounts.includes(account)}
-                        onChange={() => toggleAccount(account)}
-                      >
-                        {account}
-                      </SummaryCheckbox>
-                    ))}
-                  </div>
-                  <div
-                    className={`${summaryStyles.filterOption} ${summaryStyles.filterOptionGroup}`}
-                  >
-                    <span className={summaryStyles.filterBox} />
-                    <span>Cartões</span>
-                    <CaretDownIcon className={summaryStyles.filterCaret} aria-hidden="true" />
-                  </div>
-                  <div className={summaryStyles.filterChildren}>
-                    <SummaryCheckbox
-                      isSelected={selectedAccounts.includes(accountOptions[2])}
-                      onChange={() => toggleAccount(accountOptions[2])}
-                    >
-                      {accountOptions[2]}
-                    </SummaryCheckbox>
-                  </div>
-                </div>
+                <FilterTree
+                  ariaLabel="Contas"
+                  items={accountFilterItems}
+                  onSelectionChange={handleAccountTreeSelectionChange}
+                  selectedKeys={selectedAccounts}
+                />
               </fieldset>
 
               <div className={summaryStyles.filterGroup}>
@@ -583,14 +528,12 @@ function SummaryPage({ data }: SummaryPageProps) {
               <span className={summaryStyles.filterChip}>Mês: {summary.monthLabel}</span>
               {appliedCategories.length > 0 && (
                 <span className={summaryStyles.filterChip}>
-                  Categorias: {appliedCategories.join(", ")}
+                  Categorias: {appliedCategories.map(getCategoryFilterLabel).join(", ")}
                 </span>
               )}
-              {appliedAccounts.length > 0 && (
+              {hasAccountFilter && (
                 <span className={summaryStyles.filterChip}>
-                  {appliedAccounts.includes("Todas as contas")
-                    ? "Todas as contas"
-                    : `${appliedAccounts.length} contas`}
+                  {`${appliedAccounts.length} contas`}
                 </span>
               )}
             </div>
@@ -773,8 +716,6 @@ export const Route = createFileRoute("/_private/summary")({
     return summary;
   },
   component: SummaryPageRoute,
-  errorComponent: RouteError,
-  pendingComponent: RoutePending,
   preloadStaleTime: 30_000,
 });
 

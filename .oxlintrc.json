@@ -37,7 +37,12 @@
       "warn",
       {
         "allowConstantExport": true,
-        "customHOCs": ["createFileRoute", "createRootRouteWithContext", "createRootRoute"]
+        "customHOCs": [
+          "createFileRoute",
+          "createRootRouteWithContext",
+          "createRootRoute",
+          "createLink"
+        ]
       }
     ],
     "import/no-unassigned-import": "off",

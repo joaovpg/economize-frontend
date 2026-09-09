@@ -1,6 +1,6 @@
 import { forwardRef, type ReactNode } from "react";
 
-import { createLink } from "@tanstack/react-router";
+import { createLink, type LinkComponent } from "@tanstack/react-router";
 
 import { buttonStyles, type ButtonStyleProps } from "./Button/buttonStyles";
 import { IconSlot } from "./IconSlot";
@@ -53,6 +53,6 @@ const StyledLinkWithRef = forwardRef(StyledLink);
  *
  * O `createLink` mantém `to`, `params`, `search` e `preload` ligados à árvore de rotas gerada. Isso
  * faz com que links internos e seus parâmetros sejam verificados pelo TypeScript no ponto de uso. O
- * Router também adiciona o preloading por intenção configurado em `src/router.tsx`.
+ * Router também adiciona o preloading por intenção configurado em `src/main.tsx`.
  */
-export const Link = createLink(StyledLinkWithRef);
+export const Link: LinkComponent<typeof StyledLinkWithRef> = createLink(StyledLinkWithRef);

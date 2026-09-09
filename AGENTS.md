@@ -12,7 +12,10 @@ Frontend React do Economize, uma aplicação web para registrar, entender e cont
 
 ## Instruções por contexto
 
-- [Desenvolvimento e validação](docs/agent-guidelines/development.md)
-- [Arquitetura frontend](docs/agent-guidelines/frontend-architecture.md)
-- [Interface e estilos](docs/agent-guidelines/ui-and-styling.md)
-- [Decisões arquiteturais aceitas](docs/adr/)
+- Ao configurar o ambiente ou validar alterações, consulte
+  [Desenvolvimento e validação](docs/agent-guidelines/development.md).
+- Ao alterar rotas, layouts, estado na URL ou acesso a dados, consulte
+  [Arquitetura frontend](docs/agent-guidelines/frontend-architecture.md).
+- Ao criar componentes, formulários ou estilos, consulte
+  [Interface e estilos](docs/agent-guidelines/ui-and-styling.md).
+- Antes de mudar uma decisão arquitetural, consulte os [ADRs aceitos](docs/adr/).

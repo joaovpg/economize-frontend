@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_private")({
   pendingComponent: RoutePending,
 });
 
-export const privateLayoutStyles = {
+const privateLayoutStyles = {
   app: "relative isolate min-h-svh overflow-hidden bg-canvas text-foreground selection:bg-brand-soft selection:text-brand-hover",
   shell:
     "relative z-[1] mx-auto min-h-svh w-full max-w-[77.5rem] border-x border-[color-mix(in_oklch,var(--color-border)_72%,transparent)] bg-[color-mix(in_oklch,var(--color-canvas)_34%,transparent)] max-[48rem]:border-x-0",
@@ -33,7 +33,7 @@ export const privateLayoutStyles = {
     "gap-2 !text-brand text-button no-underline whitespace-nowrap data-hovered:!text-brand-hover data-hovered:underline data-hovered:underline-offset-4 max-[60rem]:hidden",
 } as const;
 
-export const privateNavLinkStyles = tv({
+const privateNavLinkStyles = tv({
   base: "!h-11 !min-h-11 !rounded-full !px-3 text-button !text-muted no-underline data-hovered:!text-foreground data-hovered:no-underline max-[28rem]:!px-2.5 max-[28rem]:[&>span>svg]:hidden",
   variants: {
     active: {
@@ -61,9 +61,7 @@ function PrivateLayout() {
   const { pathname } = useLocation();
 
   const isActive = (to: string) =>
-    to === "/summary"
-      ? pathname === "/summary" || pathname === "/dashboard"
-      : pathname === to || pathname.startsWith(`${to}/`);
+    to === "/summary" ? pathname === "/summary" : pathname === to || pathname.startsWith(`${to}/`);
 
   return (
     <div className={`app-background ${privateLayoutStyles.app}`}>

@@ -2,12 +2,11 @@ import { ArrowLeftIcon } from "@phosphor-icons/react/dist/csr/ArrowLeft";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
 import { Link } from "../../components/Link";
-import { RouteError, RoutePending } from "../../components/RouteStates";
+import { formatSignedCurrency } from "../../lib/formatters";
 import { getTransaction, type TransactionData } from "../../lib/summary";
 
 export const Route = createFileRoute("/_private/transactions/$transactionId")({
   component: TransactionDetailRoute,
-  errorComponent: RouteError,
   loader: async ({ params }) => {
     const transaction = await getTransaction(params.transactionId);
 
@@ -17,7 +16,6 @@ export const Route = createFileRoute("/_private/transactions/$transactionId")({
 
     return transaction;
   },
-  pendingComponent: RoutePending,
 });
 
 function TransactionDetailRoute() {
@@ -29,12 +27,6 @@ function TransactionDetailRoute() {
 type TransactionDetailPageProps = {
   transaction: TransactionData;
 };
-
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  currency: "BRL",
-  minimumFractionDigits: 2,
-  style: "currency",
-});
 
 function TransactionDetailPage({ transaction }: TransactionDetailPageProps) {
   const signedValue = transaction.kind === "expense" ? -transaction.value : transaction.value;
@@ -58,8 +50,7 @@ function TransactionDetailPage({ transaction }: TransactionDetailPageProps) {
       <p
         className={`m-0 text-metric ${transaction.kind === "expense" ? "text-danger" : "text-success"}`}
       >
-        {signedValue >= 0 ? "+ " : "− "}
-        {currencyFormatter.format(Math.abs(signedValue))}
+        {formatSignedCurrency(signedValue)}
       </p>
       <p className="m-0 text-body-small text-subtle">
         Identificador: <code>{transaction.id}</code>

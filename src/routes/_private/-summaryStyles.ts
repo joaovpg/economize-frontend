@@ -3,7 +3,6 @@ import { tv } from "tailwind-variants";
 export const summaryStyles = {
   page: "min-w-0",
   layout: "grid min-w-0 grid-cols-[18.25rem_minmax(0,1fr)] items-start max-[48rem]:block",
-  filtersHeader: "flex items-start justify-between gap-4",
   filterCount: "m-0 text-subtle",
   filterClose: "!hidden max-[48rem]:!inline-flex",
   filterForm: "grid gap-5.5",
@@ -14,15 +13,6 @@ export const summaryStyles = {
     "flex min-h-[2.625rem] min-w-0 items-center gap-2.5 rounded-xl border border-border bg-[color-mix(in_oklch,var(--color-surface)_70%,transparent)] px-3 text-subtle transition-[background-color,border-color] duration-150 ease-out motion-reduce:transition-none hover:border-border-strong hover:bg-surface-muted focus-within:border-brand focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand [&>svg]:size-4 [&>svg]:shrink-0",
   filterInput:
     "min-w-0 flex-1 border-0 bg-transparent text-body-small text-foreground caret-brand outline-none placeholder:text-subtle",
-  filterTree: "grid gap-1.75",
-  filterChildren: "mt-0.5 mb-0.5 ml-[1.625rem] grid gap-1.75",
-  filterOption:
-    "flex min-h-[1.625rem] cursor-pointer items-center gap-2 text-caption text-muted max-[48rem]:min-h-11",
-  filterOptionGroup: "font-medium",
-  filterBox:
-    "grid size-4 shrink-0 place-items-center rounded-[0.3125rem] border border-border-strong bg-[color-mix(in_oklch,var(--color-surface)_70%,transparent)] text-brand data-[partial=true]:border-brand data-[partial=true]:bg-brand-soft [&>svg]:size-2.75",
-  filterCaret: "ml-auto size-3.5 shrink-0 text-subtle",
-  filterFooter: "mt-0.5 grid grid-cols-2 gap-2",
   main: "min-w-0 p-[2rem_1.75rem_2.5rem] max-[48rem]:p-[1.5rem_1rem_2rem]",
   pageHead:
     "mb-5.5 flex items-end justify-between gap-4 max-[48rem]:mb-4 max-[48rem]:grid max-[48rem]:items-start max-[48rem]:gap-4",
@@ -34,7 +24,6 @@ export const summaryStyles = {
   filterChips: "flex flex-wrap gap-2",
   filterChip:
     "rounded-full border border-border bg-[color-mix(in_oklch,var(--color-surface)_60%,transparent)] px-2.5 py-1.5 text-caption text-muted",
-  card: "min-w-0 rounded-2xl border border-border bg-[linear-gradient(180deg,color-mix(in_oklch,var(--color-surface)_78%,transparent),color-mix(in_oklch,var(--color-canvas)_92%,transparent))] p-4.5 shadow-card",
   cardTitle: "m-0 text-title-compact font-bold text-foreground",
   ledgerTools: "flex items-center gap-1",
   ledgerHelp: "relative",
@@ -42,7 +31,6 @@ export const summaryStyles = {
     "grid size-9 cursor-pointer list-none place-items-center rounded-lg text-subtle hover:bg-surface-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand [&>svg]:size-4.5 [&::-webkit-details-marker]:hidden",
   ledgerHelpCopy:
     "absolute top-[calc(100%+0.5rem)] right-0 z-2 m-0 w-[min(16rem,70vw)] rounded-xl border border-border bg-surface p-3 text-caption text-muted shadow-popover",
-  ledgerBody: "grid gap-1.5 p-4",
   ledgerRow:
     "flex min-h-8 items-center justify-between gap-4 text-body-small text-muted max-[28rem]:gap-3",
   ledgerValue: "whitespace-nowrap text-subtle font-semibold tabular-nums",
@@ -53,7 +41,6 @@ export const summaryStyles = {
   ledgerTotalValue: "whitespace-nowrap text-metric text-foreground tabular-nums",
   contentGrid:
     "grid grid-cols-[minmax(0,1.05fr)_minmax(18rem,0.95fr)] gap-4 max-[48rem]:grid-cols-1",
-  cardHeading: "flex items-baseline justify-between gap-4",
   cardPeriod: "text-subtle",
   cardAction: "text-caption",
   categoryChart: "m-0 grid list-none gap-3.5 p-0",
@@ -85,29 +72,6 @@ export const summaryFiltersStyles = tv({
     open: {
       false: "",
       true: "max-[48rem]:!grid",
-    },
-  },
-});
-
-export const summaryCheckboxStyles = tv({
-  base: "flex min-h-[1.625rem] cursor-pointer items-center gap-2 text-caption text-muted data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focus-visible:outline-2 data-focus-visible:outline-offset-2 data-focus-visible:outline-brand max-[48rem]:min-h-11",
-  variants: {
-    placement: {
-      filter: "",
-      ledger: "mb-1 min-h-8 gap-2.25",
-    },
-  },
-  defaultVariants: {
-    placement: "filter",
-  },
-});
-
-export const summaryCheckboxIndicatorStyles = tv({
-  base: "grid size-4 shrink-0 place-items-center rounded-[0.3125rem] border border-border-strong bg-[color-mix(in_oklch,var(--color-surface)_70%,transparent)] text-brand [&>svg]:size-2.75",
-  variants: {
-    selected: {
-      false: "",
-      true: "border-brand bg-brand-soft",
     },
   },
 });
