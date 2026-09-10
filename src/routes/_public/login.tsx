@@ -13,7 +13,6 @@ import { Card, CardBody } from "../../components/Card";
 import { TextField } from "../../components/TextField";
 import { api } from "../../lib/api";
 import { emailSchema, passwordSchema } from "../../lib/auth";
-import { authGridStyles, authCopyStyles } from "./-authStyles";
 
 export const Route = createFileRoute("/_public/login")({
   component: LoginPage,
@@ -104,8 +103,11 @@ function LoginPage() {
   };
 
   return (
-    <section className={authGridStyles()} aria-labelledby="auth-title">
-      <div className={authCopyStyles()}>
+    <section
+      className="grid min-h-107.5 grid-cols-[minmax(0,1fr)_22.5rem] items-end gap-26 max-[56.25rem]:min-h-0 max-[56.25rem]:grid-cols-1 max-[56.25rem]:gap-8.5"
+      aria-labelledby="auth-title"
+    >
+      <div className="flex flex-col gap-5 pb-5.5 max-[56.25rem]:pb-0">
         <span
           className="block h-1 w-10 rounded-full bg-linear-to-r from-brand to-teal-200"
           aria-hidden="true"
