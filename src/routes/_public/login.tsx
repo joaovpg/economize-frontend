@@ -4,38 +4,20 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute } from "@tanstack/react-router";
 import { getRouteApi } from "@tanstack/react-router";
-import { isHTTPError } from "ky";
-import { z } from "zod";
 
 import { AuthConsent } from "../../components/AuthConsent";
 import { Button } from "../../components/Button";
 import { Card, CardBody } from "../../components/Card";
 import { TextField } from "../../components/TextField";
-import { api } from "../../lib/api";
-import { emailSchema, passwordSchema } from "../../lib/auth";
+import { isApiError } from "../../lib/api-errors";
+import { postLogin } from "../../services/auth/api";
+import { loginRequestSchema, type LoginRequest } from "../../services/auth/contracts";
 
 export const Route = createFileRoute("/_public/login")({
   component: LoginPage,
 });
 
-const loginSchema = z.object({ email: emailSchema, senha: passwordSchema });
-
-const problemDetailsSchema = z.object({
-  detail: z.string().optional(),
-  violations: z
-    .array(
-      z.object({
-        field: z.string().optional(),
-        message: z.string().optional(),
-      }),
-    )
-    .optional(),
-});
-
-type LoginFormData = {
-  email: string;
-  senha: string;
-};
+type LoginFormData = LoginRequest;
 
 const loginRoute = getRouteApi("/_public/login");
 
@@ -55,7 +37,7 @@ function LoginPage() {
     setError,
   } = useForm<LoginFormData>({
     mode: "onSubmit",
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(loginRequestSchema),
   });
   const emailField = register("email");
   const senhaField = register("senha");
@@ -64,39 +46,31 @@ function LoginPage() {
     setSubmitError(null);
 
     try {
-      await api.post("autenticacao/login", {
-        json: { email: data.email, senha: data.senha },
-      });
+      await postLogin(data);
       await navigate({ replace: true, to: "/summary" });
     } catch (error) {
-      if (!isHTTPError(error)) {
+      if (!isApiError(error)) {
         setSubmitError("Não foi possível conectar ao servidor. Tente novamente.");
         return;
       }
-      if (error.response.status === 401) {
+      if (error.status === 401 || error.code === "CREDENCIAIS_INVALIDAS") {
         setSubmitError("E-mail ou senha inválidos.");
         return;
       }
-      try {
-        const problemResult = problemDetailsSchema.safeParse(await error.response.clone().json());
-        if (!problemResult.success) {
-          setSubmitError("Não foi possível entrar. Tente novamente.");
-          return;
+
+      let hasFieldError = false;
+      for (const [fieldName, messages] of Object.entries(error.fieldErrors)) {
+        const field = getFieldName(fieldName);
+        const message = messages[0];
+
+        if (field && message) {
+          setError(field, { type: "server", message });
+          hasFieldError = true;
         }
-        const problem = problemResult.data;
-        let hasFieldError = false;
-        for (const violation of problem.violations ?? []) {
-          const field = getFieldName(violation.field);
-          if (field && violation.message) {
-            setError(field, { type: "server", message: violation.message });
-            hasFieldError = true;
-          }
-        }
-        if (!hasFieldError || problem.detail) {
-          setSubmitError(problem.detail ?? "Não foi possível entrar. Tente novamente.");
-        }
-      } catch {
-        setSubmitError("Não foi possível entrar. Tente novamente.");
+      }
+
+      if (!hasFieldError || error.problem?.detail) {
+        setSubmitError(error.problem?.detail ?? "Não foi possível entrar. Tente novamente.");
       }
       return;
     }

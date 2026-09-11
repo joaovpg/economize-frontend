@@ -1,31 +1,45 @@
 import { z } from "zod";
 
-export const categoryOptions = ["Moradia", "Mercado", "Transporte", "Lazer"] as const;
-export const categoryFilterOptions = [
-  "Aluguel",
-  "Mercado",
-  "Transporte",
-  "Lazer",
-  "Receita",
-] as const;
-export const accountOptions = ["Nubank", "Banco Inter", "C6 Crédito"] as const;
-export const accountFilterOptions = ["Todas as contas", ...accountOptions] as const;
+export const allAccountsFilterValue = "Todas as contas";
+export const categoryFilterValueSchema = z.uuid();
+export const accountFilterValueSchema = z.union([z.uuid(), z.literal(allAccountsFilterValue)]);
+
+export type AccountFilterValue = z.infer<typeof accountFilterValueSchema>;
+
 export const summaryMonthValues = ["2026-08", "2026-07"] as const;
 
-export type CategoryFilterValue = (typeof categoryFilterOptions)[number];
-type CategorySearchValue = CategoryFilterValue | "Moradia";
+export type SummaryFilterResource = {
+  id: string;
+  nome: string;
+};
 
-const categorySearchOptions = [...categoryFilterOptions, "Moradia"] as const;
+export type DemoCategoryResource = SummaryFilterResource & {
+  categoriaPaiId: string | null;
+};
 
-function normalizeCategoryFilters(
-  categories: readonly CategorySearchValue[],
-): CategoryFilterValue[] {
-  const normalizedCategories: CategoryFilterValue[] = categories.map((category) =>
-    category === "Moradia" ? "Aluguel" : category,
-  );
+export const demoAccountResources = [
+  { id: "00000000-0000-4000-8000-000000000001", nome: "Nubank" },
+  { id: "00000000-0000-4000-8000-000000000002", nome: "Banco Inter" },
+  { id: "00000000-0000-4000-8000-000000000003", nome: "C6 Crédito" },
+] as const satisfies readonly SummaryFilterResource[];
 
-  return [...new Set(normalizedCategories)];
-}
+const demoCategoryIds = {
+  aluguel: "00000000-0000-4000-8000-000000000102",
+  lazer: "00000000-0000-4000-8000-000000000105",
+  mercado: "00000000-0000-4000-8000-000000000103",
+  moradia: "00000000-0000-4000-8000-000000000101",
+  receita: "00000000-0000-4000-8000-000000000106",
+  transporte: "00000000-0000-4000-8000-000000000104",
+} as const;
+
+export const demoCategoryResources = [
+  { categoriaPaiId: null, id: demoCategoryIds.moradia, nome: "Moradia" },
+  { categoriaPaiId: demoCategoryIds.moradia, id: demoCategoryIds.aluguel, nome: "Aluguel" },
+  { categoriaPaiId: null, id: demoCategoryIds.mercado, nome: "Mercado" },
+  { categoriaPaiId: null, id: demoCategoryIds.transporte, nome: "Transporte" },
+  { categoriaPaiId: null, id: demoCategoryIds.lazer, nome: "Lazer" },
+  { categoriaPaiId: null, id: demoCategoryIds.receita, nome: "Receita" },
+] as const satisfies readonly DemoCategoryResource[];
 
 export const monthOptions = [
   { label: "Agosto 2026", value: "2026-08" },
@@ -34,14 +48,10 @@ export const monthOptions = [
 
 export const summarySearchSchema = z.object({
   accounts: z
-    .array(z.enum(accountFilterOptions))
-    .catch(["Todas as contas"])
-    .default(["Todas as contas"]),
-  categories: z
-    .array(z.enum(categorySearchOptions))
-    .transform(normalizeCategoryFilters)
-    .catch([])
-    .default([]),
+    .array(accountFilterValueSchema)
+    .catch([allAccountsFilterValue])
+    .default([allAccountsFilterValue]),
+  categories: z.array(categoryFilterValueSchema).catch([]).default([]),
   includePreviousBalance: z.boolean().catch(true).default(true),
   ledgerExpanded: z.boolean().catch(true).default(true),
   month: z.enum(summaryMonthValues).catch("2026-08").default("2026-08"),
@@ -52,10 +62,12 @@ export type SummarySearch = z.infer<typeof summarySearchSchema>;
 export type SummaryMonth = SummarySearch["month"];
 
 export type Movement = {
-  account: (typeof accountOptions)[number];
+  account: string;
+  accountId: string;
   category: string;
+  categoryId: string;
   description: string;
-  filterCategory: CategoryFilterValue;
+  filterCategory: string;
   id: string;
   kind: "income" | "expense";
   value: number;
@@ -63,7 +75,7 @@ export type Movement = {
 
 export type CategoryExpense = {
   amount: number;
-  name: (typeof categoryOptions)[number];
+  name: string;
   share: number;
 };
 
@@ -94,6 +106,8 @@ const summaryByMonth: Record<SummaryMonth, SummaryData> = {
     ],
     movements: [
       {
+        accountId: demoAccountResources[0].id,
+        categoryId: demoCategoryIds.aluguel,
         id: "rent-august",
         description: "Aluguel",
         category: "Aluguel",
@@ -103,6 +117,8 @@ const summaryByMonth: Record<SummaryMonth, SummaryData> = {
         value: 1850,
       },
       {
+        accountId: demoAccountResources[1].id,
+        categoryId: demoCategoryIds.receita,
         id: "salary-august",
         description: "Salário",
         category: "Receita",
@@ -112,6 +128,8 @@ const summaryByMonth: Record<SummaryMonth, SummaryData> = {
         value: 7500,
       },
       {
+        accountId: demoAccountResources[2].id,
+        categoryId: demoCategoryIds.mercado,
         id: "market-august",
         description: "Mercado",
         category: "Alimentação",
@@ -135,6 +153,8 @@ const summaryByMonth: Record<SummaryMonth, SummaryData> = {
     ],
     movements: [
       {
+        accountId: demoAccountResources[0].id,
+        categoryId: demoCategoryIds.aluguel,
         id: "rent-july",
         description: "Aluguel",
         category: "Aluguel",
@@ -144,6 +164,8 @@ const summaryByMonth: Record<SummaryMonth, SummaryData> = {
         value: 1850,
       },
       {
+        accountId: demoAccountResources[1].id,
+        categoryId: demoCategoryIds.receita,
         id: "salary-july",
         description: "Salário",
         category: "Receita",
@@ -153,6 +175,8 @@ const summaryByMonth: Record<SummaryMonth, SummaryData> = {
         value: 7200,
       },
       {
+        accountId: demoAccountResources[2].id,
+        categoryId: demoCategoryIds.mercado,
         id: "market-july",
         description: "Supermercado",
         category: "Alimentação",

@@ -32,19 +32,26 @@ import { FilterTree, type FilterTreeItem } from "../../components/FilterTree";
 import { Link } from "../../components/Link";
 import { formatCurrency, formatSignedCurrency } from "../../lib/formatters";
 import {
-  accountFilterOptions,
+  accountFilterValueSchema,
+  allAccountsFilterValue,
+  demoAccountResources,
+  demoCategoryResources,
+  categoryFilterValueSchema,
   getSummaryData,
-  accountOptions,
-  categoryOptions,
-  categoryFilterOptions,
+  type AccountFilterValue,
+  type CategoryExpense,
+  type DemoCategoryResource,
+  type SummaryData,
+  type SummaryFilterResource,
+  type SummaryMonth,
   monthOptions,
   summaryMonthValues,
   summarySearchSchema,
-  type CategoryExpense,
-  type CategoryFilterValue,
-  type SummaryMonth,
-  type SummaryData,
 } from "../../lib/summary";
+import { getContas } from "../../services/accounts/api";
+import { type ContaResponse } from "../../services/accounts/contracts";
+import { getCategorias } from "../../services/categories/api";
+import { type CategoriaResponse } from "../../services/categories/contracts";
 import {
   summaryFiltersStyles,
   summarySelectTriggerStyles,
@@ -60,17 +67,13 @@ function getCategoryBarStyle(share: number): CategoryBarStyle {
   return { "--category-share": `${share}%` };
 }
 
-function getCategoryFilterLabel(category: CategoryFilterValue) {
-  return category === "Receita" ? "Receitas" : category;
-}
-
-function getCategoryExpenseName(filterCategory: CategoryFilterValue) {
+function getCategoryExpenseName(filterCategory: string) {
   return filterCategory === "Aluguel" ? "Moradia" : filterCategory;
 }
 
 const summaryFilterSchema = z.object({
-  accounts: z.array(z.enum(accountFilterOptions)),
-  categories: z.array(z.enum(categoryFilterOptions)),
+  accounts: z.array(accountFilterValueSchema),
+  categories: z.array(categoryFilterValueSchema),
   includePreviousBalance: z.boolean(),
   month: z.enum(summaryMonthValues),
   search: z.string(),
@@ -78,38 +81,114 @@ const summaryFilterSchema = z.object({
 
 type SummaryFilterFormData = z.infer<typeof summaryFilterSchema>;
 
-type AccountFilterValue = (typeof accountFilterOptions)[number];
+type CategoryResource =
+  | Pick<CategoriaResponse, "id" | "nome" | "categoriaPaiId">
+  | DemoCategoryResource;
 
-const categoryFilterItems: readonly FilterTreeItem<CategoryFilterValue>[] = [
-  {
-    children: categoryOptions.map((category) =>
-      category === "Moradia"
-        ? {
-            children: [{ id: "Aluguel", label: "Aluguel" }],
-            id: "moradia",
-            label: category,
-          }
-        : { id: category, label: category },
-    ),
-    id: "despesas",
-    label: "Despesas",
-  },
-  { id: "Receita", label: "Receitas" },
-];
+function getSelectedResourceNames(
+  resources: readonly SummaryFilterResource[],
+  selectedIds: readonly string[],
+) {
+  const selectedIdSet = new Set(selectedIds);
 
-const accountFilterItems: readonly FilterTreeItem<AccountFilterValue>[] = [
-  { id: "Todas as contas", label: "Todas as contas" },
-  {
-    children: accountOptions.slice(0, 2).map((account) => ({ id: account, label: account })),
-    id: "bancos",
-    label: "Bancos",
-  },
-  {
-    children: [{ id: accountOptions[2], label: accountOptions[2] }],
-    id: "cartoes",
-    label: "Cartões",
-  },
-];
+  return new Set(
+    resources.filter((resource) => selectedIdSet.has(resource.id)).map((resource) => resource.nome),
+  );
+}
+
+function buildCategoryTreeItems(
+  categories: readonly CategoryResource[],
+): readonly FilterTreeItem[] {
+  const categoryById = new Map<string, CategoryResource>(
+    categories.map((category): [string, CategoryResource] => [category.id, category]),
+  );
+  const childrenByParentId = new Map<string, CategoryResource[]>();
+
+  for (const category of categories) {
+    if (category.categoriaPaiId === null) {
+      continue;
+    }
+
+    const children = childrenByParentId.get(category.categoriaPaiId) ?? [];
+    children.push(category);
+    childrenByParentId.set(category.categoriaPaiId, children);
+  }
+
+  const rootCategories = categories.filter(
+    (category) => category.categoriaPaiId === null || !categoryById.has(category.categoriaPaiId),
+  );
+
+  const buildItem = (
+    category: CategoryResource,
+    ancestorIds: ReadonlySet<string>,
+  ): FilterTreeItem => {
+    const children = (childrenByParentId.get(category.id) ?? []).filter(
+      (child) => !ancestorIds.has(child.id),
+    );
+
+    if (children.length === 0) {
+      return { id: category.id, label: category.nome };
+    }
+
+    const nextAncestorIds = new Set(ancestorIds);
+    nextAncestorIds.add(category.id);
+
+    return {
+      children: children.map((child) => buildItem(child, nextAncestorIds)),
+      id: category.id,
+      label: category.nome,
+    };
+  };
+
+  return rootCategories.map((category) => buildItem(category, new Set()));
+}
+
+const demoCategoriesGroupId = "categorias-demonstrativas";
+
+function buildCategoryFilterItems(
+  categories: readonly CategoriaResponse[],
+  demoCategories: readonly DemoCategoryResource[],
+): readonly FilterTreeItem[] {
+  return [
+    ...buildCategoryTreeItems(categories),
+    {
+      children: buildCategoryTreeItems(demoCategories),
+      id: demoCategoriesGroupId,
+      label: "Dados demonstrativos",
+    },
+  ];
+}
+
+const inactiveAccountsGroupId = "contas-inativas";
+const demoAccountsGroupId = "contas-demonstrativas";
+
+function buildAccountFilterItems(
+  accounts: readonly ContaResponse[],
+  demoAccounts: readonly SummaryFilterResource[],
+): readonly FilterTreeItem[] {
+  const activeAccounts = accounts.filter((account) => account.ativo);
+  const inactiveAccounts = accounts.filter((account) => !account.ativo);
+  const items: FilterTreeItem[] = [
+    { id: allAccountsFilterValue, label: allAccountsFilterValue },
+    ...activeAccounts.map((account) => ({ id: account.id, label: account.nome })),
+  ];
+
+  if (inactiveAccounts.length > 0) {
+    items.push({
+      children: inactiveAccounts.map((account) => ({ id: account.id, label: account.nome })),
+      id: inactiveAccountsGroupId,
+      label: "Contas inativas",
+    });
+  }
+
+  items.push({
+    children: demoAccounts.map((account) => ({ id: account.id, label: account.nome })),
+    id: demoAccountsGroupId,
+    label: "Contas demonstrativas",
+  });
+
+  return items;
+}
 
 const summaryRoute = getRouteApi("/_private/summary");
 
@@ -196,13 +275,17 @@ function calculateCategoryShares(categories: CategoryExpense[]) {
 }
 
 type SummaryPageProps = {
+  accounts: readonly ContaResponse[];
+  categories: readonly CategoriaResponse[];
   data: SummaryData;
 };
 
-function SummaryPage({ data }: SummaryPageProps) {
+function SummaryPage({ accounts, categories, data }: SummaryPageProps) {
   const search = summaryRoute.useSearch();
   const navigate = summaryRoute.useNavigate();
   const summary = data;
+  const accountFilterItems = buildAccountFilterItems(accounts, demoAccountResources);
+  const categoryFilterItems = buildCategoryFilterItems(categories, demoCategoryResources);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const filterTriggerRef = useRef<HTMLButtonElement>(null);
   const wasFiltersOpenRef = useRef(false);
@@ -219,6 +302,18 @@ function SummaryPage({ data }: SummaryPageProps) {
     });
   const appliedAccounts = search.accounts;
   const appliedCategories = search.categories;
+  const selectedAccountIds = appliedAccounts.filter(
+    (account) => account !== allAccountsFilterValue,
+  );
+  const selectedCategoryNames = getSelectedResourceNames(
+    [...categories, ...demoCategoryResources],
+    appliedCategories,
+  );
+  const selectedCategoryExpenseNames = new Set(
+    Array.from(selectedCategoryNames, getCategoryExpenseName),
+  );
+  const selectedAccountIdSet = new Set(selectedAccountIds);
+  const selectedCategoryIdSet = new Set(appliedCategories);
   const appliedSearchTerm = search.q;
   const includePreviousBalance = search.includePreviousBalance;
   const isLedgerExpanded = search.ledgerExpanded;
@@ -228,7 +323,7 @@ function SummaryPage({ data }: SummaryPageProps) {
     useWatch({ control, name: "includePreviousBalance" }) ?? search.includePreviousBalance;
   const selectedMonth = useWatch({ control, name: "month" }) ?? search.month;
   const searchField = register("search");
-  const allAccountsSelected = appliedAccounts.includes("Todas as contas");
+  const allAccountsSelected = appliedAccounts.includes(allAccountsFilterValue);
   const hasAccountFilter = appliedAccounts.length > 0 && !allAccountsSelected;
   const activeFilterCount =
     1 +
@@ -246,12 +341,11 @@ function SummaryPage({ data }: SummaryPageProps) {
         value.toLocaleLowerCase("pt-BR").includes(normalizedSearchTerm),
       );
     const matchesCategory =
-      appliedCategories.length === 0 ||
-      appliedCategories.some((category) => category === movement.filterCategory);
+      appliedCategories.length === 0 || selectedCategoryIdSet.has(movement.categoryId);
     const matchesAccount =
       appliedAccounts.length === 0 ||
       allAccountsSelected ||
-      appliedAccounts.includes(movement.account);
+      selectedAccountIdSet.has(movement.accountId);
 
     return matchesSearch && matchesCategory && matchesAccount;
   });
@@ -273,10 +367,7 @@ function SummaryPage({ data }: SummaryPageProps) {
       )
     : summary.categoryExpenses.filter(
         (category) =>
-          appliedCategories.length === 0 ||
-          appliedCategories.some(
-            (filterCategory) => getCategoryExpenseName(filterCategory) === category.name,
-          ),
+          appliedCategories.length === 0 || selectedCategoryExpenseNames.has(category.name),
       );
   const ledgerIncome = hasMovementFilter
     ? visibleMovements
@@ -318,17 +409,16 @@ function SummaryPage({ data }: SummaryPageProps) {
   }, [isFiltersOpen, setFocus]);
 
   const handleAccountTreeSelectionChange = (nextAccounts: AccountFilterValue[]) => {
-    const allAccountsKey = "Todas as contas" as const;
-    const individualAccounts = nextAccounts.filter((account) => account !== allAccountsKey);
-    const hadAllAccountsSelected = selectedAccounts.includes(allAccountsKey);
-    const hasAllAccountsSelected = nextAccounts.includes(allAccountsKey);
+    const individualAccounts = nextAccounts.filter((account) => account !== allAccountsFilterValue);
+    const hadAllAccountsSelected = selectedAccounts.includes(allAccountsFilterValue);
+    const hasAllAccountsSelected = nextAccounts.includes(allAccountsFilterValue);
 
     const normalizedAccounts = hasAllAccountsSelected
       ? hadAllAccountsSelected
         ? individualAccounts.length > 0
           ? individualAccounts
-          : [allAccountsKey]
-        : [allAccountsKey]
+          : [allAccountsFilterValue]
+        : [allAccountsFilterValue]
       : individualAccounts;
 
     setValue("accounts", normalizedAccounts, { shouldDirty: true });
@@ -337,11 +427,11 @@ function SummaryPage({ data }: SummaryPageProps) {
   const handleClearFilters = () => {
     setValue("search", "", { shouldDirty: true });
     setValue("categories", [], { shouldDirty: true });
-    setValue("accounts", ["Todas as contas"], { shouldDirty: true });
+    setValue("accounts", [allAccountsFilterValue], { shouldDirty: true });
     void navigate({
       search: (current) => ({
         ...current,
-        accounts: ["Todas as contas"],
+        accounts: [allAccountsFilterValue],
         categories: [],
         q: "",
       }),
@@ -443,8 +533,8 @@ function SummaryPage({ data }: SummaryPageProps) {
                 <FilterTree
                   ariaLabel="Categorias"
                   items={categoryFilterItems}
-                  onSelectionChange={(categories) =>
-                    setValue("categories", categories, { shouldDirty: true })
+                  onSelectionChange={(selectedCategoryIds) =>
+                    setValue("categories", selectedCategoryIds, { shouldDirty: true })
                   }
                   selectedKeys={selectedCategories}
                 />
@@ -528,7 +618,7 @@ function SummaryPage({ data }: SummaryPageProps) {
               <span className={summaryStyles.filterChip}>Mês: {summary.monthLabel}</span>
               {appliedCategories.length > 0 && (
                 <span className={summaryStyles.filterChip}>
-                  Categorias: {appliedCategories.map(getCategoryFilterLabel).join(", ")}
+                  Categorias: {Array.from(selectedCategoryNames).join(", ")}
                 </span>
               )}
               {hasAccountFilter && (
@@ -706,21 +796,25 @@ function SummaryPage({ data }: SummaryPageProps) {
 export const Route = createFileRoute("/_private/summary")({
   validateSearch: summarySearchSchema,
   loaderDeps: ({ search }) => ({ month: search.month }),
-  loader: async ({ deps }) => {
-    const summary = await getSummaryData(deps.month);
+  loader: async ({ abortController, deps }) => {
+    const [summary, categories, accounts] = await Promise.all([
+      getSummaryData(deps.month),
+      getCategorias({ signal: abortController.signal }),
+      getContas({ signal: abortController.signal }),
+    ]);
 
     if (!summary) {
       throw notFound();
     }
 
-    return summary;
+    return { accounts, categories, summary };
   },
   component: SummaryPageRoute,
   preloadStaleTime: 30_000,
 });
 
 function SummaryPageRoute() {
-  const summary = Route.useLoaderData();
+  const { accounts, categories, summary } = Route.useLoaderData();
 
-  return <SummaryPage data={summary} />;
+  return <SummaryPage accounts={accounts} categories={categories} data={summary} />;
 }

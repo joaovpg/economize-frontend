@@ -10,11 +10,11 @@ const filterTreeStyles = {
   tree: "grid gap-1.75 outline-none",
   item: "min-w-0 outline-none",
   content:
-    "flex min-h-[1.625rem] min-w-0 items-center gap-2 rounded-lg pl-[calc((var(--tree-item-level)-1)*1.625rem)] text-caption text-muted max-[48rem]:min-h-11",
+    "flex min-h-[1.625rem] min-w-0 items-center gap-2 rounded-lg pl-[calc((var(--tree-item-level)-1)*1rem)] text-caption text-muted max-[48rem]:min-h-11",
   contentFocus: "outline-2 outline-offset-2 outline-solid outline-brand",
   contentGroup: "font-medium",
   checkbox: "flex-1",
-  label: "min-w-0 truncate",
+  label: "min-w-0 truncate ",
   chevron: "ml-auto size-[1.125rem]! shrink-0 rounded-[0.3125rem]!",
 } as const;
 
