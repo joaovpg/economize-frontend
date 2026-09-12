@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PrivateRouteRouteImport } from './routes/_private/route'
 import { Route as PublicRouteRouteImport } from './routes/_public/route'
+import { Route as PrivateCategoriesRouteImport } from './routes/_private/categories'
 import { Route as PrivateProfileRouteImport } from './routes/_private/profile'
 import { Route as PrivateSummaryRouteImport } from './routes/_private/summary'
 import { Route as PrivateTransactionsRouteImport } from './routes/_private/transactions'
@@ -31,6 +32,11 @@ const PrivateRouteRoute = PrivateRouteRouteImport.update({
 const PublicRouteRoute = PublicRouteRouteImport.update({
   id: '/_public',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PrivateCategoriesRoute = PrivateCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => PrivateRouteRoute,
 } as any)
 const PrivateProfileRoute = PrivateProfileRouteImport.update({
   id: '/profile',
@@ -66,6 +72,7 @@ const PrivateTransactionsTransactionIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/categories': typeof PrivateCategoriesRoute
   '/profile': typeof PrivateProfileRoute
   '/summary': typeof PrivateSummaryRoute
   '/transactions': typeof PrivateTransactionsRouteWithChildren
@@ -75,6 +82,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/categories': typeof PrivateCategoriesRoute
   '/profile': typeof PrivateProfileRoute
   '/summary': typeof PrivateSummaryRoute
   '/transactions': typeof PrivateTransactionsRouteWithChildren
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_private': typeof PrivateRouteRouteWithChildren
   '/_public': typeof PublicRouteRouteWithChildren
+  '/_private/categories': typeof PrivateCategoriesRoute
   '/_private/profile': typeof PrivateProfileRoute
   '/_private/summary': typeof PrivateSummaryRoute
   '/_private/transactions': typeof PrivateTransactionsRouteWithChildren
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/categories'
     | '/profile'
     | '/summary'
     | '/transactions'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/categories'
     | '/profile'
     | '/summary'
     | '/transactions'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_private'
     | '/_public'
+    | '/_private/categories'
     | '/_private/profile'
     | '/_private/summary'
     | '/_private/transactions'
@@ -154,6 +166,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof PublicRouteRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_private/categories': {
+      id: '/_private/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof PrivateCategoriesRouteImport
+      parentRoute: typeof PrivateRouteRoute
     }
     '/_private/profile': {
       id: '/_private/profile'
@@ -212,12 +231,14 @@ const PrivateTransactionsRouteWithChildren =
   PrivateTransactionsRoute._addFileChildren(PrivateTransactionsRouteChildren)
 
 interface PrivateRouteRouteChildren {
+  PrivateCategoriesRoute: typeof PrivateCategoriesRoute
   PrivateProfileRoute: typeof PrivateProfileRoute
   PrivateSummaryRoute: typeof PrivateSummaryRoute
   PrivateTransactionsRoute: typeof PrivateTransactionsRouteWithChildren
 }
 
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
+  PrivateCategoriesRoute: PrivateCategoriesRoute,
   PrivateProfileRoute: PrivateProfileRoute,
   PrivateSummaryRoute: PrivateSummaryRoute,
   PrivateTransactionsRoute: PrivateTransactionsRouteWithChildren,

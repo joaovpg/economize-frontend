@@ -4,6 +4,7 @@
   --color-canvas-value: var(--color-slate-50);
   --color-surface-value: var(--color-slate-50);
   --color-surface-muted-value: var(--color-slate-100);
+  --color-scrim-value: color-mix(in oklch, var(--color-slate-950) 58%, transparent);
 
   --color-foreground-value: var(--color-slate-900);
   --color-muted-value: var(--color-slate-600);

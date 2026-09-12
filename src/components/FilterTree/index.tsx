@@ -6,18 +6,6 @@ import { CaretDownIcon } from "@phosphor-icons/react/dist/csr/CaretDown";
 import { Button } from "../Button";
 import { Checkbox } from "../Checkbox";
 
-const filterTreeStyles = {
-  tree: "grid gap-1.75 outline-none",
-  item: "min-w-0 outline-none",
-  content:
-    "flex min-h-[1.625rem] min-w-0 items-center gap-2 rounded-lg pl-[calc((var(--tree-item-level)-1)*1rem)] text-caption text-muted max-[48rem]:min-h-11",
-  contentFocus: "outline-2 outline-offset-2 outline-solid outline-brand",
-  contentGroup: "font-medium",
-  checkbox: "flex-1",
-  label: "min-w-0 truncate ",
-  chevron: "ml-auto size-[1.125rem]! shrink-0 rounded-[0.3125rem]!",
-} as const;
-
 export type FilterTreeItem<TSelectionKey extends string = string> =
   | {
       id: TSelectionKey;
@@ -182,7 +170,7 @@ export function FilterTree<TSelectionKey extends string>({
 
     return (
       <TreeItem
-        className={filterTreeStyles.item}
+        className="min-w-0 outline-none"
         focusMode="row"
         id={item.id}
         key={item.id}
@@ -192,18 +180,18 @@ export function FilterTree<TSelectionKey extends string>({
           {({ hasChildItems, isExpanded, isFocusVisible }) => (
             <div
               className={[
-                filterTreeStyles.content,
-                hasChildren(item) ? filterTreeStyles.contentGroup : "",
-                isFocusVisible ? filterTreeStyles.contentFocus : "",
+                "flex min-h-6.5 min-w-0 items-center gap-2 rounded-lg pl-[calc((var(--tree-item-level)-1)*1rem)] text-caption text-muted max-[48rem]:min-h-11",
+                hasChildren(item) ? "font-medium" : "",
+                isFocusVisible ? "outline-2 outline-offset-2 outline-solid outline-brand" : "",
               ]
                 .filter(Boolean)
                 .join(" ")}
             >
               <Checkbox
-                className={filterTreeStyles.checkbox}
+                className="flex-1"
                 focusRing="none"
                 isIndeterminate={selectionState.isIndeterminate}
-                labelClassName={filterTreeStyles.label}
+                labelClassName="min-w-0 truncate"
                 slot="selection"
               >
                 {item.label}
@@ -211,7 +199,7 @@ export function FilterTree<TSelectionKey extends string>({
               {hasChildItems && (
                 <Button
                   aria-label={isExpanded ? `Recolher ${item.label}` : `Expandir ${item.label}`}
-                  className={filterTreeStyles.chevron}
+                  className="ml-auto size-4.5! shrink-0 rounded-[0.3125rem]!"
                   isIconOnly
                   size="sm"
                   variant="ghost"
@@ -231,7 +219,7 @@ export function FilterTree<TSelectionKey extends string>({
   return (
     <Tree
       aria-label={ariaLabel}
-      className={filterTreeStyles.tree}
+      className="grid gap-1.75 outline-none"
       defaultExpandedKeys={getBranchKeys(items)}
       onSelectionChange={handleSelectionChange}
       selectedKeys={currentTreeSelection}

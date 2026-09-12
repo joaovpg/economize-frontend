@@ -1,31 +1,16 @@
 # Interface e estilos
 
-## Estilos
-
-- Use Tailwind Variants para criar variantes em componentes.
-- Objetos de classes estáticas podem continuar como objetos; não precisam de `tv`.
-- Prefira as cores semânticas de `src/styles/tokens/` e preserve os temas claro e escuro.
-
-## Componentes e formulários
-
-- Reutilize os componentes de `src/components/` antes de criar novos controles.
-- Para novos controles interativos, prefira React Aria quando aplicável. Preserve navegação por
-  teclado, nomes acessíveis e indicação de foco ao personalizar os estilos.
-- Prefira React Hook Form com Zod e `zodResolver` em formulários que precisam de gerenciamento
-  de estado e validação. Exiba os erros junto aos campos correspondentes.
-- Ao adicionar animações, respeite a preferência de movimento reduzido.
-
-## Ícones
-
-Ao importar ícones ou atualizar o Phosphor, siga o padrão e a verificação de compatibilidade do
-[ADR-0002](../adr/0002-phosphor-icons-import-performance.md).
-
-## Tipografia
-
-- Prefira os papéis tipográficos do
-  [catálogo de utilitários](../../src/styles/tokens/utilities/typography.css) antes de criar tamanhos
-  locais. O catálogo define os nomes e as medidas disponíveis.
-- Preserve a tipografia padrão da variante `link`; aplique ajustes contextuais no ponto de uso.
-
-Para a motivação e o impacto do contrato tipográfico compartilhado, consulte
-[ADR-0005](../adr/0005-escala-tipografica-semantica-e-estilo-base-de-links.md).
+- Mantenha classes Tailwind no `className` do JSX; não as extraia para objetos, constantes ou
+  arquivos `.ts`/`.js`. Composição condicional inline é permitida.
+- Em componentes ou layouts complexos com variações/estados semânticos, use `tailwind-variants` no
+  próprio `.tsx`; a configuração local de `tv` é a exceção à regra anterior.
+- Se o JSX de um layout ficar poluído, crie subcomponentes locais no mesmo `.tsx`, sem extrair
+  strings de classes ou texto.
+- Prefira tokens semânticos de `src/styles/tokens/` e preserve os temas claro e escuro.
+- Reutilize componentes de `src/components/`; para controles interativos, preserve acessibilidade
+  e prefira React Aria quando aplicável.
+- Em formulários complexos, prefira React Hook Form com Zod. Respeite movimento reduzido em
+  animações.
+- Importe ícones Phosphor individualmente conforme o [ADR-0002](../adr/0002-phosphor-icons-import-performance.md).
+- Use os papéis tipográficos do [catálogo](../../src/styles/tokens/utilities/typography.css) e
+  preserve a tipografia da variante `link`, conforme o [ADR-0005](../adr/0005-escala-tipografica-semantica-e-estilo-base-de-links.md).

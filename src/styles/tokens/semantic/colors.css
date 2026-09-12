@@ -2,6 +2,7 @@
   --color-canvas: var(--color-canvas-value);
   --color-surface: var(--color-surface-value);
   --color-surface-muted: var(--color-surface-muted-value);
+  --color-scrim: var(--color-scrim-value);
 
   --color-foreground: var(--color-foreground-value);
   --color-muted: var(--color-muted-value);
