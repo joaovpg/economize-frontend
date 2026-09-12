@@ -726,7 +726,7 @@ function CategoriesPage() {
   };
 
   return (
-    <main
+    <section
       aria-labelledby="categories-title"
       className="min-w-0 p-[2rem_1.75rem_2.5rem] max-[48rem]:p-[1.5rem_1rem_2rem]"
     >
@@ -849,7 +849,7 @@ function CategoriesPage() {
         }}
         pendingToggle={pendingToggle}
       />
-    </main>
+    </section>
   );
 }
 

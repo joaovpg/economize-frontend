@@ -514,7 +514,7 @@ function SummaryPage({ accounts, categories, data }: SummaryPageProps) {
   };
 
   return (
-    <main className="min-w-0" aria-labelledby="summary-title">
+    <section className="min-w-0" aria-labelledby="summary-title">
       <div className="grid min-w-0 grid-cols-[18.25rem_minmax(0,1fr)] items-start max-[48rem]:block">
         <Card
           as="aside"
@@ -842,7 +842,7 @@ function SummaryPage({ accounts, categories, data }: SummaryPageProps) {
           </p>
         </div>
       </div>
-    </main>
+    </section>
   );
 }
 

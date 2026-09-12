@@ -9,7 +9,7 @@ type ComingSoonPageProps = {
 
 export function ComingSoonPage({ description, title }: ComingSoonPageProps) {
   return (
-    <main className="grid max-w-152 gap-3.5 px-7 py-16" aria-labelledby="placeholder-title">
+    <section className="grid max-w-152 gap-3.5 px-7 py-16" aria-labelledby="placeholder-title">
       <h1 className="m-0 text-page-title" id="placeholder-title">
         {title}
       </h1>
@@ -18,6 +18,6 @@ export function ComingSoonPage({ description, title }: ComingSoonPageProps) {
       <Link to="/summary" variant="secondary" leadingIcon={<ArrowLeftIcon aria-hidden="true" />}>
         Voltar ao resumo
       </Link>
-    </main>
+    </section>
   );
 }

@@ -97,11 +97,11 @@ function PrivateLayout() {
           </Link>
         </header>
 
-        <div className="min-w-0">
+        <main className="min-w-0">
           <Suspense fallback={<LoadingPage className="min-h-[calc(100svh-5.5rem)]" />}>
             <Outlet />
           </Suspense>
-        </div>
+        </main>
       </div>
     </div>
   );

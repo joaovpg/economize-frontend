@@ -18,7 +18,6 @@ import { Route as PrivateSummaryRouteImport } from './routes/_private/summary'
 import { Route as PrivateTransactionsRouteImport } from './routes/_private/transactions'
 import { Route as PublicCadastroRouteImport } from './routes/_public/cadastro'
 import { Route as PublicLoginRouteImport } from './routes/_public/login'
-import { Route as PrivateTransactionsTransactionIdRouteImport } from './routes/_private/transactions.$transactionId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -63,32 +62,24 @@ const PublicLoginRoute = PublicLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => PublicRouteRoute,
 } as any)
-const PrivateTransactionsTransactionIdRoute =
-  PrivateTransactionsTransactionIdRouteImport.update({
-    id: '/$transactionId',
-    path: '/$transactionId',
-    getParentRoute: () => PrivateTransactionsRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/categories': typeof PrivateCategoriesRoute
   '/profile': typeof PrivateProfileRoute
   '/summary': typeof PrivateSummaryRoute
-  '/transactions': typeof PrivateTransactionsRouteWithChildren
+  '/transactions': typeof PrivateTransactionsRoute
   '/cadastro': typeof PublicCadastroRoute
   '/login': typeof PublicLoginRoute
-  '/transactions/$transactionId': typeof PrivateTransactionsTransactionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/categories': typeof PrivateCategoriesRoute
   '/profile': typeof PrivateProfileRoute
   '/summary': typeof PrivateSummaryRoute
-  '/transactions': typeof PrivateTransactionsRouteWithChildren
+  '/transactions': typeof PrivateTransactionsRoute
   '/cadastro': typeof PublicCadastroRoute
   '/login': typeof PublicLoginRoute
-  '/transactions/$transactionId': typeof PrivateTransactionsTransactionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,10 +89,9 @@ export interface FileRoutesById {
   '/_private/categories': typeof PrivateCategoriesRoute
   '/_private/profile': typeof PrivateProfileRoute
   '/_private/summary': typeof PrivateSummaryRoute
-  '/_private/transactions': typeof PrivateTransactionsRouteWithChildren
+  '/_private/transactions': typeof PrivateTransactionsRoute
   '/_public/cadastro': typeof PublicCadastroRoute
   '/_public/login': typeof PublicLoginRoute
-  '/_private/transactions/$transactionId': typeof PrivateTransactionsTransactionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -113,7 +103,6 @@ export interface FileRouteTypes {
     | '/transactions'
     | '/cadastro'
     | '/login'
-    | '/transactions/$transactionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -123,7 +112,6 @@ export interface FileRouteTypes {
     | '/transactions'
     | '/cadastro'
     | '/login'
-    | '/transactions/$transactionId'
   id:
     | '__root__'
     | '/'
@@ -135,7 +123,6 @@ export interface FileRouteTypes {
     | '/_private/transactions'
     | '/_public/cadastro'
     | '/_public/login'
-    | '/_private/transactions/$transactionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -209,39 +196,21 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicLoginRouteImport
       parentRoute: typeof PublicRouteRoute
     }
-    '/_private/transactions/$transactionId': {
-      id: '/_private/transactions/$transactionId'
-      path: '/$transactionId'
-      fullPath: '/transactions/$transactionId'
-      preLoaderRoute: typeof PrivateTransactionsTransactionIdRouteImport
-      parentRoute: typeof PrivateTransactionsRoute
-    }
   }
 }
-
-interface PrivateTransactionsRouteChildren {
-  PrivateTransactionsTransactionIdRoute: typeof PrivateTransactionsTransactionIdRoute
-}
-
-const PrivateTransactionsRouteChildren: PrivateTransactionsRouteChildren = {
-  PrivateTransactionsTransactionIdRoute: PrivateTransactionsTransactionIdRoute,
-}
-
-const PrivateTransactionsRouteWithChildren =
-  PrivateTransactionsRoute._addFileChildren(PrivateTransactionsRouteChildren)
 
 interface PrivateRouteRouteChildren {
   PrivateCategoriesRoute: typeof PrivateCategoriesRoute
   PrivateProfileRoute: typeof PrivateProfileRoute
   PrivateSummaryRoute: typeof PrivateSummaryRoute
-  PrivateTransactionsRoute: typeof PrivateTransactionsRouteWithChildren
+  PrivateTransactionsRoute: typeof PrivateTransactionsRoute
 }
 
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
   PrivateCategoriesRoute: PrivateCategoriesRoute,
   PrivateProfileRoute: PrivateProfileRoute,
   PrivateSummaryRoute: PrivateSummaryRoute,
-  PrivateTransactionsRoute: PrivateTransactionsRouteWithChildren,
+  PrivateTransactionsRoute: PrivateTransactionsRoute,
 }
 
 const PrivateRouteRouteWithChildren = PrivateRouteRoute._addFileChildren(
