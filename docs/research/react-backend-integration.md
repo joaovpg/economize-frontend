@@ -21,7 +21,7 @@ Recomendação para este projeto:
 
 - O cliente HTTP compartilhado está em [`src/lib/api.ts`](../../src/lib/api.ts). Ele usa `ky.create`, `prefix` baseado em `VITE_API_URL`, `credentials: "include"` e redireciona respostas `401` para `/login` fora das rotas públicas.
 - [`src/services/accounts/`](../../src/services/accounts/), [`src/services/auth/`](../../src/services/auth/) e [`src/services/categories/`](../../src/services/categories/) reservam a divisão por domínio; cada pasta separa operações em `api.ts` dos schemas e tipos em `contracts.ts`.
-- O resumo faz chamadas diretamente em [`src/lib/summary.ts`](../../src/lib/summary.ts), e o login chama o cliente diretamente em [`src/routes/_public/login.tsx`](../../src/routes/_public/login.tsx). Isso é um bom ponto de partida para uma migração posterior, mas hoje mistura caso de uso de domínio com detalhes HTTP.
+- A consulta de transações já está isolada em [`src/services/transactions/`](../../src/services/transactions/), com o serviço HTTP separado dos contratos Zod e consumido pelo loader da rota. O resumo não possui rota correspondente na API e permanece sem dados demonstrativos; o login ainda chama o cliente diretamente em [`src/routes/_public/login.tsx`](../../src/routes/_public/login.tsx), que continua sendo um ponto de migração futura.
 - As diretrizes do projeto já recomendam [`src/lib/api.ts`](../../docs/agent-guidelines/frontend-architecture.md) para integrações HTTP, loaders para obter dados necessários à rota e estado compartilhado/restaurável na URL.
 - O projeto atualmente não declara `@tanstack/react-query` em [`package.json`](../../package.json). Portanto, as recomendações de Query abaixo são uma decisão futura, não uma dependência que deva ser adicionada como parte deste relatório.
 
@@ -56,7 +56,7 @@ src/
     categories/
       api.ts            # operações de categorias
       contracts.ts      # schemas e tipos de categorias
-    transactions/       # recurso futuro
+    transactions/       # operações de transações e seus contratos
     summary/            # recurso futuro, se for agregado pela API
   routes/               # loaders/query options consomem services
 ```
@@ -177,7 +177,7 @@ Para a integração Router + Query, a documentação oficial mostra passar `Quer
 - preservar `src/lib/api.ts` como cliente único;
 - estabelecer uma convenção para `service` receber `signal` e devolver dados já validados;
 - implementar operações em `auth`, `accounts` e `categories` antes de criar mais abstrações;
-- mover gradualmente chamadas diretas de [`src/lib/summary.ts`](../../src/lib/summary.ts) e das rotas para os serviços;
+- mover gradualmente as chamadas diretas restantes das rotas para os serviços;
 - manter regras de navegação (`401`) no cliente compartilhado e mensagens de tela fora dele.
 
 ### Fase 2 — schemas e erros

@@ -21,6 +21,6 @@
 - Prefira loaders para obter os dados necessários à rota e mantenha o acesso a dados separado da renderização.
 - Use `src/lib/api.ts` nas integrações HTTP. O cliente envia cookies com `credentials: "include"` e redireciona para `/login` ao receber `401` fora das rotas públicas.
 - Mantenha `PrivateLayout` sem guard de sessão: a API valida a sessão. O grupo `_private` organiza as telas e não comprova autenticação.
-- Atualmente, resumo e detalhes de transação usam dados locais de demonstração em `src/lib/summary.ts`; suas funções assíncronas não representam integração com a API.
+- A consulta de transações usa o serviço de domínio em `src/services/transactions/`, com contratos Zod na fronteira HTTP e carregamento pelo loader da rota. O resumo não possui rota correspondente na API e permanece com estado vazio, sem dados demonstrativos.
 
 Para a motivação e as consequências do roteamento adotado, consulte [ADR-0004](../adr/0004-code-splitting-por-grupo-de-rotas.md).
