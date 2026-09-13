@@ -7,4 +7,9 @@ export const loginRequestSchema = z.object({
   senha: passwordSchema,
 });
 
+export const csrfTokenResponseSchema = z.object({
+  csrfToken: z.string().min(1),
+});
+
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
+export type CsrfTokenResponse = z.infer<typeof csrfTokenResponseSchema>;

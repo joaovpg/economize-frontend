@@ -116,6 +116,8 @@ export type TextFieldProps = Omit<AriaTextFieldProps, "children"> & {
   description?: string;
   /** Mensagem de validação exibida na área reservada abaixo do input. */
   errorMessage?: string;
+  /** Mantém uma área reservada para a mensagem de validação quando não houver erro. */
+  reserveErrorSpace?: boolean;
   /** Texto exibido dentro do input quando ele está vazio. */
   placeholder?: string;
   /** Ícone decorativo exibido antes do conteúdo do input. */
@@ -136,6 +138,7 @@ export function TextField({
   label,
   description,
   errorMessage,
+  reserveErrorSpace = true,
   placeholder,
   leadingIcon,
   trailingIcon,
@@ -204,7 +207,7 @@ export function TextField({
           trailingIcon && <IconSlot>{trailingIcon}</IconSlot>
         )}
       </div>
-      <div className="min-h-4 min-w-0">
+      <div className={reserveErrorSpace ? "min-h-4 min-w-0" : "min-w-0"}>
         <FieldError className="block text-validation wrap-break-word text-danger">
           {errorMessage}
         </FieldError>

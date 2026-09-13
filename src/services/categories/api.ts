@@ -1,5 +1,4 @@
 import { type ApiRequestOptions, api, parseApiResponse } from "../../lib/api";
-import { createContractApiError } from "../../lib/api-errors";
 import {
   cadastrarCategoriaRequestSchema,
   categoriaResponseSchema,
@@ -7,12 +6,9 @@ import {
   editarCategoriaRequestSchema,
   getCategoriasQuerySchema,
   type CadastrarCategoriaRequest,
-  type CategoriaResponse,
   type EditarCategoriaRequest,
   type GetCategoriasOptions,
 } from "./contracts";
-
-import type { ResponsePromise } from "ky";
 
 const DEFAULT_CATEGORY_COLOR = "#FFFFFF";
 
@@ -26,36 +22,6 @@ export async function getCategorias(options: GetCategoriasOptions = {}) {
   );
 }
 
-async function parseOptionalCategoriaResponse(
-  response: ResponsePromise,
-): Promise<CategoriaResponse | null> {
-  const body = await response.text();
-
-  if (body.trim().length === 0) {
-    return null;
-  }
-
-  let parsedBody: unknown;
-
-  try {
-    parsedBody = JSON.parse(body);
-  } catch (error) {
-    throw createContractApiError(error);
-  }
-
-  if (parsedBody === null) {
-    return null;
-  }
-
-  const result = categoriaResponseSchema.safeParse(parsedBody);
-
-  if (!result.success) {
-    throw createContractApiError(result.error);
-  }
-
-  return result.data;
-}
-
 export async function postCategoria(
   input: Omit<CadastrarCategoriaRequest, "cor">,
   options: ApiRequestOptions = {},
@@ -65,8 +31,9 @@ export async function postCategoria(
     cor: DEFAULT_CATEGORY_COLOR,
   });
 
-  return parseOptionalCategoriaResponse(
+  return parseApiResponse(
     api.post("categorias", { json: request, signal: options.signal }),
+    categoriaResponseSchema,
   );
 }
 
@@ -80,7 +47,8 @@ export async function putCategoria(
     cor: DEFAULT_CATEGORY_COLOR,
   });
 
-  return parseOptionalCategoriaResponse(
+  return parseApiResponse(
     api.put(`categorias/${categoriaId}`, { json: request, signal: options.signal }),
+    categoriaResponseSchema,
   );
 }

@@ -807,15 +807,9 @@ function SummaryPage({ accounts, categories, data }: SummaryPageProps) {
                       key={movement.description}
                     >
                       <div className="min-w-0">
-                        <Link
-                          className="block truncate text-caption-strong text-foreground"
-                          preload="intent"
-                          to="/transactions/$transactionId"
-                          params={{ transactionId: movement.id }}
-                          variant="link"
-                        >
+                        <span className="block truncate text-caption-strong text-foreground">
                           {movement.description}
-                        </Link>
+                        </span>
                         <span className="mt-0.75 block truncate text-caption text-subtle">
                           {movement.category} · {movement.account}
                         </span>

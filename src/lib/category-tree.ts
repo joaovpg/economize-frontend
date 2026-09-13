@@ -26,6 +26,7 @@ export function buildCategoryTree<TCategory extends CategoryTreeItem>(
   }
 
   const builtIds = new Set<string>();
+
   const buildNode = (
     category: TCategory,
     ancestorIds: ReadonlySet<string>,
@@ -50,6 +51,7 @@ export function buildCategoryTree<TCategory extends CategoryTreeItem>(
   const rootCategories = categories.filter(
     (category) => category.categoriaPaiId === null || !categoryById.has(category.categoriaPaiId),
   );
+
   const tree: CategoryTreeNode<TCategory>[] = [];
 
   for (const category of rootCategories) {
