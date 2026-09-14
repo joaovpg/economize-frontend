@@ -1,20 +1,9 @@
 import { type ReactNode, useEffect } from "react";
-import {
-  Button as AriaButton,
-  Input,
-  Label,
-  ListBox,
-  ListBoxItem,
-  Popover,
-  Select,
-  SelectValue,
-  TextField as AriaTextField,
-} from "react-aria-components";
+import { Input, TextField as AriaTextField } from "react-aria-components";
 import { useForm, useWatch } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarBlankIcon } from "@phosphor-icons/react/dist/csr/CalendarBlank";
-import { CaretDownIcon } from "@phosphor-icons/react/dist/csr/CaretDown";
 import { GearSixIcon } from "@phosphor-icons/react/dist/csr/GearSix";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/csr/MagnifyingGlass";
 import { XIcon } from "@phosphor-icons/react/dist/csr/X";
@@ -36,7 +25,9 @@ import { Button } from "../Button";
 import { Card, CardBody, CardFooter, CardHeader } from "../Card";
 import { Checkbox } from "../Checkbox";
 import { FilterTree, type FilterTreeItem } from "../FilterTree";
+import { Label } from "../Label";
 import { Link } from "../Link";
+import { Select, SelectItem } from "../Select";
 
 const filtersStyles = tv({
   base: "sticky top-6 w-auto self-start m-[1.5rem_0_1.5rem_1.5rem] max-h-[calc(100svh-3rem)] overflow-auto max-[48rem]:static max-[48rem]:m-[0_1rem_1rem] max-[48rem]:max-h-none max-[48rem]:hidden",
@@ -44,16 +35,6 @@ const filtersStyles = tv({
     open: {
       false: "",
       true: "max-[48rem]:!grid",
-    },
-  },
-});
-
-const selectTriggerStyles = tv({
-  base: "flex min-w-0 cursor-pointer items-center gap-2 border border-border text-muted transition-[background-color,border-color] duration-150 ease-out motion-reduce:transition-none hover:border-border-strong hover:bg-surface-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand [&>svg]:size-4 [&>svg]:shrink-0",
-  variants: {
-    placement: {
-      filter:
-        "min-h-[2.625rem] w-full rounded-xl bg-[color-mix(in_oklch,var(--color-surface)_70%,transparent)] px-3",
     },
   },
 });
@@ -117,6 +98,8 @@ function TransactionMonthSelect({ onChange, value }: TransactionMonthSelectProps
     <Select
       aria-label={label}
       className="min-w-0"
+      label={label}
+      leadingIcon={<CalendarBlankIcon className="text-brand" aria-hidden="true" />}
       onSelectionChange={(key) => {
         if (typeof key === "string") {
           const month = monthOptions.find((option) => option.value === key)?.value;
@@ -128,31 +111,11 @@ function TransactionMonthSelect({ onChange, value }: TransactionMonthSelectProps
       }}
       selectedKey={value}
     >
-      <Label className="m-0 text-caption-strong tracking-[0.04em] text-muted uppercase">
-        {label}
-      </Label>
-      <AriaButton className={selectTriggerStyles({ placement: "filter" })}>
-        <CalendarBlankIcon className="text-brand" aria-hidden="true" />
-        <SelectValue className="min-w-0 flex-1 truncate" />
-        <CaretDownIcon className="text-subtle" aria-hidden="true" />
-      </AriaButton>
-      <Popover className="z-10 min-w-48 overflow-hidden rounded-xl border border-border bg-surface p-1 shadow-popover">
-        <ListBox
-          aria-label={label}
-          className="grid max-h-60 gap-0.5 overflow-auto p-0 outline-none"
-        >
-          {monthOptions.map((month) => (
-            <ListBoxItem
-              className="cursor-pointer rounded-lg px-3 py-2 text-body-small text-foreground outline-none data-focused:bg-surface-muted data-selected:bg-brand-soft data-selected:text-brand-hover"
-              id={month.value}
-              key={month.value}
-              textValue={month.label}
-            >
-              {month.label}
-            </ListBoxItem>
-          ))}
-        </ListBox>
-      </Popover>
+      {monthOptions.map((month) => (
+        <SelectItem id={month.value} key={month.value} textValue={month.label}>
+          {month.label}
+        </SelectItem>
+      ))}
     </Select>
   );
 }
@@ -305,7 +268,7 @@ export function TransactionFilters({
       <form className="grid gap-5.5" onSubmit={handleSubmit(onApply)}>
         <CardBody className="gap-5.5">
           <AriaTextField className="grid gap-2.5">
-            <Label className="m-0 text-caption-strong tracking-[0.04em] text-muted uppercase">
+            <Label className="m-0 !text-caption-strong tracking-[0.04em] !text-muted uppercase">
               Buscar transação
             </Label>
             <div className="flex min-h-10.5 min-w-0 items-center gap-2.5 rounded-xl border border-border bg-[color-mix(in_oklch,var(--color-surface)_70%,transparent)] px-3 text-subtle transition-[background-color,border-color] duration-150 ease-out focus-within:border-brand focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand hover:border-border-strong hover:bg-surface-muted motion-reduce:transition-none [&>svg]:size-4 [&>svg]:shrink-0">

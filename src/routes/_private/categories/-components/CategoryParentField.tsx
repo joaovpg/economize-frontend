@@ -1,17 +1,6 @@
-import {
-  Button as AriaButton,
-  FieldError,
-  Label,
-  ListBox,
-  ListBoxItem,
-  Popover,
-  Select,
-  SelectValue,
-} from "react-aria-components";
 import { Controller, type Control } from "react-hook-form";
 
-import { CaretDownIcon } from "@phosphor-icons/react/dist/csr/CaretDown";
-
+import { Select, SelectItem } from "../../../../components/Select";
 import { buildCategoryTree } from "../../../../lib/category-tree";
 
 import type { CategoriaResponse } from "../../../../services/categories/contracts";
@@ -115,52 +104,29 @@ export function CategoryParentField({
       render={({ field }) => (
         <Select
           aria-label="Categoria-pai"
-          className="flex min-w-0 flex-col gap-1"
+          className="min-w-0"
+          errorMessage={errorMessage}
           isDisabled={isDisabled}
-          isInvalid={Boolean(errorMessage)}
+          label="Categoria-pai"
           onBlur={field.onBlur}
           onSelectionChange={(key) => {
             field.onChange(key === ROOT_CATEGORY_KEY ? null : String(key));
           }}
           selectedKey={field.value ?? ROOT_CATEGORY_KEY}
         >
-          <Label className="text-label text-foreground">Categoria-pai</Label>
-          <AriaButton className="flex min-h-12 w-full min-w-0 cursor-pointer items-center gap-2.5 rounded-xl border border-border bg-surface px-3.5 text-body-small text-foreground transition-[background-color,border-color,outline-color] duration-150 ease-out outline-none hover:border-border-strong focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-brand data-disabled:cursor-not-allowed data-disabled:bg-surface-muted data-disabled:text-subtle">
-            <SelectValue className="min-w-0 flex-1 truncate text-left" />
-            <CaretDownIcon aria-hidden="true" className="size-4 shrink-0 text-subtle" />
-          </AriaButton>
-          <div className="min-h-4">
-            {errorMessage && (
-              <FieldError className="block min-h-4 text-validation text-danger">
-                {errorMessage}
-              </FieldError>
-            )}
-          </div>
-          <Popover className="z-10 min-w-60 overflow-hidden rounded-xl border border-border bg-surface p-1 shadow-popover">
-            <ListBox
-              aria-label="Categorias-pai disponíveis"
-              className="flex max-h-60 flex-col gap-0.5 overflow-auto p-0 outline-none"
+          <SelectItem id={ROOT_CATEGORY_KEY} textValue="Categoria raiz">
+            Categoria raiz
+          </SelectItem>
+          {options.map((option) => (
+            <SelectItem
+              id={option.id}
+              isDisabled={option.isDisabled}
+              key={option.id}
+              textValue={option.label}
             >
-              <ListBoxItem
-                className="cursor-pointer rounded-lg px-3 py-2 text-body-small text-foreground outline-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focused:bg-surface-muted data-selected:bg-brand-soft data-selected:text-brand-hover"
-                id={ROOT_CATEGORY_KEY}
-                textValue="Categoria raiz"
-              >
-                Categoria raiz
-              </ListBoxItem>
-              {options.map((option) => (
-                <ListBoxItem
-                  className="cursor-pointer rounded-lg px-3 py-2 text-body-small text-foreground outline-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focused:bg-surface-muted data-selected:bg-brand-soft data-selected:text-brand-hover"
-                  id={option.id}
-                  isDisabled={option.isDisabled}
-                  key={option.id}
-                  textValue={option.label}
-                >
-                  {option.label}
-                </ListBoxItem>
-              ))}
-            </ListBox>
-          </Popover>
+              {option.label}
+            </SelectItem>
+          ))}
         </Select>
       )}
     />

@@ -1,9 +1,6 @@
 import { useState, type ReactNode, type Ref } from "react";
 import {
-  FieldError,
   Input,
-  Label,
-  Text,
   TextField as AriaTextField,
   type TextFieldProps as AriaTextFieldProps,
 } from "react-aria-components";
@@ -13,7 +10,10 @@ import { EyeSlashIcon } from "@phosphor-icons/react/dist/csr/EyeSlash";
 import { tv } from "tailwind-variants";
 
 import { Button } from "./Button";
+import { Description } from "./Description";
+import { FieldError } from "./FieldError";
 import { IconSlot } from "./IconSlot";
+import { Label } from "./Label";
 
 const control = tv({
   base: "flex h-12 min-h-12 min-w-0 items-center gap-2.5 rounded-xl border bg-[linear-gradient(180deg,rgb(255_255_255_/_0.7),#fffdf8)] px-3.5 font-ui text-subtle transition-[background-color,border-color,outline-color] motion-reduce:transition-none",
@@ -29,31 +29,6 @@ const control = tv({
     },
   },
 });
-
-const fieldCopyStyles = tv(
-  {
-    slots: {
-      label: "text-label",
-      description: "-mt-1 text-caption",
-    },
-    variants: {
-      disabled: {
-        true: {
-          label: "text-subtle",
-          description: "text-subtle",
-        },
-        false: {
-          label: "text-foreground",
-          description: "text-muted",
-        },
-      },
-    },
-    defaultVariants: {
-      disabled: false,
-    },
-  },
-  { twMerge: false },
-);
 
 const inputStyles = tv(
   {
@@ -152,9 +127,6 @@ export function TextField({
   const hasError = Boolean(errorMessage);
   const hasVisualError = hasError && !isDisabled;
   const inputType = isPassword && isPasswordVisible ? "text" : type;
-  const { description: descriptionStyles, label: labelStyles } = fieldCopyStyles({
-    disabled: isDisabled,
-  });
 
   return (
     <AriaTextField
@@ -164,12 +136,8 @@ export function TextField({
       type={inputType}
       className="grid min-w-0 gap-1"
     >
-      <Label className={labelStyles()}>{label}</Label>
-      {description && (
-        <Text slot="description" className={descriptionStyles()}>
-          {description}
-        </Text>
-      )}
+      <Label isDisabled={isDisabled}>{label}</Label>
+      {description && <Description isDisabled={isDisabled}>{description}</Description>}
       <div
         className={control({
           invalid: hasVisualError,
@@ -208,9 +176,7 @@ export function TextField({
         )}
       </div>
       <div className={reserveErrorSpace ? "min-h-4 min-w-0" : "min-w-0"}>
-        <FieldError className="block text-validation wrap-break-word text-danger">
-          {errorMessage}
-        </FieldError>
+        <FieldError>{errorMessage}</FieldError>
       </div>
     </AriaTextField>
   );
