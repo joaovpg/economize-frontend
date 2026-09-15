@@ -26,6 +26,10 @@ export const buttonStyles = tv(
         true: "size-[var(--button-height)] min-w-0 flex-none px-0",
         false: "h-[var(--button-height)] min-w-max px-[var(--button-padding-x)]",
       },
+      emphasis: {
+        default: "",
+        strong: "font-bold",
+      },
     },
     compoundVariants: [
       {
@@ -38,6 +42,7 @@ export const buttonStyles = tv(
       size: "md",
       variant: "primary",
       isIconOnly: false,
+      emphasis: "default",
     },
   },
   { twMerge: false },

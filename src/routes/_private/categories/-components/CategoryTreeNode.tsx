@@ -27,7 +27,7 @@ export function CategoryTreeNode({
     <li className="flex min-w-0 flex-col gap-2">
       <div
         className={cn(
-          "flex min-w-0 items-center justify-between gap-3 rounded-xl border border-border bg-[color-mix(in_oklch,var(--color-surface)_58%,transparent)] px-3 py-2.5",
+          "flex min-w-0 items-center justify-between gap-3 rounded-xl border border-border bg-surface-overlay px-3 py-2.5",
           !node.ativo && "bg-surface-muted/55",
         )}
       >
@@ -73,13 +73,13 @@ export function CategoryTreeNode({
           </Button>
           <Switch
             aria-label={`${node.ativo ? "Inativar" : "Ativar"} categoria ${node.nome}`}
-            className="group inline-flex min-h-9 cursor-pointer items-center rounded-lg p-1 transition-[background-color] outline-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focus-visible:bg-surface-muted"
+            className="group inline-flex min-h-9 cursor-pointer items-center rounded-lg p-1 transition-colors outline-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focus-visible:bg-surface-muted"
             isDisabled={pendingCategoryId !== null}
             isSelected={node.ativo}
             onChange={(nextActive) => onToggle(node, nextActive)}
           >
-            <span className="relative block h-5 w-9 rounded-full bg-border-strong transition-[background-color] duration-150 ease-out group-data-selected:bg-brand motion-reduce:transition-none">
-              <span className="absolute top-0.5 left-0.5 block size-4 rounded-full bg-surface shadow-[0_1px_2px_rgb(15_23_42/0.18)] transition-transform duration-150 ease-out group-data-selected:translate-x-4 motion-reduce:transition-none" />
+            <span className="relative block h-5 w-9 rounded-full bg-border-strong transition-colors duration-150 ease-out group-data-selected:bg-brand motion-reduce:transition-none">
+              <span className="absolute top-0.5 left-0.5 block size-4 rounded-full bg-surface shadow-tree-node transition-transform duration-150 ease-out group-data-selected:translate-x-4 motion-reduce:transition-none" />
             </span>
           </Switch>
           {isPending && <span className="sr-only">Salvando alteração</span>}

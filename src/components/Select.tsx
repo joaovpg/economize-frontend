@@ -101,7 +101,13 @@ export function SelectItem<T = object>({ children, className, ...itemProps }: Se
  */
 export type SelectProps<T = object, M extends SelectionMode = "single"> = Omit<
   AriaSelectProps<T, M>,
-  "children" | "description" | "errorMessage" | "label"
+  | "children"
+  | "defaultSelectedKey"
+  | "description"
+  | "errorMessage"
+  | "label"
+  | "onSelectionChange"
+  | "selectedKey"
 > & {
   /** Opções renderizadas dentro da lista. */
   children: ReactNode;

@@ -96,7 +96,7 @@ function LoginPage() {
       </div>
 
       <Card as="form" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-        <CardBody className="gap-2">
+        <CardBody spacing="compact">
           {submitError && (
             <p
               className="m-0 rounded-md bg-danger-soft px-3 py-2 text-validation text-danger"
@@ -131,7 +131,7 @@ function LoginPage() {
             errorMessage={errors.senha?.message}
           />
           <div className="flex justify-end">
-            <Button className="font-bold" type="button" variant="link">
+            <Button emphasis="strong" type="button" variant="link">
               Esqueci minha senha
             </Button>
           </div>

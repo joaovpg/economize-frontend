@@ -1,6 +1,6 @@
 import { createElement, type ComponentPropsWithRef } from "react";
 
-import { cn } from "tailwind-variants";
+import { cn, tv, type VariantProps } from "tailwind-variants";
 
 type CardElement = "div" | "section" | "aside" | "form" | "output";
 export type CardProps<T extends CardElement = "div"> = ComponentPropsWithRef<T> & { as?: T };
@@ -34,8 +34,29 @@ export function CardHeader({ className, ...props }: ComponentPropsWithRef<"div">
   );
 }
 
-export function CardBody({ className, ...props }: ComponentPropsWithRef<"div">) {
-  return <div {...props} data-slot="card-body" className={cn("grid min-w-0 gap-3.5", className)} />;
+const cardBodyStyles = tv(
+  {
+    base: "grid min-w-0",
+    variants: {
+      spacing: {
+        default: "gap-3.5",
+        compact: "gap-2",
+        none: "gap-0",
+      },
+    },
+    defaultVariants: {
+      spacing: "default",
+    },
+  },
+  { twMerge: false },
+);
+
+export type CardBodyProps = ComponentPropsWithRef<"div"> & VariantProps<typeof cardBodyStyles>;
+
+export function CardBody({ className, spacing = "default", ...props }: CardBodyProps) {
+  return (
+    <div {...props} data-slot="card-body" className={cardBodyStyles({ className, spacing })} />
+  );
 }
 
 export function CardFooter({ className, ...props }: ComponentPropsWithRef<"div">) {

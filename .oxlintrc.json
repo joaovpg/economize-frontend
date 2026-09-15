@@ -1,11 +1,14 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "oxc", "import", "jsx-a11y", "promise", "unicorn"],
-  "jsPlugins": ["oxlint-tailwindcss"],
+  "jsPlugins": ["@shadcn/lint", "oxlint-tailwindcss"],
   "options": {
     "typeAware": true
   },
   "settings": {
+    "shadcn": {
+      "componentImports": ["(^|/)components(/|$)"]
+    },
     "tailwindcss": {
       "entryPoint": "src/styles/index.css"
     }
@@ -20,6 +23,44 @@
     "nursery": "off"
   },
   "rules": {
+    "shadcn/no-restyle": [
+      "error",
+      {
+        "allow": ["layout"]
+      }
+    ],
+    "shadcn/no-raw-colors": [
+      "error",
+      {
+        "allow": [
+          "text-display-hero",
+          "text-page-title",
+          "text-section-title",
+          "text-card-title",
+          "text-title-compact",
+          "text-metric",
+          "text-body-large",
+          "text-body",
+          "text-body-small",
+          "text-label",
+          "text-button",
+          "text-caption",
+          "text-caption-strong",
+          "text-validation",
+          "text-meta",
+          "text-code",
+          "text-token",
+          "shadow-dialog",
+          "shadow-popover",
+          "shadow-nav-active",
+          "shadow-tree-node"
+        ]
+      }
+    ],
+    "shadcn/no-arbitrary-values": ["error", { "allow": ["layout"] }],
+    "shadcn/no-inline-styles": "error",
+    "shadcn/no-unknown-classes": "warn",
+    "shadcn/require-static-classes": "error",
     "eslint/no-unused-vars": "error",
     "no-alert": "error",
     "no-console": "error",
@@ -53,5 +94,15 @@
     "tailwindcss/no-duplicate-classes": "error",
     "tailwindcss/no-conflicting-classes": "error",
     "tailwindcss/no-deprecated-classes": "error"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/components/**"],
+      "rules": {
+        "shadcn/no-restyle": "off",
+        "shadcn/no-arbitrary-values": "off",
+        "shadcn/require-static-classes": "off"
+      }
+    }
+  ]
 }

@@ -100,16 +100,18 @@ function TransactionMonthSelect({ onChange, value }: TransactionMonthSelectProps
       className="min-w-0"
       label={label}
       leadingIcon={<CalendarBlankIcon className="text-brand" aria-hidden="true" />}
-      onSelectionChange={(key) => {
-        if (typeof key === "string") {
-          const month = monthOptions.find((option) => option.value === key)?.value;
+      onChange={(nextValue) => {
+        if (typeof nextValue !== "string") {
+          return;
+        }
 
-          if (month) {
-            onChange(month);
-          }
+        const month = monthOptions.find((option) => option.value === nextValue)?.value;
+
+        if (month) {
+          onChange(month);
         }
       }}
-      selectedKey={value}
+      value={value}
     >
       {monthOptions.map((month) => (
         <SelectItem id={month.value} key={month.value} textValue={month.label}>

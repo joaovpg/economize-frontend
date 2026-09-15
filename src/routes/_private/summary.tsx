@@ -92,7 +92,7 @@ function SummaryPage({ accounts, categories }: SummaryPageProps) {
           }}
         />
 
-        <div className="min-w-0 p-[2rem_1.75rem_2.5rem] max-[48rem]:p-[1.5rem_1rem_2rem]">
+        <div className="min-w-0 pt-8 pr-7 pb-10 pl-7 max-[48rem]:pt-6 max-[48rem]:pr-4 max-[48rem]:pb-8 max-[48rem]:pl-4">
           <header className="mb-5.5 flex items-end justify-between gap-4 max-[48rem]:mb-4 max-[48rem]:grid max-[48rem]:items-start max-[48rem]:gap-4">
             <div>
               <h1 className="m-0 text-page-title" id="summary-title">
@@ -123,16 +123,16 @@ function SummaryPage({ accounts, categories }: SummaryPageProps) {
           >
             <span className="text-meta text-subtle uppercase">Filtros ativos</span>
             <div className="flex flex-wrap gap-2">
-              <span className="rounded-full border border-border bg-[color-mix(in_oklch,var(--color-surface)_60%,transparent)] px-2.5 py-1.5 text-caption text-muted">
+              <span className="rounded-full border border-border bg-surface-overlay-strong px-2.5 py-1.5 text-caption text-muted">
                 Mês: {getMonthLabel(search.month)}
               </span>
               {search.categories.length > 0 && (
-                <span className="rounded-full border border-border bg-[color-mix(in_oklch,var(--color-surface)_60%,transparent)] px-2.5 py-1.5 text-caption text-muted">
+                <span className="rounded-full border border-border bg-surface-overlay-strong px-2.5 py-1.5 text-caption text-muted">
                   Categorias: {selectedCategoryNames.join(", ")}
                 </span>
               )}
               {hasAccountFilter && (
-                <span className="rounded-full border border-border bg-[color-mix(in_oklch,var(--color-surface)_60%,transparent)] px-2.5 py-1.5 text-caption text-muted">
+                <span className="rounded-full border border-border bg-surface-overlay-strong px-2.5 py-1.5 text-caption text-muted">
                   {`${search.accounts.length} contas`}
                 </span>
               )}

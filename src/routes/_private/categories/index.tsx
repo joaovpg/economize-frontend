@@ -134,12 +134,12 @@ function CategoriesPage() {
   return (
     <section
       aria-labelledby="categories-title"
-      className="flex min-w-0 flex-col p-[2rem_1.75rem_2.5rem] max-[48rem]:p-[1.5rem_1rem_2rem]"
+      className="flex min-w-0 flex-col pt-8 pr-7 pb-10 pl-7 max-[48rem]:pt-6 max-[48rem]:pr-4 max-[48rem]:pb-8 max-[48rem]:pl-4"
     >
       <div className="flex w-full max-w-5xl flex-col gap-5.5 self-center">
         <Link
-          className="self-start text-caption"
           leadingIcon={<ArrowLeftIcon aria-hidden="true" />}
+          linkVariant="back"
           to="/summary"
           size="sm"
           variant="link"
@@ -195,7 +195,7 @@ function CategoriesPage() {
         )}
 
         <Card as="section" aria-labelledby="categories-list-title">
-          <CardHeader className="flex flex-col items-start gap-4">
+          <CardHeader className="flex flex-col items-start">
             <TextField
               label="Pesquisar categoria"
               leadingIcon={<MagnifyingGlassIcon aria-hidden="true" />}

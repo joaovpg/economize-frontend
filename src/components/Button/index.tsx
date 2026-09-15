@@ -54,6 +54,7 @@ export type ButtonProps = Omit<AriaButtonProps, "className"> &
 export function Button({
   children,
   className,
+  emphasis = "default",
   isIconOnly = false,
   isPending = false,
   leadingIcon,
@@ -68,6 +69,7 @@ export function Button({
     (userClassName: string | undefined, _renderProps: ButtonRenderProps) =>
       buttonStyles({
         className: userClassName,
+        emphasis,
         isIconOnly,
         size,
         variant,

@@ -109,10 +109,15 @@ export function CategoryParentField({
           isDisabled={isDisabled}
           label="Categoria-pai"
           onBlur={field.onBlur}
-          onSelectionChange={(key) => {
-            field.onChange(key === ROOT_CATEGORY_KEY ? null : String(key));
+          onChange={(nextValue) => {
+            if (nextValue === null || nextValue === ROOT_CATEGORY_KEY) {
+              field.onChange(null);
+              return;
+            }
+
+            field.onChange(String(nextValue));
           }}
-          selectedKey={field.value ?? ROOT_CATEGORY_KEY}
+          value={field.value ?? ROOT_CATEGORY_KEY}
         >
           <SelectItem id={ROOT_CATEGORY_KEY} textValue="Categoria raiz">
             Categoria raiz

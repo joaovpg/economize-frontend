@@ -71,7 +71,7 @@ function RegisterPage() {
       </div>
 
       <Card as="form" onSubmit={handleSubmit((data) => data)} noValidate>
-        <CardBody className="gap-2">
+        <CardBody spacing="compact">
           <TextField
             label="Nome completo"
             name={nomeField.name}

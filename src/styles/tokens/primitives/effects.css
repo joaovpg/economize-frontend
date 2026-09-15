@@ -3,6 +3,11 @@
   --shadow-xs: 0 1px 2px rgb(15 23 42 / 0.04);
   --shadow-sm: 0 1px 3px rgb(15 23 42 / 0.06), 0 1px 2px rgb(15 23 42 / 0.04);
   --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px rgb(15 23 42 / 0.04);
+  --shadow-nav-active: inset 0 1px 0
+    color-mix(in oklch, var(--color-surface-value) 82%, transparent);
   --shadow-popover: 0 12px 32px rgb(15 23 42 / 0.12);
   --shadow-dialog: 0 24px 64px rgb(15 23 42 / 0.18);
+  --shadow-tree-node: 0 1px 2px rgb(15 23 42 / 0.18);
+
+  --blur-header: 14px;
 }
