@@ -1,19 +1,12 @@
 import { z } from "zod";
 
+import { getCurrentYearMonth, yearMonthSchema } from "./transaction-month";
+
 export const allAccountsFilterValue = "Todas as contas";
 export const categoryFilterValueSchema = z.uuid();
 export const accountFilterValueSchema = z.union([z.uuid(), z.literal(allAccountsFilterValue)]);
 
-export const transactionMonthValues = ["2026-09", "2026-08"] as const;
-
-export const monthOptions = [
-  { label: "Setembro 2026", value: "2026-09" },
-  { label: "Agosto 2026", value: "2026-08" },
-] as const satisfies readonly { label: string; value: TransactionMonth }[];
-
-export function getMonthLabel(month: string) {
-  return monthOptions.find((option) => option.value === month)?.label ?? month;
-}
+export { getMonthLabel } from "./transaction-month";
 
 const transactionSearchShape = {
   accounts: z
@@ -22,7 +15,7 @@ const transactionSearchShape = {
     .default([allAccountsFilterValue]),
   categories: z.array(categoryFilterValueSchema).catch([]).default([]),
   includePreviousBalance: z.boolean().catch(true).default(true),
-  month: z.enum(transactionMonthValues).catch("2026-09").default("2026-09"),
+  month: yearMonthSchema.catch(getCurrentYearMonth).default(getCurrentYearMonth),
   q: z.string().catch("").default(""),
 };
 
@@ -35,7 +28,7 @@ export const transactionFilterFormSchema = z.object({
   accounts: z.array(accountFilterValueSchema),
   categories: z.array(categoryFilterValueSchema),
   includePreviousBalance: z.boolean(),
-  month: z.enum(transactionMonthValues),
+  month: yearMonthSchema,
   search: z.string(),
 });
 
@@ -47,4 +40,3 @@ export type TransactionFilterState = Pick<
   TransactionSearch,
   "accounts" | "categories" | "includePreviousBalance" | "month" | "q"
 >;
-export type TransactionMonth = (typeof transactionMonthValues)[number];

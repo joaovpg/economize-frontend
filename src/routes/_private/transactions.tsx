@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { FunnelIcon } from "@phosphor-icons/react/dist/csr/Funnel";
-import { createFileRoute, getRouteApi } from "@tanstack/react-router";
+import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
+import { createFileRoute, getRouteApi, useRouter } from "@tanstack/react-router";
 
 import { Button } from "../../components/Button";
 import { Card, CardBody, CardHeader } from "../../components/Card";
+import { MonthYearFilter } from "../../components/MonthYearFilter";
 import { TransactionFilters } from "../../components/TransactionFilters";
 import { formatCurrency } from "../../lib/formatters";
 import {
@@ -13,6 +15,11 @@ import {
   transactionSearchSchema,
   type TransactionFilterFormData,
 } from "../../lib/transaction-filters";
+import {
+  parseTransactionMonth,
+  toYearMonth,
+  type TransactionMonth,
+} from "../../lib/transaction-month";
 import { getContas } from "../../services/accounts/api";
 import { type ContaResponse } from "../../services/accounts/contracts";
 import { getCategorias } from "../../services/categories/api";
@@ -20,6 +27,7 @@ import { type CategoriaResponse } from "../../services/categories/contracts";
 import { getTransacoes } from "../../services/transactions/api";
 import { type ConsultaTransacoesResponse } from "../../services/transactions/contracts";
 import { getAccountLabel, getCategoryLabel } from "./transactions/-components/transaction-labels";
+import { TransactionCreationModal } from "./transactions/-components/TransactionCreationModal";
 import { TransactionTable } from "./transactions/-components/TransactionTable";
 
 const transactionsRoute = getRouteApi("/_private/transactions");
@@ -33,9 +41,14 @@ type TransactionsPageProps = {
 function TransactionsPage({ accounts, categories, data }: TransactionsPageProps) {
   const search = transactionsRoute.useSearch();
   const navigate = transactionsRoute.useNavigate();
+  const router = useRouter();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [isCreationOpen, setIsCreationOpen] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
   const filterTriggerRef = useRef<HTMLButtonElement>(null);
   const wasFiltersOpenRef = useRef(false);
+  const selectedMonth = parseTransactionMonth(search.month);
   const allAccountsSelected = search.accounts.includes(allAccountsFilterValue);
   const hasAccountFilter = search.accounts.length > 0 && !allAccountsSelected;
   const selectedCategoryNames = categories
@@ -75,6 +88,15 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
     });
   };
 
+  const handleMonthChange = (month: TransactionMonth) => {
+    void navigate({
+      search: (current) => ({
+        ...current,
+        month: toYearMonth(month),
+      }),
+    });
+  };
+
   const handleApplyFilters = (formData: TransactionFilterFormData) => {
     void navigate({
       search: (current) => ({
@@ -89,6 +111,25 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
     setIsFiltersOpen(false);
   };
 
+  const handleOpenCreation = () => {
+    setFeedback(null);
+    setRefreshError(null);
+    setIsCreationOpen(true);
+  };
+
+  const handleSaved = async (message: string) => {
+    setIsCreationOpen(false);
+
+    try {
+      await router.invalidate({ sync: true });
+      setRefreshError(null);
+      setFeedback(message);
+    } catch {
+      setFeedback(message);
+      setRefreshError("A alteração foi salva, mas não foi possível atualizar a lista.");
+    }
+  };
+
   return (
     <section className="min-w-0" aria-labelledby="transactions-title">
       <div className="grid min-w-0 grid-cols-[18.25rem_minmax(0,1fr)] items-start max-[48rem]:block">
@@ -101,6 +142,7 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
           onApply={handleApplyFilters}
           onClear={handleClearFilters}
           onClose={() => setIsFiltersOpen(false)}
+          showMonth={false}
           value={{
             accounts: search.accounts,
             categories: search.categories,
@@ -120,19 +162,51 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
                 Movimentações de {getMonthLabel(data.inicio)}.
               </p>
             </div>
-            <Button
-              className="hidden! max-[48rem]:inline-flex!"
-              variant="secondary"
-              size="md"
-              ref={filterTriggerRef}
-              leadingIcon={<FunnelIcon aria-hidden="true" />}
-              aria-expanded={isFiltersOpen}
-              aria-controls="transactions-filters"
-              onPress={() => setIsFiltersOpen((isOpen) => !isOpen)}
-            >
-              Filtros
-            </Button>
+            <div className="flex items-center gap-2 max-[48rem]:grid max-[48rem]:w-full">
+              <Button
+                className="max-[48rem]:w-full"
+                leadingIcon={<PlusIcon aria-hidden="true" />}
+                onPress={handleOpenCreation}
+              >
+                Nova movimentação
+              </Button>
+              <MonthYearFilter
+                className="max-[48rem]:w-full"
+                onChange={handleMonthChange}
+                value={selectedMonth}
+              />
+              <Button
+                className="hidden! max-[48rem]:inline-flex! max-[48rem]:w-full"
+                variant="secondary"
+                size="md"
+                ref={filterTriggerRef}
+                leadingIcon={<FunnelIcon aria-hidden="true" />}
+                aria-expanded={isFiltersOpen}
+                aria-controls="transactions-filters"
+                onPress={() => setIsFiltersOpen((isOpen) => !isOpen)}
+              >
+                Filtros
+              </Button>
+            </div>
           </header>
+
+          {feedback && (
+            <output
+              aria-live="polite"
+              className="mb-4 block rounded-xl border border-success/25 bg-success-soft px-3.5 py-3 text-body-small text-success"
+            >
+              {feedback}
+            </output>
+          )}
+          {refreshError && (
+            <p
+              aria-live="assertive"
+              className="mb-4 rounded-xl border border-warning/25 bg-warning-soft px-3.5 py-3 text-body-small text-warning"
+              role="alert"
+            >
+              {refreshError}
+            </p>
+          )}
 
           <section
             className="mb-3.5 hidden gap-2.5 max-[48rem]:grid"
@@ -201,6 +275,15 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
           </Card>
         </div>
       </div>
+      {isCreationOpen && (
+        <TransactionCreationModal
+          accounts={accounts}
+          categories={categories}
+          onClose={() => setIsCreationOpen(false)}
+          onSaved={handleSaved}
+          selectedMonth={selectedMonth}
+        />
+      )}
     </section>
   );
 }

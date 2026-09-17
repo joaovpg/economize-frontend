@@ -3,7 +3,6 @@ import { Input, TextField as AriaTextField } from "react-aria-components";
 import { useForm, useWatch } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarBlankIcon } from "@phosphor-icons/react/dist/csr/CalendarBlank";
 import { GearSixIcon } from "@phosphor-icons/react/dist/csr/GearSix";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/csr/MagnifyingGlass";
 import { XIcon } from "@phosphor-icons/react/dist/csr/X";
@@ -12,13 +11,12 @@ import { tv } from "tailwind-variants";
 import { buildCategoryTree, type CategoryTreeNode } from "../../lib/category-tree";
 import {
   allAccountsFilterValue,
-  monthOptions,
   type AccountFilterValue,
   type TransactionFilterFormData,
   type TransactionFilterState,
-  type TransactionMonth,
   transactionFilterFormSchema,
 } from "../../lib/transaction-filters";
+import { parseTransactionMonth, toYearMonth } from "../../lib/transaction-month";
 import { type ContaResponse } from "../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../services/categories/contracts";
 import { Button } from "../Button";
@@ -27,7 +25,7 @@ import { Checkbox } from "../Checkbox";
 import { FilterTree, type FilterTreeItem } from "../FilterTree";
 import { Label } from "../Label";
 import { Link } from "../Link";
-import { Select, SelectItem } from "../Select";
+import { MonthYearFilter } from "../MonthYearFilter";
 
 const filtersStyles = tv({
   base: "sticky top-6 w-auto self-start m-[1.5rem_0_1.5rem_1.5rem] max-h-[calc(100svh-3rem)] overflow-auto max-[48rem]:static max-[48rem]:m-[0_1rem_1rem] max-[48rem]:max-h-none max-[48rem]:hidden",
@@ -86,42 +84,6 @@ function toFormValues(value: TransactionFilterState): TransactionFilterFormData 
   };
 }
 
-type TransactionMonthSelectProps = {
-  onChange: (value: TransactionMonth) => void;
-  value: TransactionMonth;
-};
-
-function TransactionMonthSelect({ onChange, value }: TransactionMonthSelectProps) {
-  const label = "Mês";
-
-  return (
-    <Select
-      aria-label={label}
-      className="min-w-0"
-      label={label}
-      leadingIcon={<CalendarBlankIcon className="text-brand" aria-hidden="true" />}
-      onChange={(nextValue) => {
-        if (typeof nextValue !== "string") {
-          return;
-        }
-
-        const month = monthOptions.find((option) => option.value === nextValue)?.value;
-
-        if (month) {
-          onChange(month);
-        }
-      }}
-      value={value}
-    >
-      {monthOptions.map((month) => (
-        <SelectItem id={month.value} key={month.value} textValue={month.label}>
-          {month.label}
-        </SelectItem>
-      ))}
-    </Select>
-  );
-}
-
 type TransactionFilterCheckboxProps = {
   children: ReactNode;
   isSelected: boolean;
@@ -149,6 +111,7 @@ export type TransactionFiltersProps = {
   onApply: (values: TransactionFilterFormData) => void;
   onClear: () => void;
   onClose: () => void;
+  showMonth?: boolean;
   value: TransactionFilterState;
 };
 
@@ -161,6 +124,7 @@ export function TransactionFilters({
   onApply,
   onClear,
   onClose,
+  showMonth = true,
   value,
 }: TransactionFiltersProps) {
   const {
@@ -311,7 +275,7 @@ export function TransactionFilters({
           </fieldset>
 
           <fieldset className="grid min-w-0 gap-2.5 border-0 p-0">
-            <legend className="m-0 text-caption-strong tracking-[0.04em] text-muted uppercase">
+            <legend className="m-0 text-caption-strong tracking-label text-muted uppercase">
               Contas
             </legend>
             <FilterTree
@@ -323,10 +287,12 @@ export function TransactionFilters({
           </fieldset>
 
           <div className="grid gap-2.5">
-            <TransactionMonthSelect
-              onChange={(month) => setValue("month", month, { shouldDirty: true })}
-              value={selectedMonth}
-            />
+            {showMonth && (
+              <MonthYearFilter
+                onChange={(month) => setValue("month", toYearMonth(month), { shouldDirty: true })}
+                value={parseTransactionMonth(selectedMonth)}
+              />
+            )}
             <TransactionFilterCheckbox
               isSelected={selectedIncludePreviousBalance}
               onChange={(isSelected) =>

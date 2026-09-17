@@ -15,7 +15,7 @@ export function Card<T extends CardElement = "div">({ as, className, ...props }:
     ...props,
     "data-slot": "card",
     className: cn(
-      "group/card grid w-full min-w-0 content-start gap-3.5 rounded-[1.125rem] border border-border bg-[linear-gradient(180deg,rgb(255_255_255_/_0.78),rgb(255_253_248_/_0.92))] p-[1.375rem] shadow-[0_1px_0_color-mix(in_oklch,white_88%,transparent),0_0.75rem_2.25rem_rgb(15_23_42_/_0.04)]",
+      "group/card grid w-full min-w-0 content-start gap-3.5 rounded-[1.125rem] border border-border p-[1.375rem] shadow-[0_1px_0_color-mix(in_oklch,white_88%,transparent),0_0.75rem_2.25rem_rgb(15_23_42_/_0.04)] card-background",
       className,
     ),
   });

@@ -22,10 +22,16 @@ import { IconSlot } from "./IconSlot";
 import { Label } from "./Label";
 
 const control = tv({
-  base: "flex h-12 min-h-12 w-full min-w-0 cursor-pointer items-center gap-3 rounded-xl border bg-[linear-gradient(180deg,rgb(255_255_255_/_0.7),#fffdf8)] px-3.5 font-ui text-subtle transition-[background-color,border-color,outline-color] motion-reduce:transition-none",
+  base: "flex w-full min-w-0 cursor-pointer items-center gap-3 border font-ui text-subtle transition-[background-color,border-color,outline-color] motion-reduce:transition-none",
   variants: {
+    appearance: {
+      default:
+        "h-12 min-h-12 rounded-xl bg-[linear-gradient(180deg,rgb(255_255_255_/_0.7),#fffdf8)] px-3.5",
+      compact:
+        "h-9 min-h-9 rounded-lg !border-transparent bg-transparent px-2.5 data-hovered:bg-surface-muted data-pressed:bg-surface-strong",
+    },
     invalid: {
-      true: "border-danger focus-within:!border-danger focus-within:outline-danger focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
+      true: "!border-danger focus-within:!border-danger focus-within:outline-danger focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
       false:
         "border-border hover:border-border-strong focus-within:!border-brand focus-within:outline-brand focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
     },
@@ -113,6 +119,10 @@ export type SelectProps<T = object, M extends SelectionMode = "single"> = Omit<
   children: ReactNode;
   /** Texto exibido acima do controle. */
   label: string;
+  /** Aparência do controle, com uma opção compacta para composições em linha. */
+  appearance?: "default" | "compact";
+  /** Classes adicionais aplicadas à label do campo. */
+  labelClassName?: string;
   /** Texto auxiliar opcional exibido logo abaixo da label. */
   description?: string;
   /** Mensagem de validação exibida na área reservada abaixo do controle. */
@@ -135,11 +145,13 @@ export type SelectProps<T = object, M extends SelectionMode = "single"> = Omit<
  */
 export function Select<T = object, M extends SelectionMode = "single">({
   children,
+  appearance = "default",
   description,
   errorMessage,
   isDisabled = false,
   isInvalid = false,
   label,
+  labelClassName,
   leadingIcon,
   listBoxClassName,
   placeholder = "Selecione uma opção",
@@ -159,10 +171,13 @@ export function Select<T = object, M extends SelectionMode = "single">({
       isInvalid={hasError}
       placeholder={placeholder}
     >
-      <Label isDisabled={isDisabled}>{label}</Label>
+      <Label className={labelClassName} isDisabled={isDisabled}>
+        {label}
+      </Label>
       {description && <Description isDisabled={isDisabled}>{description}</Description>}
       <AriaButton
         className={control({
+          appearance,
           invalid: hasVisualError,
           disabled: isDisabled,
         })}
