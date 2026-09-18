@@ -3,7 +3,8 @@
   "plugins": ["react", "typescript", "oxc", "import", "jsx-a11y", "promise", "unicorn"],
   "jsPlugins": ["@shadcn/lint", "oxlint-tailwindcss"],
   "options": {
-    "typeAware": true
+    "typeAware": true,
+    "typeCheck": true
   },
   "settings": {
     "shadcn": {
@@ -23,6 +24,7 @@
     "nursery": "off"
   },
   "rules": {
+    "typescript/no-deprecated": "warn",
     "shadcn/no-restyle": [
       "error",
       {
@@ -57,7 +59,12 @@
         ]
       }
     ],
-    "shadcn/no-arbitrary-values": ["error", { "allow": ["layout"] }],
+    "shadcn/no-arbitrary-values": [
+      "error",
+      {
+        "allow": ["layout"]
+      }
+    ],
     "shadcn/no-inline-styles": "error",
     "shadcn/no-unknown-classes": "warn",
     "shadcn/require-static-classes": "error",

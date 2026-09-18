@@ -1,6 +1,6 @@
 # Consulta de transações integrada ao backend
 
-**Status:** Aceito
+**Status:** Superseded by [ADR-0008](0008-integracao-do-tanstack-query-com-o-tanstack-router.md)
 
 ## Contexto
 
@@ -20,7 +20,7 @@ O resumo não possui uma rota equivalente no backend. Portanto, retirar os dados
 - A origem `TRANSFERENCIA` será apresentada como a categoria “Transferência”. As origens `TRANSACAO_RECORRENTE` e `PARCELA` serão sinalizadas com ícone de recorrência.
 - O resumo permanecerá com estado vazio até existir um endpoint próprio. Não haverá dados demonstrativos, fallback fictício ou filtro de situação.
 - Esta etapa cobre somente leitura. Criação, edição e remoção de transações ficam para contratos e fluxos futuros, incluindo a definição explícita de CSRF para operações mutáveis.
-- Não será introduzido TanStack Query nem geração automática a partir do OpenAPI nesta etapa; o contrato manual validado mantém o padrão atual de serviços e permite evoluir o restante da integração separadamente.
+- A decisão original de não introduzir TanStack Query nesta etapa foi substituída pela ADR-0008. O contrato manual validado e o serviço de domínio continuam sendo usados, agora atrás de `queryOptions` e do cache compartilhado.
 
 ## Consequências
 

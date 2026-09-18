@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { Button } from "../../../../components/Button";
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../../../../components/Modal";
 import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
@@ -9,6 +11,7 @@ import {
   deleteTransferencia,
 } from "../../../../services/transactions/api";
 import { type RecurrenceScope } from "../../../../services/transactions/contracts";
+import { transactionsQueryKey } from "../../../../services/transactions/queries";
 import { type TransactionActionTarget } from "./transaction-actions";
 import { recurrenceScopeOptions } from "./transaction-form";
 
@@ -32,6 +35,27 @@ export function TransactionDeleteModal({
   const [scope, setScope] = useState<RecurrenceScope>("ONLY_THIS");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
+  const deleteTransferMutation = useMutation({
+    mutationFn: (id: string) => deleteTransferencia(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: transactionsQueryKey }).catch(() => undefined);
+    },
+  });
+  const deleteRecurrenceMutation = useMutation({
+    mutationFn: ({
+      dataOriginal,
+      escopo,
+      segmentoId,
+    }: {
+      dataOriginal: string;
+      escopo: RecurrenceScope;
+      segmentoId: string;
+    }) => deleteOcorrenciaRecorrente(segmentoId, dataOriginal, { escopo }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: transactionsQueryKey }).catch(() => undefined);
+    },
+  });
   const isRecurrence = target.kind === "recurrence";
   const label = target.kind === "transfer" ? "transferência" : target.entryLabel;
 
@@ -41,9 +65,13 @@ export function TransactionDeleteModal({
 
     try {
       if (target.kind === "transfer") {
-        await deleteTransferencia(target.id);
+        await deleteTransferMutation.mutateAsync(target.id);
       } else {
-        await deleteOcorrenciaRecorrente(target.segmentoId, target.dataOriginal, { escopo: scope });
+        await deleteRecurrenceMutation.mutateAsync({
+          dataOriginal: target.dataOriginal,
+          escopo: scope,
+          segmentoId: target.segmentoId,
+        });
       }
 
       await onDeleted(

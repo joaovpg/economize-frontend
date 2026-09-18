@@ -2,12 +2,14 @@ import { useState } from "react";
 import { useForm, type UseFormSetError } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../../../../components/Modal";
 import { TextField } from "../../../../components/TextField";
 import { isApiError } from "../../../../lib/api-errors";
 import { postCategoria, putCategoria } from "../../../../services/categories/api";
+import { categoriesQueryKey } from "../../../../services/categories/queries";
 import { categoryFormSchema, type CategoryFormData } from "./category-form";
 import { CategoryParentField } from "./CategoryParentField";
 
@@ -62,6 +64,20 @@ export function CategoryEditorModal({
 }: CategoryEditorModalProps) {
   const isEditing = category !== null;
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const createCategoryMutation = useMutation({
+    mutationFn: (input: Parameters<typeof postCategoria>[0]) => postCategoria(input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: categoriesQueryKey }).catch(() => undefined);
+    },
+  });
+  const editCategoryMutation = useMutation({
+    mutationFn: ({ id, input }: { id: string; input: Parameters<typeof putCategoria>[1] }) =>
+      putCategoria(id, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: categoriesQueryKey }).catch(() => undefined);
+    },
+  });
   const {
     control,
     formState: { errors, isSubmitting },
@@ -84,14 +100,17 @@ export function CategoryEditorModal({
 
     try {
       if (category) {
-        await putCategoria(category.id, {
-          ativo: category.ativo,
-          categoriaPaiId: data.categoriaPaiId,
-          nome: data.nome.trim(),
+        await editCategoryMutation.mutateAsync({
+          id: category.id,
+          input: {
+            ativo: category.ativo,
+            categoriaPaiId: data.categoriaPaiId,
+            nome: data.nome.trim(),
+          },
         });
         successMessage = "Categoria atualizada com sucesso.";
       } else {
-        await postCategoria({
+        await createCategoryMutation.mutateAsync({
           categoriaPaiId: data.categoriaPaiId,
           nome: data.nome.trim(),
         });

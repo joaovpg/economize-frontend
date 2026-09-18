@@ -133,7 +133,7 @@ export function TransactionTable({
               <tr className="grid w-full md:table-row">
                 <th
                   aria-label={`Dia ${formatTransactionDate(group.date)}`}
-                  className={`block p-0 text-left text-caption-strong text-foreground min-[48rem]:table-cell min-[48rem]:py-3 ${groupIndex > 0 ? "md:pt-6" : ""}`}
+                  className={`block p-0 text-left text-caption-strong text-foreground md:table-cell md:py-3 ${groupIndex > 0 ? "md:pt-6" : ""}`}
                   colSpan={5}
                   scope="rowgroup"
                 >
@@ -161,7 +161,7 @@ export function TransactionTable({
                     key={getItemKey(item)}
                   >
                     <td className="flex items-start justify-between gap-4 border-0 p-0 md:table-cell md:max-w-0 md:py-3 md:pr-4 md:align-top">
-                      <span className="block text-meta text-subtle uppercase min-[48rem]:hidden">
+                      <span className="block text-meta text-subtle uppercase md:hidden">
                         Descrição
                       </span>
                       <div className="min-w-0">
@@ -181,8 +181,8 @@ export function TransactionTable({
                         </div>
                       </div>
                     </td>
-                    <td className="flex items-start justify-between gap-4 border-0 p-0 text-caption text-muted md:table-cell md:py-3 md:pr-4 min-[48rem]:align-top">
-                      <span className="block text-meta text-subtle uppercase min-[48rem]:hidden">
+                    <td className="flex items-start justify-between gap-4 border-0 p-0 text-caption text-muted md:table-cell md:py-3 md:pr-4 md:align-top">
+                      <span className="block text-meta text-subtle uppercase md:hidden">
                         Categoria
                       </span>
                       <span className="max-w-[60%] text-right md:max-w-none">
@@ -190,25 +190,19 @@ export function TransactionTable({
                       </span>
                     </td>
                     <td className="flex items-start justify-between gap-4 border-0 p-0 text-caption text-muted md:table-cell md:py-3 md:pr-4 md:align-top">
-                      <span className="block text-meta text-subtle uppercase min-[48rem]:hidden">
-                        Conta
-                      </span>
+                      <span className="block text-meta text-subtle uppercase md:hidden">Conta</span>
                       <span className="max-w-[60%] text-right md:max-w-none">
                         {getAccountLabel(item, accounts)}
                       </span>
                     </td>
-                    <td className="flex items-start justify-between gap-4 border-0 p-0 text-right tabular-nums md:table-cell md:py-3 min-[48rem]:align-top">
-                      <span className="block text-meta text-subtle uppercase min-[48rem]:hidden">
-                        Valor
-                      </span>
+                    <td className="flex items-start justify-between gap-4 border-0 p-0 text-right tabular-nums md:table-cell md:py-3 md:align-top">
+                      <span className="block text-meta text-subtle uppercase md:hidden">Valor</span>
                       <strong className={`font-semibold whitespace-nowrap ${valueClassName}`}>
                         {formatSignedCurrency(item.valor)}
                       </strong>
                     </td>
                     <td className="flex items-center justify-between gap-4 border-0 p-0 md:table-cell md:py-3 md:pl-4 md:align-top">
-                      <span className="block text-meta text-subtle uppercase min-[48rem]:hidden">
-                        Ações
-                      </span>
+                      <span className="block text-meta text-subtle uppercase md:hidden">Ações</span>
                       {shouldRenderActions && actionTarget ? (
                         <div className="flex justify-end gap-1">
                           <Button
@@ -243,13 +237,13 @@ export function TransactionTable({
                   </tr>
                 );
               })}
-              <tr className="block border-t border-dashed border-border-strong min-[48rem]:table-row">
+              <tr className="block border-t border-dashed border-border-strong md:table-row">
                 <td
                   aria-label={`Saldo do dia ${formatCurrency(group.balance)}`}
-                  className="block p-0 text-right min-[48rem]:table-cell min-[48rem]:py-2.5"
+                  className="block p-0 text-right md:table-cell md:py-2.5"
                   colSpan={5}
                 >
-                  <div className="flex items-baseline justify-end gap-2 py-2.5 min-[48rem]:p-0">
+                  <div className="flex items-baseline justify-end gap-2 py-2.5 md:p-0">
                     <span className="text-meta text-subtle uppercase">Saldo do dia</span>
                     <strong className={`whitespace-nowrap tabular-nums ${balanceClassName}`}>
                       {formatCurrency(group.balance)}

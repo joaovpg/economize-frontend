@@ -1,4 +1,4 @@
-import { Switch } from "react-aria-components";
+import { SwitchButton, SwitchField } from "react-aria-components";
 
 import { PencilSimpleIcon } from "@phosphor-icons/react/dist/csr/PencilSimple";
 import { cn } from "tailwind-variants";
@@ -71,17 +71,19 @@ export function CategoryTreeNode({
           >
             <PencilSimpleIcon aria-hidden="true" />
           </Button>
-          <Switch
+          <SwitchField
             aria-label={`${node.ativo ? "Inativar" : "Ativar"} categoria ${node.nome}`}
-            className="group inline-flex min-h-9 cursor-pointer items-center rounded-lg p-1 transition-colors outline-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focus-visible:bg-surface-muted"
+            className="contents"
             isDisabled={pendingCategoryId !== null}
             isSelected={node.ativo}
             onChange={(nextActive) => onToggle(node, nextActive)}
           >
-            <span className="relative block h-5 w-9 rounded-full bg-border-strong transition-colors duration-150 ease-out group-data-selected:bg-brand motion-reduce:transition-none">
-              <span className="absolute top-0.5 left-0.5 block size-4 rounded-full bg-surface shadow-tree-node transition-transform duration-150 ease-out group-data-selected:translate-x-4 motion-reduce:transition-none" />
-            </span>
-          </Switch>
+            <SwitchButton className="group inline-flex min-h-9 cursor-pointer items-center rounded-lg p-1 transition-colors outline-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focus-visible:bg-surface-muted">
+              <span className="relative block h-5 w-9 rounded-full bg-border-strong transition-colors duration-150 ease-out group-data-selected:bg-brand motion-reduce:transition-none">
+                <span className="absolute top-0.5 left-0.5 block size-4 rounded-full bg-surface shadow-tree-node transition-transform duration-150 ease-out group-data-selected:translate-x-4 motion-reduce:transition-none" />
+              </span>
+            </SwitchButton>
+          </SwitchField>
           {isPending && <span className="sr-only">Salvando alteração</span>}
         </div>
       </div>

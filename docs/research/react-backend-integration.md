@@ -4,6 +4,8 @@
 **Escopo:** Vite, React 19, TypeScript, TanStack Router, Ky, Zod e a organização atual de `src/services`.  
 **Objetivo:** registrar recomendações aplicáveis ao Economize sem implementar a refatoração.
 
+**Status:** A recomendação de integração do TanStack Query foi implementada posteriormente pela [ADR-0008](../adr/0008-integracao-do-tanstack-query-com-o-tanstack-router.md). As observações abaixo preservam a pesquisa original; quando houver conflito, a ADR e as diretrizes atuais do frontend são a fonte de verdade.
+
 ## Resumo executivo
 
 O repositório já tem a decisão correta para a infraestrutura HTTP: um cliente Ky compartilhado em [`src/lib/api.ts`](../../src/lib/api.ts), com `VITE_API_URL`, cookies incluídos e tratamento transversal de `401`. A próxima fronteira deve ser fazer cada módulo em [`src/services/`](../../src/services/) representar um domínio, deixando rotas e componentes consumirem funções de serviço em vez de conhecerem URLs, opções do Ky ou formatos crus de resposta. Essa separação mantém o acesso a dados fora da renderização, alinhada à orientação do React para evitar usar Effects como orquestradores do fluxo de dados e às APIs de carregamento do TanStack Router ([React — You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect), [TanStack Router — Data Loading](https://tanstack.com/router/latest/docs/guide/data-loading)).
@@ -14,7 +16,7 @@ Recomendação para este projeto:
 2. mover chamadas de domínio para `src/services/<domínio>/api.ts`, com schemas e tipos em `contracts.ts` próximos da fronteira da API;
 3. validar respostas externas em runtime com Zod antes de expô-las ao restante da aplicação;
 4. manter loaders do TanStack Router para dados necessários à entrada de uma rota, usando `loaderDeps` para dependências derivadas de search params;
-5. adotar TanStack Query quando o estado de servidor passar a ser compartilhado entre rotas/componentes, exigir deduplicação, invalidação ou mutations coordenadas;
+5. adotar TanStack Query para o estado de servidor compartilhado entre rotas/componentes, com deduplicação, invalidação e mutations coordenadas;
 6. usar um contrato OpenAPI gerado somente quando o backend fornecer uma especificação estável. Nesse caso, preferir geração de tipos com `openapi-typescript` e avaliar Orval apenas se hooks/clientes gerados trouxerem benefício maior que a manutenção de um segundo padrão de acesso.
 
 ## Leitura do repositório
@@ -23,7 +25,7 @@ Recomendação para este projeto:
 - [`src/services/accounts/`](../../src/services/accounts/), [`src/services/auth/`](../../src/services/auth/) e [`src/services/categories/`](../../src/services/categories/) reservam a divisão por domínio; cada pasta separa operações em `api.ts` dos schemas e tipos em `contracts.ts`.
 - A consulta de transações já está isolada em [`src/services/transactions/`](../../src/services/transactions/), com o serviço HTTP separado dos contratos Zod e consumido pelo loader da rota. O resumo não possui rota correspondente na API e permanece sem dados demonstrativos; o login ainda chama o cliente diretamente em [`src/routes/_public/login.tsx`](../../src/routes/_public/login.tsx), que continua sendo um ponto de migração futura.
 - As diretrizes do projeto já recomendam [`src/lib/api.ts`](../../docs/agent-guidelines/frontend-architecture.md) para integrações HTTP, loaders para obter dados necessários à rota e estado compartilhado/restaurável na URL.
-- O projeto atualmente não declara `@tanstack/react-query` em [`package.json`](../../package.json). Portanto, as recomendações de Query abaixo são uma decisão futura, não uma dependência que deva ser adicionada como parte deste relatório.
+- O projeto agora declara `@tanstack/react-query` em [`package.json`](../../package.json), com `QueryClient` único no contexto do Router e query options por domínio. A pesquisa original tratava essa adoção como futura; a implementação atual está descrita na ADR-0008.
 
 ## Recomendações
 
@@ -168,7 +170,7 @@ Se TanStack Query for adotado, as query keys devem ser arrays serializáveis, ú
 
 Também é importante conhecer os defaults: queries stale podem ser refetchadas ao montar, ao focar a janela ou ao reconectar. O `staleTime` deve refletir a volatilidade de cada recurso, não ser escolhido globalmente por hábito ([TanStack Query — Important Defaults](https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults)).
 
-Para a integração Router + Query, a documentação oficial mostra passar `QueryClient` pelo contexto do Router e usar o loader para `ensureQueryData`/prefetch, evitando waterfalls e mantendo a rota declarativa ([TanStack Router — TanStack Query Integration](https://tanstack.com/router/latest/docs/integrations/query), [TanStack Query — Prefetching & Router Integration](https://tanstack.com/query/latest/docs/framework/react/guides/prefetching)). Isso seria uma etapa posterior ao primeiro movimento de retirar chamadas HTTP das telas.
+Para a integração Router + Query, a documentação oficial mostra passar `QueryClient` pelo contexto do Router e usar o loader para `ensureQueryData`/prefetch, evitando waterfalls e mantendo a rota declarativa ([TanStack Router — TanStack Query Integration](https://tanstack.com/router/latest/docs/integrations/query), [TanStack Query — Prefetching & Router Integration](https://tanstack.com/query/latest/docs/framework/react/guides/prefetching)). Esse padrão agora é usado nas rotas de resumo, transações e categorias.
 
 ## Plano de adoção recomendado
 
@@ -187,12 +189,12 @@ Para a integração Router + Query, a documentação oficial mostra passar `Quer
 - definir o erro normalizado e o formato Problem Details esperado do backend;
 - documentar quais status são esperados por operação e quais podem ser repetidos com segurança.
 
-### Fase 3 — loaders e cache
+### Fase 3 — loaders e cache (implementada)
 
 - usar loaders do Router para dados necessários à rota, passando o `signal` para os serviços;
 - manter `loaderDeps` mínimo e derivado de search params validados;
-- medir a necessidade de cache compartilhado, refetch e mutations;
-- só então introduzir TanStack Query, com `QueryClient` único, query keys por domínio e invalidação após mutation.
+- manter cache compartilhado, refetch e mutations coordenadas pelo TanStack Query;
+- usar `QueryClient` único, query keys por domínio e invalidação após mutation, conforme a ADR-0008.
 
 ### Fase 4 — contrato gerado, se houver OpenAPI
 

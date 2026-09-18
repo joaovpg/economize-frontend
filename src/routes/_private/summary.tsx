@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { FunnelIcon } from "@phosphor-icons/react/dist/csr/Funnel";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 
 import { Button } from "../../components/Button";
@@ -12,14 +13,16 @@ import {
   summarySearchSchema,
   type TransactionFilterFormData,
 } from "../../lib/transaction-filters";
-import { getContas } from "../../services/accounts/api";
-import { getCategorias } from "../../services/categories/api";
+import { type ContaResponse } from "../../services/accounts/contracts";
+import { accountsQueryOptions } from "../../services/accounts/queries";
+import { type CategoriaResponse } from "../../services/categories/contracts";
+import { categoriesQueryOptions } from "../../services/categories/queries";
 
 const summaryRoute = getRouteApi("/_private/summary");
 
 type SummaryPageProps = {
-  accounts: Awaited<ReturnType<typeof getContas>>;
-  categories: Awaited<ReturnType<typeof getCategorias>>;
+  accounts: readonly ContaResponse[];
+  categories: readonly CategoriaResponse[];
 };
 
 function SummaryPage({ accounts, categories }: SummaryPageProps) {
@@ -167,20 +170,24 @@ function SummaryPage({ accounts, categories }: SummaryPageProps) {
 
 export const Route = createFileRoute("/_private/summary")({
   validateSearch: summarySearchSchema,
-  loader: async ({ abortController }) => {
-    const [categories, accounts] = await Promise.all([
-      getCategorias({ ativo: true, signal: abortController.signal }),
-      getContas({ signal: abortController.signal }),
-    ]);
-
-    return { accounts, categories };
-  },
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.query({
+        ...categoriesQueryOptions({ ativo: true }),
+        staleTime: "static",
+      }),
+      context.queryClient.query({
+        ...accountsQueryOptions(),
+        staleTime: "static",
+      }),
+    ]),
   component: SummaryPageRoute,
   preloadStaleTime: 30_000,
 });
 
 function SummaryPageRoute() {
-  const { accounts, categories } = Route.useLoaderData();
+  const { data: categories } = useSuspenseQuery(categoriesQueryOptions({ ativo: true }));
+  const { data: accounts } = useSuspenseQuery(accountsQueryOptions());
 
   return <SummaryPage accounts={accounts} categories={categories} />;
 }

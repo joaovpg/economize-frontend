@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { TextArea } from "../../../../components/TextArea";
 import { TextField } from "../../../../components/TextField";
 import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../../../services/categories/contracts";
 import { postTransacao } from "../../../../services/transactions/api";
+import { transactionsQueryKey } from "../../../../services/transactions/queries";
 import { applyFormError, getServerFieldName } from "./form-errors";
 import {
   formatFormDate,
@@ -67,6 +69,13 @@ export function TransactionForm({
   selectedMonth,
 }: TransactionFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const createTransactionMutation = useMutation({
+    mutationFn: (input: Parameters<typeof postTransacao>[0]) => postTransacao(input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: transactionsQueryKey }).catch(() => undefined);
+    },
+  });
   const {
     control,
     formState: { errors, isDirty, isSubmitting },
@@ -105,7 +114,7 @@ export function TransactionForm({
     setSubmitError(null);
 
     try {
-      await postTransacao(toCreateTransactionRequest(data));
+      await createTransactionMutation.mutateAsync(toCreateTransactionRequest(data));
     } catch (error) {
       applyFormError(
         error,

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
 import { Checkbox } from "../../../../components/Checkbox";
@@ -12,6 +13,7 @@ import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../../../services/categories/contracts";
 import { postRecorrencia } from "../../../../services/transactions/api";
 import { type DayOfWeek } from "../../../../services/transactions/contracts";
+import { transactionsQueryKey } from "../../../../services/transactions/queries";
 import { applyFormError, getServerFieldName } from "./form-errors";
 import {
   dayOfWeekOptions,
@@ -140,6 +142,13 @@ export function RecurrenceForm({
 }: RecurrenceFormProps) {
   const initialEntryDate = getInitialEntryDate(selectedMonth);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const createRecurrenceMutation = useMutation({
+    mutationFn: (input: Parameters<typeof postRecorrencia>[0]) => postRecorrencia(input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: transactionsQueryKey }).catch(() => undefined);
+    },
+  });
   const {
     control,
     formState: { errors, isDirty, isSubmitting },
@@ -223,7 +232,7 @@ export function RecurrenceForm({
     setSubmitError(null);
 
     try {
-      await postRecorrencia(toCreateRecurrenceRequest(data));
+      await createRecurrenceMutation.mutateAsync(toCreateRecurrenceRequest(data));
     } catch (error) {
       applyFormError(
         error,

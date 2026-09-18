@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { TextArea } from "../../../../components/TextArea";
 import { TextField } from "../../../../components/TextField";
 import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../../../services/categories/contracts";
 import { postRecorrencia } from "../../../../services/transactions/api";
+import { transactionsQueryKey } from "../../../../services/transactions/queries";
 import { applyFormError, getServerFieldName } from "./form-errors";
 import {
   formatFormDate,
@@ -63,6 +65,13 @@ export function InstallmentForm({
   selectedMonth,
 }: InstallmentFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const createInstallmentMutation = useMutation({
+    mutationFn: (input: Parameters<typeof postRecorrencia>[0]) => postRecorrencia(input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: transactionsQueryKey }).catch(() => undefined);
+    },
+  });
   const {
     control,
     formState: { errors, isDirty, isSubmitting },
@@ -108,7 +117,7 @@ export function InstallmentForm({
     setSubmitError(null);
 
     try {
-      await postRecorrencia(toCreateInstallmentRequest(data));
+      await createInstallmentMutation.mutateAsync(toCreateInstallmentRequest(data));
     } catch (error) {
       applyFormError(
         error,

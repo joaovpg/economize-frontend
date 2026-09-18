@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { TextArea } from "../../../../components/TextArea";
 import { TextField } from "../../../../components/TextField";
 import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { postTransferencia, putTransferencia } from "../../../../services/transactions/api";
+import { transactionsQueryKey } from "../../../../services/transactions/queries";
 import { applyFormError, getServerFieldName } from "./form-errors";
 import {
   formatFormDate,
@@ -49,6 +51,11 @@ function getTransferField(field: string | undefined): keyof TransferFormData | n
   return validFields.find((validField) => validField === fieldName) ?? null;
 }
 
+type EditTransferMutationVariables = {
+  id: string;
+  input: Parameters<typeof putTransferencia>[1];
+};
+
 export function TransferForm({
   accounts,
   initialValues,
@@ -62,6 +69,19 @@ export function TransferForm({
 }: TransferFormProps) {
   const isEditing = transferId !== undefined;
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const createTransferMutation = useMutation({
+    mutationFn: (input: Parameters<typeof postTransferencia>[0]) => postTransferencia(input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: transactionsQueryKey }).catch(() => undefined);
+    },
+  });
+  const editTransferMutation = useMutation({
+    mutationFn: ({ id, input }: EditTransferMutationVariables) => putTransferencia(id, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: transactionsQueryKey }).catch(() => undefined);
+    },
+  });
   const {
     control,
     formState: { errors, isDirty, isSubmitting },
@@ -132,9 +152,12 @@ export function TransferForm({
 
     try {
       if (isEditing && transferId) {
-        await putTransferencia(transferId, toEditTransferRequest(data));
+        await editTransferMutation.mutateAsync({
+          id: transferId,
+          input: toEditTransferRequest(data),
+        });
       } else {
-        await postTransferencia(toCreateTransferRequest(data));
+        await createTransferMutation.mutateAsync(toCreateTransferRequest(data));
       }
     } catch (error) {
       applyFormError(

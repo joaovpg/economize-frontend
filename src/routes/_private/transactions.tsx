@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { FunnelIcon } from "@phosphor-icons/react/dist/csr/Funnel";
 import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
-import { createFileRoute, getRouteApi, useRouter } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 
 import { Button } from "../../components/Button";
 import { Card, CardBody, CardHeader } from "../../components/Card";
@@ -20,12 +21,12 @@ import {
   toYearMonth,
   type TransactionMonth,
 } from "../../lib/transaction-month";
-import { getContas } from "../../services/accounts/api";
 import { type ContaResponse } from "../../services/accounts/contracts";
-import { getCategorias } from "../../services/categories/api";
+import { accountsQueryOptions } from "../../services/accounts/queries";
 import { type CategoriaResponse } from "../../services/categories/contracts";
-import { getTransacoes } from "../../services/transactions/api";
+import { categoriesQueryOptions } from "../../services/categories/queries";
 import { type ConsultaTransacoesResponse } from "../../services/transactions/contracts";
+import { transactionsQueryOptions } from "../../services/transactions/queries";
 import { type TransactionActionTarget } from "./transactions/-components/transaction-actions";
 import { getAccountLabel, getCategoryLabel } from "./transactions/-components/transaction-labels";
 import { TransactionCreationModal } from "./transactions/-components/TransactionCreationModal";
@@ -41,16 +42,18 @@ type TransactionsPageProps = {
   data: ConsultaTransacoesResponse;
 };
 
+function getAccountIds(accountFilter: readonly string[]) {
+  return accountFilter.filter((accountId) => accountId !== allAccountsFilterValue);
+}
+
 function TransactionsPage({ accounts, categories, data }: TransactionsPageProps) {
   const search = transactionsRoute.useSearch();
   const navigate = transactionsRoute.useNavigate();
-  const router = useRouter();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isCreationOpen, setIsCreationOpen] = useState(false);
   const [editingTarget, setEditingTarget] = useState<TransactionActionTarget | null>(null);
   const [deletingTarget, setDeletingTarget] = useState<TransactionActionTarget | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [refreshError, setRefreshError] = useState<string | null>(null);
   const filterTriggerRef = useRef<HTMLButtonElement>(null);
   const wasFiltersOpenRef = useRef(false);
   const selectedMonth = parseTransactionMonth(search.month);
@@ -118,7 +121,6 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
 
   const handleOpenCreation = () => {
     setFeedback(null);
-    setRefreshError(null);
     setEditingTarget(null);
     setDeletingTarget(null);
     setIsCreationOpen(true);
@@ -129,19 +131,11 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
     setEditingTarget(null);
     setDeletingTarget(null);
 
-    try {
-      await router.invalidate({ sync: true });
-      setRefreshError(null);
-      setFeedback(message);
-    } catch {
-      setFeedback(message);
-      setRefreshError("A alteração foi salva, mas não foi possível atualizar a lista.");
-    }
+    setFeedback(message);
   };
 
   const handleEdit = (target: TransactionActionTarget) => {
     setFeedback(null);
-    setRefreshError(null);
     setIsCreationOpen(false);
     setDeletingTarget(null);
     setEditingTarget(target);
@@ -149,7 +143,6 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
 
   const handleDelete = (target: TransactionActionTarget) => {
     setFeedback(null);
-    setRefreshError(null);
     setIsCreationOpen(false);
     setEditingTarget(null);
     setDeletingTarget(target);
@@ -223,16 +216,6 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
               {feedback}
             </output>
           )}
-          {refreshError && (
-            <p
-              aria-live="assertive"
-              className="mb-4 rounded-xl border border-warning/25 bg-warning-soft px-3.5 py-3 text-body-small text-warning"
-              role="alert"
-            >
-              {refreshError}
-            </p>
-          )}
-
           <section
             className="mb-3.5 hidden gap-2.5 max-[48rem]:grid"
             aria-label="Filtros ativos"
@@ -339,33 +322,42 @@ export const Route = createFileRoute("/_private/transactions")({
     categories: search.categories,
     month: search.month,
   }),
-  loader: async ({ abortController, deps }) => {
-    const accountIds = deps.accounts.reduce<string[]>((ids, accountId) => {
-      if (accountId !== allAccountsFilterValue) {
-        ids.push(accountId);
-      }
-      return ids;
-    }, []);
-    const [data, categories, accounts] = await Promise.all([
-      getTransacoes({
-        categoriaIds: deps.categories,
-        contaIds: accountIds,
-        fim: deps.month,
-        inicio: deps.month,
-        signal: abortController.signal,
+  loader: ({ context, deps }) =>
+    Promise.all([
+      context.queryClient.query({
+        ...transactionsQueryOptions({
+          categoriaIds: deps.categories,
+          contaIds: getAccountIds(deps.accounts),
+          fim: deps.month,
+          inicio: deps.month,
+        }),
+        staleTime: "static",
       }),
-      getCategorias({ ativo: true, signal: abortController.signal }),
-      getContas({ signal: abortController.signal }),
-    ]);
-
-    return { accounts, categories, data };
-  },
+      context.queryClient.query({
+        ...categoriesQueryOptions({ ativo: true }),
+        staleTime: "static",
+      }),
+      context.queryClient.query({
+        ...accountsQueryOptions(),
+        staleTime: "static",
+      }),
+    ]),
   component: TransactionsPageRoute,
   preloadStaleTime: 30_000,
 });
 
 function TransactionsPageRoute() {
-  const { accounts, categories, data } = Route.useLoaderData();
+  const search = transactionsRoute.useSearch();
+  const { data } = useSuspenseQuery(
+    transactionsQueryOptions({
+      categoriaIds: search.categories,
+      contaIds: getAccountIds(search.accounts),
+      fim: search.month,
+      inicio: search.month,
+    }),
+  );
+  const { data: categories } = useSuspenseQuery(categoriesQueryOptions({ ativo: true }));
+  const { data: accounts } = useSuspenseQuery(accountsQueryOptions());
 
   return <TransactionsPage accounts={accounts} categories={categories} data={data} />;
 }

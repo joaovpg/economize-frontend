@@ -1,4 +1,4 @@
-import { type FormEventHandler, type ReactNode } from "react";
+import { type ComponentProps, type ReactNode } from "react";
 
 import { Button } from "../../../../components/Button";
 import { ModalBody, ModalFooter } from "../../../../components/Modal";
@@ -13,7 +13,7 @@ type TransactionFormShellProps = {
   mode: TransactionEntryMode;
   onClose: () => void;
   onModeChange: (mode: TransactionEntryMode) => void;
-  onSubmit: FormEventHandler<HTMLFormElement>;
+  onSubmit: NonNullable<ComponentProps<"form">["onSubmit"]>;
   showModeSelector?: boolean;
   submitLabel: string;
 };

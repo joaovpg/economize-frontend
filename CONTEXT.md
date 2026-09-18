@@ -32,6 +32,18 @@ _Evitar_: token no frontend, estado logado
 Requisição que cria, altera ou remove dados persistidos e, por isso, exige a proteção CSRF prevista pelo contrato da API.
 _Evitar_: requisição de escrita, comando
 
+**Estado de servidor**:
+Dados persistidos pela API do Economize que o frontend mantém com ciclo próprio de cache, atualização e invalidação; filtros na URL e estado de modal não fazem parte dele.
+_Evitar_: estado global, estado da tela
+
+**Consulta do recurso**:
+Definição tipada de como um recurso da API é identificado, carregado e mantido no cache do TanStack Query, incluindo todas as variáveis que alteram seu resultado.
+_Evitar_: fetch da tela, cache sem chave
+
+**Invalidação da consulta**:
+Operação que marca consultas afetadas por uma operação mutável como obsoletas para que o TanStack Query atualize os dados ativos.
+_Evitar_: recarregar a página, invalidar a rota inteira
+
 ## Dados exibidos
 
 **Dado demonstrativo**:
