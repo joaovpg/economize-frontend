@@ -16,6 +16,7 @@ export const transactionTypeSchema = z.enum(["RECEITA", "DESPESA"]);
 export const transactionSituationSchema = z.enum(["PLANEJADA", "EFETIVADA"]);
 export const transferSituationSchema = z.enum(["PLANEJADA", "EFETIVADA"]);
 export const recurrenceGroupTypeSchema = z.enum(["RECORRENCIA", "PARCELAMENTO"]);
+export const recurrenceScopeSchema = z.enum(["ONLY_THIS", "THIS_AND_FUTURE"]);
 export const recurrenceStatusSchema = z.enum(["ATIVO", "CONCLUIDO", "CANCELADO"]);
 export const recurrenceFrequencySchema = z.enum(["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]);
 export const dayOfWeekSchema = z.enum([
@@ -75,6 +76,27 @@ export const criarRecorrenciaRequestSchema = z.object({
   quantidadeOcorrencias: z.number().int().min(1).optional(),
   ate: z.iso.date().optional(),
   numeroPrimeiraParcela: z.number().int().min(1).optional(),
+  quantidadeTotalOriginal: z.number().int().min(1).optional(),
+});
+
+export const alterarTransferenciaRequestSchema = criarTransferenciaRequestSchema;
+
+export const alterarOcorrenciaRecorrenteRequestSchema = z.object({
+  escopo: recurrenceScopeSchema,
+  contaId: z.uuid(),
+  categoriaId: z.uuid().nullable().optional(),
+  tipo: transactionTypeSchema,
+  descricao: z.string().trim().min(1).max(255),
+  observacoes: optionalTransactionTextSchema,
+  valor: positiveMoneySchema,
+  dataFinanceira: z.iso.date(),
+  frequencia: recurrenceFrequencySchema.optional(),
+  intervalo: z.number().int().min(1).optional(),
+  diasSemana: z.array(dayOfWeekSchema).optional(),
+  diasMes: z.array(z.number().int().min(1).max(31)).optional(),
+  quantidadeOcorrencias: z.number().int().min(1).optional(),
+  ate: z.iso.date().optional(),
+  semTermino: z.boolean().optional(),
   quantidadeTotalOriginal: z.number().int().min(1).optional(),
 });
 
@@ -150,6 +172,28 @@ export const recorrenciaResponseSchema = z.looseObject({
   politicaDataOcorrencia: recurrenceDatePolicySchema,
 });
 
+export const recorrenciaOperacaoResponseSchema = z.looseObject({
+  id: z.uuid(),
+  grupoId: z.uuid(),
+  segmentoId: z.uuid(),
+  tipoGrupo: recurrenceGroupTypeSchema,
+  status: recurrenceStatusSchema,
+  tipo: transactionTypeSchema,
+  situacao: transactionSituationSchema,
+  descricao: z.string(),
+  observacoes: z.string().nullable(),
+  valor: z.number(),
+  dataFinanceira: z.iso.date(),
+  efetivadoEm: z.iso.datetime().nullable(),
+  contaId: z.uuid(),
+  categoriaId: z.uuid().nullable(),
+  dataOriginalRecorrencia: z.iso.date(),
+  numeroParcela: z.number().int().nullable(),
+  rrule: z.string(),
+  inicioRecorrencia: z.iso.date(),
+  politicaDataOcorrencia: recurrenceDatePolicySchema,
+});
+
 export const getTransacoesQuerySchema = z.object({
   inicio: yearMonthSchema,
   fim: yearMonthSchema,
@@ -163,10 +207,16 @@ export type DayOfWeek = z.infer<typeof dayOfWeekSchema>;
 export type CriarTransacaoRequest = z.infer<typeof criarTransacaoRequestSchema>;
 export type CriarTransferenciaRequest = z.infer<typeof criarTransferenciaRequestSchema>;
 export type CriarRecorrenciaRequest = z.infer<typeof criarRecorrenciaRequestSchema>;
+export type AlterarTransferenciaRequest = z.infer<typeof alterarTransferenciaRequestSchema>;
+export type AlterarOcorrenciaRecorrenteRequest = z.infer<
+  typeof alterarOcorrenciaRecorrenteRequestSchema
+>;
 export type RecurrenceFrequency = z.infer<typeof recurrenceFrequencySchema>;
+export type RecurrenceScope = z.infer<typeof recurrenceScopeSchema>;
 export type TransacaoResponse = z.infer<typeof transacaoResponseSchema>;
 export type TransferenciaResponse = z.infer<typeof transferenciaResponseSchema>;
 export type RecorrenciaResponse = z.infer<typeof recorrenciaResponseSchema>;
+export type RecorrenciaOperacaoResponse = z.infer<typeof recorrenciaOperacaoResponseSchema>;
 export type TransactionSituation = z.infer<typeof transactionSituationSchema>;
 export type TransactionType = z.infer<typeof transactionTypeSchema>;
 export type GetTransacoesOptions = ApiRequestOptions & {
@@ -174,4 +224,8 @@ export type GetTransacoesOptions = ApiRequestOptions & {
   contaIds?: readonly string[];
   fim: string;
   inicio: string;
+};
+
+export type DeleteRecorrenciaOptions = ApiRequestOptions & {
+  escopo?: RecurrenceScope;
 };

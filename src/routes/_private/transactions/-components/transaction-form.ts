@@ -10,11 +10,14 @@ import {
   recurrenceFrequencySchema,
   transactionSituationSchema,
   transactionTypeSchema,
+  type AlterarOcorrenciaRecorrenteRequest,
+  type AlterarTransferenciaRequest,
   type CriarRecorrenciaRequest,
   type CriarTransacaoRequest,
   type CriarTransferenciaRequest,
   type DayOfWeek,
   type RecurrenceFrequency,
+  type RecurrenceScope,
   type TransactionSituation,
   type TransactionType,
 } from "../../../../services/transactions/contracts";
@@ -83,6 +86,23 @@ export const recurrenceEndOptions = [
   { label: "Após uma quantidade", value: "count" },
   { label: "Em uma data", value: "until" },
 ] as const;
+
+export const recurrenceScopeOptions = [
+  {
+    description: "Altera somente o lançamento escolhido.",
+    label: "Somente esta ocorrência",
+    value: "ONLY_THIS",
+  },
+  {
+    description: "Altera este lançamento e os próximos do mesmo segmento.",
+    label: "Esta e as futuras",
+    value: "THIS_AND_FUTURE",
+  },
+] satisfies readonly {
+  description: string;
+  label: string;
+  value: RecurrenceScope;
+}[];
 
 type RecurrenceEndType = (typeof recurrenceEndOptions)[number]["value"];
 
@@ -315,6 +335,14 @@ export const recurrenceFormSchema = z
 
 export type RecurrenceFormData = z.infer<typeof recurrenceFormSchema>;
 
+export const recurrenceOccurrenceFormSchema = z.object({
+  ...financialFields,
+  contaId: uuidInputSchema("Selecione uma conta."),
+  dataFinanceira: isoDateSchema,
+});
+
+export type RecurrenceOccurrenceFormData = z.infer<typeof recurrenceOccurrenceFormSchema>;
+
 export const installmentFormSchema = z
   .object({
     ...financialFields,
@@ -469,6 +497,21 @@ export function toCreateTransferRequest(data: TransferFormData): CriarTransferen
     observacoes: normalizeOptionalText(data.observacoes),
     situacao: data.situacao,
     valor: parseValidatedMoney(data.valor),
+  };
+}
+
+export function toEditTransferRequest(data: TransferFormData): AlterarTransferenciaRequest {
+  return toCreateTransferRequest(data);
+}
+
+export function toEditRecurrenceOccurrenceRequest(
+  data: RecurrenceOccurrenceFormData,
+  escopo: RecurrenceScope,
+): AlterarOcorrenciaRecorrenteRequest {
+  return {
+    ...buildSharedRecurrenceFields(data),
+    dataFinanceira: data.dataFinanceira,
+    escopo,
   };
 }
 

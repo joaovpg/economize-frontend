@@ -26,8 +26,11 @@ import { getCategorias } from "../../services/categories/api";
 import { type CategoriaResponse } from "../../services/categories/contracts";
 import { getTransacoes } from "../../services/transactions/api";
 import { type ConsultaTransacoesResponse } from "../../services/transactions/contracts";
+import { type TransactionActionTarget } from "./transactions/-components/transaction-actions";
 import { getAccountLabel, getCategoryLabel } from "./transactions/-components/transaction-labels";
 import { TransactionCreationModal } from "./transactions/-components/TransactionCreationModal";
+import { TransactionDeleteModal } from "./transactions/-components/TransactionDeleteModal";
+import { TransactionEditModal } from "./transactions/-components/TransactionEditModal";
 import { TransactionTable } from "./transactions/-components/TransactionTable";
 
 const transactionsRoute = getRouteApi("/_private/transactions");
@@ -44,6 +47,8 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
   const router = useRouter();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isCreationOpen, setIsCreationOpen] = useState(false);
+  const [editingTarget, setEditingTarget] = useState<TransactionActionTarget | null>(null);
+  const [deletingTarget, setDeletingTarget] = useState<TransactionActionTarget | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [refreshError, setRefreshError] = useState<string | null>(null);
   const filterTriggerRef = useRef<HTMLButtonElement>(null);
@@ -114,11 +119,15 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
   const handleOpenCreation = () => {
     setFeedback(null);
     setRefreshError(null);
+    setEditingTarget(null);
+    setDeletingTarget(null);
     setIsCreationOpen(true);
   };
 
   const handleSaved = async (message: string) => {
     setIsCreationOpen(false);
+    setEditingTarget(null);
+    setDeletingTarget(null);
 
     try {
       await router.invalidate({ sync: true });
@@ -128,6 +137,22 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
       setFeedback(message);
       setRefreshError("A alteração foi salva, mas não foi possível atualizar a lista.");
     }
+  };
+
+  const handleEdit = (target: TransactionActionTarget) => {
+    setFeedback(null);
+    setRefreshError(null);
+    setIsCreationOpen(false);
+    setDeletingTarget(null);
+    setEditingTarget(target);
+  };
+
+  const handleDelete = (target: TransactionActionTarget) => {
+    setFeedback(null);
+    setRefreshError(null);
+    setIsCreationOpen(false);
+    setEditingTarget(null);
+    setDeletingTarget(target);
   };
 
   return (
@@ -264,6 +289,8 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
                   accounts={accounts}
                   categories={categories}
                   items={visibleItems}
+                  onDelete={handleDelete}
+                  onEdit={handleEdit}
                   openingBalance={data.saldoAbertura}
                 />
               ) : (
@@ -282,6 +309,23 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
           onClose={() => setIsCreationOpen(false)}
           onSaved={handleSaved}
           selectedMonth={selectedMonth}
+        />
+      )}
+      {editingTarget && (
+        <TransactionEditModal
+          accounts={accounts}
+          categories={categories}
+          onClose={() => setEditingTarget(null)}
+          onSaved={handleSaved}
+          selectedMonth={selectedMonth}
+          target={editingTarget}
+        />
+      )}
+      {deletingTarget && (
+        <TransactionDeleteModal
+          onClose={() => setDeletingTarget(null)}
+          onDeleted={handleSaved}
+          target={deletingTarget}
         />
       )}
     </section>

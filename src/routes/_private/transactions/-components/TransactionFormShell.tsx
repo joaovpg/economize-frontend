@@ -14,6 +14,7 @@ type TransactionFormShellProps = {
   onClose: () => void;
   onModeChange: (mode: TransactionEntryMode) => void;
   onSubmit: FormEventHandler<HTMLFormElement>;
+  showModeSelector?: boolean;
   submitLabel: string;
 };
 
@@ -26,6 +27,7 @@ export function TransactionFormShell({
   onClose,
   onModeChange,
   onSubmit,
+  showModeSelector = true,
   submitLabel,
 }: TransactionFormShellProps) {
   const selectedMode = transactionEntryModeOptions.find((option) => option.value === mode);
@@ -33,29 +35,31 @@ export function TransactionFormShell({
   return (
     <form className="contents" id={formId} noValidate onSubmit={onSubmit}>
       <ModalBody>
-        <div className="grid gap-1.5">
-          <Select
-            isDisabled={isDisabled || isSubmitting}
-            label="Tipo de movimentação"
-            onChange={(nextValue) => {
-              const nextMode = transactionEntryModeOptions.find(
-                (option) => option.value === String(nextValue),
-              )?.value;
+        {showModeSelector && (
+          <div className="grid gap-1.5">
+            <Select
+              isDisabled={isDisabled || isSubmitting}
+              label="Tipo de movimentação"
+              onChange={(nextValue) => {
+                const nextMode = transactionEntryModeOptions.find(
+                  (option) => option.value === String(nextValue),
+                )?.value;
 
-              if (nextMode) {
-                onModeChange(nextMode);
-              }
-            }}
-            value={mode}
-          >
-            {transactionEntryModeOptions.map((option) => (
-              <SelectItem id={option.value} key={option.value} textValue={option.label}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </Select>
-          <p className="m-0 text-caption text-muted">{selectedMode?.description}</p>
-        </div>
+                if (nextMode) {
+                  onModeChange(nextMode);
+                }
+              }}
+              value={mode}
+            >
+              {transactionEntryModeOptions.map((option) => (
+                <SelectItem id={option.value} key={option.value} textValue={option.label}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </Select>
+            <p className="m-0 text-caption text-muted">{selectedMode?.description}</p>
+          </div>
+        )}
 
         {children}
       </ModalBody>

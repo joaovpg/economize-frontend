@@ -1,17 +1,23 @@
 import { useMemo } from "react";
 
+import { PencilSimpleIcon } from "@phosphor-icons/react/dist/csr/PencilSimple";
 import { RepeatIcon } from "@phosphor-icons/react/dist/csr/Repeat";
+import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
 
+import { Button } from "../../../../components/Button";
 import { formatCurrency, formatSignedCurrency } from "../../../../lib/formatters";
 import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../../../services/categories/contracts";
 import { type ConsultaTransacaoItem } from "../../../../services/transactions/contracts";
+import { getTransactionActionTarget, type TransactionActionTarget } from "./transaction-actions";
 import { getAccountLabel, getCategoryLabel } from "./transaction-labels";
 
 type TransactionTableProps = {
   accounts: readonly ContaResponse[];
   categories: readonly CategoriaResponse[];
   items: readonly ConsultaTransacaoItem[];
+  onDelete: (target: TransactionActionTarget) => void;
+  onEdit: (target: TransactionActionTarget) => void;
   openingBalance: number;
 };
 
@@ -71,12 +77,15 @@ export function TransactionTable({
   accounts,
   categories,
   items,
+  onDelete,
+  onEdit,
   openingBalance,
 }: TransactionTableProps) {
   const dayGroups = useMemo(
     () => groupTransactionsByDay(items, openingBalance),
     [items, openingBalance],
   );
+  const renderedActionKeys = new Set<string>();
 
   return (
     <div className="min-w-0 overflow-hidden">
@@ -108,6 +117,12 @@ export function TransactionTable({
             >
               Valor
             </th>
+            <th
+              className="pb-3 pl-4 text-right text-caption-strong tracking-label text-muted uppercase"
+              scope="col"
+            >
+              Ações
+            </th>
           </tr>
         </thead>
         {dayGroups.map((group, groupIndex) => {
@@ -119,7 +134,7 @@ export function TransactionTable({
                 <th
                   aria-label={`Dia ${formatTransactionDate(group.date)}`}
                   className={`block p-0 text-left text-caption-strong text-foreground min-[48rem]:table-cell min-[48rem]:py-3 ${groupIndex > 0 ? "md:pt-6" : ""}`}
-                  colSpan={4}
+                  colSpan={5}
                   scope="rowgroup"
                 >
                   <div
@@ -132,6 +147,13 @@ export function TransactionTable({
               {group.items.map((item, itemIndex) => {
                 const recurring = isRecurringItem(item);
                 const valueClassName = item.valor >= 0 ? "text-success" : "text-danger";
+                const actionTarget = getTransactionActionTarget(item);
+                const shouldRenderActions =
+                  actionTarget !== null && !renderedActionKeys.has(actionTarget.key);
+
+                if (actionTarget) {
+                  renderedActionKeys.add(actionTarget.key);
+                }
 
                 return (
                   <tr
@@ -183,6 +205,41 @@ export function TransactionTable({
                         {formatSignedCurrency(item.valor)}
                       </strong>
                     </td>
+                    <td className="flex items-center justify-between gap-4 border-0 p-0 md:table-cell md:py-3 md:pl-4 md:align-top">
+                      <span className="block text-meta text-subtle uppercase min-[48rem]:hidden">
+                        Ações
+                      </span>
+                      {shouldRenderActions && actionTarget ? (
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            aria-label={`Editar ${
+                              actionTarget.kind === "transfer"
+                                ? "transferência"
+                                : actionTarget.entryLabel
+                            }`}
+                            isIconOnly
+                            onPress={() => onEdit(actionTarget)}
+                            size="sm"
+                            variant="ghost"
+                          >
+                            <PencilSimpleIcon aria-hidden="true" />
+                          </Button>
+                          <Button
+                            aria-label={`Excluir ${
+                              actionTarget.kind === "transfer"
+                                ? "transferência"
+                                : actionTarget.entryLabel
+                            }`}
+                            isIconOnly
+                            onPress={() => onDelete(actionTarget)}
+                            size="sm"
+                            variant="danger"
+                          >
+                            <TrashIcon aria-hidden="true" />
+                          </Button>
+                        </div>
+                      ) : null}
+                    </td>
                   </tr>
                 );
               })}
@@ -190,7 +247,7 @@ export function TransactionTable({
                 <td
                   aria-label={`Saldo do dia ${formatCurrency(group.balance)}`}
                   className="block p-0 text-right min-[48rem]:table-cell min-[48rem]:py-2.5"
-                  colSpan={4}
+                  colSpan={5}
                 >
                   <div className="flex items-baseline justify-end gap-2 py-2.5 min-[48rem]:p-0">
                     <span className="text-meta text-subtle uppercase">Saldo do dia</span>

@@ -16,6 +16,7 @@ type AccountSelectProps = {
   description?: string;
   errorMessage?: string;
   excludedAccountId?: string;
+  includeSelectedInactive?: boolean;
   isDisabled?: boolean;
   label: string;
   name?: string;
@@ -30,6 +31,7 @@ export function AccountSelect({
   description,
   errorMessage,
   excludedAccountId,
+  includeSelectedInactive = false,
   isDisabled = false,
   label,
   name,
@@ -39,7 +41,7 @@ export function AccountSelect({
 }: AccountSelectProps) {
   const options = accounts.filter(
     (account) =>
-      account.ativo &&
+      (account.ativo || (includeSelectedInactive && account.id === value)) &&
       account.id !== excludedAccountId &&
       (currency === undefined || account.moeda === currency),
   );
@@ -67,7 +69,10 @@ export function AccountSelect({
           >
             <span className="flex min-w-0 items-center justify-between gap-3">
               <span className="truncate">{account.nome}</span>
-              <span className="shrink-0 text-caption text-subtle">{account.moeda}</span>
+              <span className="shrink-0 text-caption text-subtle">
+                {account.moeda}
+                {!account.ativo && " · inativa"}
+              </span>
             </span>
           </SelectItem>
         ))
@@ -83,6 +88,7 @@ export function AccountSelect({
 type CategorySelectProps = {
   categories: readonly CategoriaResponse[];
   errorMessage?: string;
+  includeSelectedInactive?: boolean;
   isDisabled?: boolean;
   label?: string;
   name?: string;
@@ -94,6 +100,7 @@ type CategorySelectProps = {
 export function CategorySelect({
   categories,
   errorMessage,
+  includeSelectedInactive = false,
   isDisabled = false,
   label = "Categoria",
   name,
@@ -101,7 +108,9 @@ export function CategorySelect({
   onChange,
   value,
 }: CategorySelectProps) {
-  const activeCategories = categories.filter((category) => category.ativo);
+  const activeCategories = categories.filter(
+    (category) => category.ativo || (includeSelectedInactive && category.id === value),
+  );
 
   return (
     <Select
@@ -122,8 +131,13 @@ export function CategorySelect({
         Sem categoria
       </SelectItem>
       {activeCategories.map((category) => (
-        <SelectItem id={category.id} key={category.id} textValue={category.nome}>
+        <SelectItem
+          id={category.id}
+          key={category.id}
+          textValue={`${category.nome}${category.ativo ? "" : " (inativa)"}`}
+        >
           {category.nome}
+          {!category.ativo && " · inativa"}
         </SelectItem>
       ))}
     </Select>

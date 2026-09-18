@@ -6,13 +6,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { TextArea } from "../../../../components/TextArea";
 import { TextField } from "../../../../components/TextField";
 import { type ContaResponse } from "../../../../services/accounts/contracts";
-import { postTransferencia } from "../../../../services/transactions/api";
+import { postTransferencia, putTransferencia } from "../../../../services/transactions/api";
 import { applyFormError, getServerFieldName } from "./form-errors";
 import {
   formatFormDate,
   formatMoneyForSummary,
   getInitialEntryDate,
   isValidFormDate,
+  toEditTransferRequest,
   toCreateTransferRequest,
   transferFormSchema,
   type TransactionEntryMode,
@@ -23,12 +24,14 @@ import { TransactionFormShell } from "./TransactionFormShell";
 
 type TransferFormProps = {
   accounts: readonly ContaResponse[];
+  initialValues?: TransferFormData;
   mode: TransactionEntryMode;
   onClose: () => void;
   onFormStateChange: (state: { isDirty: boolean; isSubmitting: boolean }) => void;
   onModeChange: (mode: TransactionEntryMode) => void;
   onSaved: (message: string) => Promise<void>;
   selectedMonth: Parameters<typeof getInitialEntryDate>[0];
+  transferId?: string;
 };
 
 function getTransferField(field: string | undefined): keyof TransferFormData | null {
@@ -48,13 +51,16 @@ function getTransferField(field: string | undefined): keyof TransferFormData | n
 
 export function TransferForm({
   accounts,
+  initialValues,
   mode,
   onClose,
   onFormStateChange,
   onModeChange,
   onSaved,
   selectedMonth,
+  transferId,
 }: TransferFormProps) {
+  const isEditing = transferId !== undefined;
   const [submitError, setSubmitError] = useState<string | null>(null);
   const {
     control,
@@ -64,7 +70,7 @@ export function TransferForm({
     setError,
     setValue,
   } = useForm<TransferFormData>({
-    defaultValues: {
+    defaultValues: initialValues ?? {
       contaDestinoId: "",
       contaOrigemId: "",
       dataFinanceira: getInitialEntryDate(selectedMonth),
@@ -125,23 +131,31 @@ export function TransferForm({
     }
 
     try {
-      await postTransferencia(toCreateTransferRequest(data));
+      if (isEditing && transferId) {
+        await putTransferencia(transferId, toEditTransferRequest(data));
+      } else {
+        await postTransferencia(toCreateTransferRequest(data));
+      }
     } catch (error) {
       applyFormError(
         error,
         setError,
         getTransferField,
         setSubmitError,
-        "Não foi possível cadastrar a transferência. Tente novamente.",
+        isEditing
+          ? "Não foi possível atualizar a transferência. Tente novamente."
+          : "Não foi possível cadastrar a transferência. Tente novamente.",
       );
       return;
     }
 
-    await onSaved("Transferência cadastrada com sucesso.");
+    await onSaved(
+      isEditing ? "Transferência atualizada com sucesso." : "Transferência cadastrada com sucesso.",
+    );
   };
 
   const activeAccounts = accounts.filter((account) => account.ativo);
-  const noActiveAccounts = activeAccounts.length < 2;
+  const noActiveAccounts = !isEditing && activeAccounts.length < 2;
   const summaryOrigin = originAccount?.nome ?? "origem não selecionada";
   const summaryDestination =
     accounts.find((account) => account.id === destinationAccountId)?.nome ??
@@ -151,14 +165,15 @@ export function TransferForm({
 
   return (
     <TransactionFormShell
-      formId="transfer-creation-form"
+      formId={isEditing ? "transfer-edit-form" : "transfer-creation-form"}
       isDisabled={noActiveAccounts}
       isSubmitting={isSubmitting}
       mode={mode}
       onClose={onClose}
       onModeChange={onModeChange}
       onSubmit={handleSubmit(handleFormSubmit)}
-      submitLabel="Cadastrar transferência"
+      showModeSelector={!isEditing}
+      submitLabel={isEditing ? "Salvar transferência" : "Cadastrar transferência"}
     >
       {noActiveAccounts && (
         <output
@@ -186,6 +201,7 @@ export function TransferForm({
               <AccountSelect
                 accounts={accounts}
                 errorMessage={errors.contaOrigemId?.message}
+                includeSelectedInactive={isEditing}
                 isDisabled={isSubmitting}
                 label="Conta de origem"
                 name={field.name}
@@ -209,6 +225,7 @@ export function TransferForm({
                 }
                 errorMessage={errors.contaDestinoId?.message}
                 excludedAccountId={originAccountId}
+                includeSelectedInactive={isEditing}
                 isDisabled={isSubmitting}
                 label="Conta de destino"
                 name={field.name}
