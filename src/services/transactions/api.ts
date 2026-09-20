@@ -2,10 +2,12 @@ import { z } from "zod";
 
 import { api, parseApiResponse, type ApiRequestOptions } from "../../lib/api";
 import {
+  alterarTransacaoRequestSchema,
   consultaTransacoesResponseSchema,
   criarTransacaoRequestSchema,
   getTransacoesQuerySchema,
   transacaoResponseSchema,
+  type AlterarTransacaoRequest,
   type CriarTransacaoRequest,
   type GetTransacoesOptions,
 } from "./contracts";
@@ -15,6 +17,20 @@ export async function postTransacao(input: CriarTransacaoRequest, options: ApiRe
 
   return parseApiResponse(
     api.post("transacoes", { json: request, signal: options.signal }),
+    transacaoResponseSchema,
+  );
+}
+
+export async function putTransacao(
+  id: string,
+  input: AlterarTransacaoRequest,
+  options: ApiRequestOptions = {},
+) {
+  const transactionId = z.uuid().parse(id);
+  const request = alterarTransacaoRequestSchema.parse(input);
+
+  return parseApiResponse(
+    api.put(`transacoes/${transactionId}`, { json: request, signal: options.signal }),
     transacaoResponseSchema,
   );
 }

@@ -200,24 +200,29 @@ export function TransactionTable({
                             Ações
                           </span>
                           <div className="flex justify-end gap-1">
-                            <Button
-                              aria-label={`Editar transação`}
-                              isIconOnly
-                              onPress={() => onEdit(item)}
-                              size="sm"
-                              variant="ghost"
-                            >
-                              <PencilSimpleIcon aria-hidden="true" />
-                            </Button>
-                            <Button
-                              aria-label={`Excluir transação`}
-                              isIconOnly
-                              onPress={() => onDelete(item)}
-                              size="sm"
-                              variant="danger"
-                            >
-                              <TrashIcon aria-hidden="true" />
-                            </Button>
+                            {shouldRenderActions && (
+                              <>
+                                <Button
+                                  aria-label="Editar transação"
+                                  isIconOnly
+                                  onPress={() => onEdit(item)}
+                                  size="sm"
+                                  variant="ghost"
+                                >
+                                  <PencilSimpleIcon aria-hidden="true" />
+                                </Button>
+
+                                <Button
+                                  aria-label={`Excluir transação`}
+                                  isIconOnly
+                                  onPress={() => onDelete(item)}
+                                  size="sm"
+                                  variant="danger"
+                                >
+                                  <TrashIcon aria-hidden="true" />
+                                </Button>
+                              </>
+                            )}
                           </div>
                         </>
                       )}

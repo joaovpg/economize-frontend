@@ -1,8 +1,7 @@
 import { Button } from "../../../../components/Button";
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../../../../components/Modal";
-import { getEntryModeLabel, type TransactionEntryMode } from "./transaction-form";
 
-export type DiscardAction = { kind: "close" } | { kind: "mode"; mode: TransactionEntryMode } | null;
+export type DiscardAction = { kind: "close" } | null;
 
 type DiscardChangesModalProps = {
   action: DiscardAction;
@@ -11,10 +10,7 @@ type DiscardChangesModalProps = {
 };
 
 export function DiscardChangesModal({ action, onCancel, onConfirm }: DiscardChangesModalProps) {
-  const description =
-    action?.kind === "mode"
-      ? `Trocar para ${getEntryModeLabel(action.mode).toLocaleLowerCase("pt-BR")} apagará os dados preenchidos.`
-      : "Fechar agora apagará os dados preenchidos.";
+  const description = "Fechar agora apagará os dados preenchidos.";
 
   return (
     <Modal

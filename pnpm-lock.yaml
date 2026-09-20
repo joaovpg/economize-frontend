@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@hookform/lenses':
+        specifier: ^0.10.0
+        version: 0.10.0(react-hook-form@7.85.0(react@19.2.8))(react@19.2.8)
       '@hookform/resolvers':
         specifier: ^5.7.1
         version: 5.7.1(react-hook-form@7.85.0(react@19.2.8))(zod@4.4.3)
@@ -211,6 +214,13 @@ packages:
   '@eslint/plugin-kit@0.7.3':
     resolution: {integrity: sha512-IkO+/KEUvwbVpiURZg+P7zF74z5Jxe0UgJxVni+RtoHQ6IZieXaO02kmadomap/q+l6bc/jdPGGqTjhuZnuz1Q==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
+
+  '@hookform/lenses@0.10.0':
+    resolution: {integrity: sha512-7kctnV90o5kioghu9Lzae/x37kB+7cmLpblJmxNd1zsgSVDAqJAG7YOfhzZtDwGViq7Cf218XvNthK8c3xYPjQ==}
+    engines: {bun: '>=1.2'}
+    peerDependencies:
+      react: ^16.8.0 || ^17 || ^18 || ^19
+      react-hook-form: ^7.55.0
 
   '@hookform/resolvers@5.7.1':
     resolution: {integrity: sha512-8wS/P4UDr5sQDe4nFaV51TVyfDPrWgNIXweqG0Bs9Z5LSuzKLb+RQNPvkN2oHM5SRrJyWrVH/F+LOUcFjUyvwQ==}
@@ -2336,6 +2346,11 @@ snapshots:
     dependencies:
       '@eslint/core': 1.2.1
       levn: 0.4.1
+
+  '@hookform/lenses@0.10.0(react-hook-form@7.85.0(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      react: 19.2.8
+      react-hook-form: 7.85.0(react@19.2.8)
 
   '@hookform/resolvers@5.7.1(react-hook-form@7.85.0(react@19.2.8))(zod@4.4.3)':
     dependencies:

@@ -13,6 +13,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hookform/lenses": "^0.10.0",
     "@hookform/resolvers": "^5.7.1",
     "@js-temporal/polyfill": "^0.5.1",
     "@phosphor-icons/react": "^2.1.10",

@@ -11,58 +11,21 @@ import {
   type DayOfWeek,
   type RecurrenceFrequency,
   type RecurrenceScope,
-  dayOfWeekSchema,
-  recurrenceFrequencySchema,
 } from "../../../../services/recurrences/contracts";
-import { type CriarTransacaoRequest } from "../../../../services/transactions/contracts";
 import {
-  transactionSituationSchema,
-  transactionTypeSchema,
-  type TransactionSituation,
-  type TransactionType,
-} from "../../../../services/transactions/shared";
+  type AlterarTransacaoRequest,
+  parseMoneyInput,
+  type CriarTransacaoRequest,
+  type FormularioEdicaoOperacaoFinanceira,
+  type FormularioOperacaoFinanceira,
+} from "../../../../services/transactions/contracts";
+import { type TransactionType } from "../../../../services/transactions/shared";
 import {
   type AlterarTransferenciaRequest,
   type CriarTransferenciaRequest,
 } from "../../../../services/transfers/contracts";
 
 const transactionTimeZone = "America/Sao_Paulo";
-
-export const transactionEntryModeSchema = z.enum([
-  "transaction",
-  "transfer",
-  "recurrence",
-  "installment",
-]);
-
-export type TransactionEntryMode = z.infer<typeof transactionEntryModeSchema>;
-
-export const transactionEntryModeOptions = [
-  {
-    description: "Uma receita ou despesa única.",
-    label: "Transação",
-    value: "transaction",
-  },
-  {
-    description: "Movimente valores entre duas contas.",
-    label: "Transferência",
-    value: "transfer",
-  },
-  {
-    description: "Repita o mesmo movimento ao longo do tempo.",
-    label: "Recorrência",
-    value: "recurrence",
-  },
-  {
-    description: "Divida uma compra em parcelas numeradas.",
-    label: "Parcelamento",
-    value: "installment",
-  },
-] satisfies readonly {
-  description: string;
-  label: string;
-  value: TransactionEntryMode;
-}[];
 
 export const dayOfWeekOptions = [
   { label: "Segunda-feira", shortLabel: "Seg", value: "MONDAY" },
@@ -108,266 +71,9 @@ export const recurrenceScopeOptions = [
   value: RecurrenceScope;
 }[];
 
-type RecurrenceEndType = (typeof recurrenceEndOptions)[number]["value"];
-
-const isoDateSchema = z
-  .string()
-  .min(1, "Informe uma data.")
-  .refine((value) => z.iso.date().safeParse(value).success, "Informe uma data válida.");
-
 export function isValidFormDate(value: string) {
   return z.iso.date().safeParse(value).success;
 }
-
-const positiveIntegerInputSchema = z
-  .string()
-  .trim()
-  .min(1, "Informe um número.")
-  .regex(/^\d+$/, "Informe um número inteiro positivo.")
-  .refine(
-    (value) => Number(value) > 0 && Number(value) <= 2_147_483_647,
-    "Informe um número válido.",
-  );
-
-function normalizeMoneyInput(value: string) {
-  const compactValue = value.trim().replace(/\s/g, "");
-
-  if (compactValue.includes(",") && compactValue.includes(".")) {
-    return compactValue.lastIndexOf(",") > compactValue.lastIndexOf(".")
-      ? compactValue.replace(/\./g, "").replace(",", ".")
-      : compactValue.replace(/,/g, "");
-  }
-
-  return compactValue.replace(",", ".");
-}
-
-export function parseMoneyInput(value: string): number | null {
-  const normalizedValue = normalizeMoneyInput(value);
-
-  if (!/^\d+(\.\d{1,4})?$/.test(normalizedValue)) {
-    return null;
-  }
-
-  const numericValue = Number(normalizedValue);
-
-  return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : null;
-}
-
-const moneyInputSchema = z
-  .string()
-  .trim()
-  .min(1, "Informe o valor.")
-  .refine(
-    (value) => parseMoneyInput(value) !== null,
-    "Informe um valor positivo com até quatro casas decimais.",
-  );
-
-const uuidInputSchema = (message: string) =>
-  z
-    .string()
-    .min(1, message)
-    .refine((value) => z.uuid().safeParse(value).success, "Selecione uma opção válida.");
-
-const optionalCategorySchema = z.uuid().nullable();
-const descriptionSchema = z
-  .string()
-  .trim()
-  .min(1, "Informe a descrição.")
-  .max(255, "Use no máximo 255 caracteres.");
-const observationsSchema = z.string().max(2000, "Use no máximo 2.000 caracteres.");
-
-const dateEndSchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("none") }),
-  z.object({ kind: z.literal("count"), value: positiveIntegerInputSchema }),
-  z.object({ kind: z.literal("until"), value: isoDateSchema }),
-]);
-
-function isFutureDate(value: string) {
-  return value > getCurrentTransactionDate();
-}
-
-function addEffectiveDateIssue(
-  data: { dataFinanceira: string; situacao: TransactionSituation },
-  context: z.RefinementCtx,
-) {
-  if (data.situacao === "EFETIVADA" && isFutureDate(data.dataFinanceira)) {
-    context.addIssue({
-      code: "custom",
-      message: "Uma transação efetivada não pode ter data futura.",
-      path: ["dataFinanceira"],
-    });
-  }
-}
-
-const financialFields = {
-  categoriaId: optionalCategorySchema,
-  descricao: descriptionSchema,
-  observacoes: observationsSchema,
-  tipo: transactionTypeSchema,
-  valor: moneyInputSchema,
-};
-export const transactionBaseFormSchema = z.object({});
-
-export const transactionFormSchema = z
-  .object({
-    ...financialFields,
-    contaId: uuidInputSchema("Selecione uma conta."),
-    dataFinanceira: isoDateSchema,
-    situacao: transactionSituationSchema,
-  })
-  .superRefine(addEffectiveDateIssue);
-
-export type TransactionFormData = z.infer<typeof transactionFormSchema>;
-
-export const transferFormSchema = z
-  .object({
-    contaDestinoId: uuidInputSchema("Selecione a conta de destino."),
-    contaOrigemId: uuidInputSchema("Selecione a conta de origem."),
-    dataFinanceira: isoDateSchema,
-    descricao: descriptionSchema,
-    observacoes: observationsSchema,
-    situacao: transactionSituationSchema,
-    valor: moneyInputSchema,
-  })
-  .superRefine((data, context) => {
-    if (data.contaOrigemId === data.contaDestinoId) {
-      context.addIssue({
-        code: "custom",
-        message: "Escolha contas diferentes.",
-        path: ["contaDestinoId"],
-      });
-    }
-
-    addEffectiveDateIssue(data, context);
-  });
-
-export type TransferFormData = z.infer<typeof transferFormSchema>;
-
-export const recurrenceFormSchema = z
-  .object({
-    ...financialFields,
-    contaId: uuidInputSchema("Selecione uma conta."),
-    diasMes: z.array(z.number().int().min(1).max(31)),
-    diasSemana: z.array(dayOfWeekSchema),
-    frequencia: recurrenceFrequencySchema,
-    inicio: isoDateSchema,
-    intervalo: positiveIntegerInputSchema,
-    termino: dateEndSchema,
-  })
-  .superRefine((data, context) => {
-    if (!isValidFormDate(data.inicio)) {
-      return;
-    }
-
-    const initialWeekday = getDayOfWeekForDate(data.inicio);
-    const initialWeekdayOrder = getDayOfWeekOrder(initialWeekday);
-
-    if (data.frequencia === "DAILY" || data.frequencia === "YEARLY") {
-      if (data.diasSemana.length > 0) {
-        context.addIssue({
-          code: "custom",
-          message: "Não selecione dias da semana para esta frequência.",
-          path: ["diasSemana"],
-        });
-      }
-      if (data.diasMes.length > 0) {
-        context.addIssue({
-          code: "custom",
-          message: "Não selecione dias do mês para esta frequência.",
-          path: ["diasMes"],
-        });
-      }
-    }
-
-    if (data.frequencia === "WEEKLY") {
-      if (data.diasSemana.length === 0) {
-        context.addIssue({
-          code: "custom",
-          message: "Selecione ao menos um dia da semana.",
-          path: ["diasSemana"],
-        });
-      }
-      if (!data.diasSemana.includes(initialWeekday)) {
-        context.addIssue({
-          code: "custom",
-          message: "Inclua o dia da data inicial na recorrência.",
-          path: ["diasSemana"],
-        });
-      }
-      if (data.diasSemana.some((day) => getDayOfWeekOrder(day) < initialWeekdayOrder)) {
-        context.addIssue({
-          code: "custom",
-          message: "O dia inicial deve ser a primeira ocorrência da semana.",
-          path: ["diasSemana"],
-        });
-      }
-    }
-
-    if (data.frequencia === "MONTHLY") {
-      const initialMonthDay = getMonthDayForDate(data.inicio);
-
-      if (data.diasMes.length === 0) {
-        context.addIssue({
-          code: "custom",
-          message: "Selecione ao menos um dia do mês.",
-          path: ["diasMes"],
-        });
-      }
-      if (!data.diasMes.includes(initialMonthDay)) {
-        context.addIssue({
-          code: "custom",
-          message: "Inclua o dia da data inicial na recorrência.",
-          path: ["diasMes"],
-        });
-      }
-      if (data.diasMes.some((day) => day < initialMonthDay)) {
-        context.addIssue({
-          code: "custom",
-          message: "O dia inicial deve ser a primeira ocorrência do mês.",
-          path: ["diasMes"],
-        });
-      }
-    }
-
-    if (data.termino.kind === "until" && data.termino.value < data.inicio) {
-      context.addIssue({
-        code: "custom",
-        message: "A data final não pode ser anterior à data inicial.",
-        path: ["termino"],
-      });
-    }
-  });
-
-export type RecurrenceFormData = z.infer<typeof recurrenceFormSchema>;
-
-export const recurrenceOccurrenceFormSchema = z.object({
-  ...financialFields,
-  contaId: uuidInputSchema("Selecione uma conta."),
-  dataFinanceira: isoDateSchema,
-});
-
-export type RecurrenceOccurrenceFormData = z.infer<typeof recurrenceOccurrenceFormSchema>;
-
-export const installmentFormSchema = z
-  .object({
-    ...financialFields,
-    contaId: uuidInputSchema("Selecione uma conta."),
-    inicio: isoDateSchema,
-    intervalo: positiveIntegerInputSchema,
-    numeroPrimeiraParcela: positiveIntegerInputSchema,
-    quantidadeTotalOriginal: positiveIntegerInputSchema,
-  })
-  .superRefine((data, context) => {
-    if (Number(data.quantidadeTotalOriginal) < Number(data.numeroPrimeiraParcela)) {
-      context.addIssue({
-        code: "custom",
-        message: "A quantidade total deve ser maior ou igual à primeira parcela.",
-        path: ["quantidadeTotalOriginal"],
-      });
-    }
-  });
-
-export type InstallmentFormData = z.infer<typeof installmentFormSchema>;
 
 export function getInitialEntryDate(selectedMonth: TransactionMonth) {
   const currentMonth = getCurrentTransactionMonth();
@@ -448,10 +154,6 @@ export function formatMoneyForSummary(value: string) {
       }).format(numericValue);
 }
 
-export function getTransactionTypeLabel(value: TransactionType) {
-  return value === "RECEITA" ? "Receita" : "Despesa";
-}
-
 function parseValidatedMoney(value: string) {
   const numericValue = parseMoneyInput(value);
 
@@ -480,11 +182,25 @@ function buildSharedRecurrenceFields(data: {
   };
 }
 
-export function toCreateTransactionRequest(data: TransactionFormData): CriarTransacaoRequest {
+function requireFormValue<T>(value: T | null | undefined, fieldName: string): T {
+  if (value === undefined || value === null || value === "") {
+    throw new Error(`O campo ${fieldName} não foi preenchido após a validação.`);
+  }
+
+  return value;
+}
+
+export function toCreateTransactionRequest(
+  data: FormularioOperacaoFinanceira,
+): CriarTransacaoRequest {
+  if (data.tipoOperacao !== "TRANSACAO") {
+    throw new Error("O formulário não representa uma transação.");
+  }
+
   return {
     categoriaId: data.categoriaId ?? undefined,
-    contaId: data.contaId,
-    dataFinanceira: data.dataFinanceira,
+    contaId: requireFormValue(data.contaId, "contaId"),
+    dataFinanceira: data.data,
     descricao: data.descricao.trim(),
     observacoes: normalizeOptionalText(data.observacoes),
     situacao: data.situacao,
@@ -493,11 +209,17 @@ export function toCreateTransactionRequest(data: TransactionFormData): CriarTran
   };
 }
 
-export function toCreateTransferRequest(data: TransferFormData): CriarTransferenciaRequest {
+export function toCreateTransferRequest(
+  data: FormularioOperacaoFinanceira,
+): CriarTransferenciaRequest {
+  if (data.tipoOperacao !== "TRANSFERENCIA") {
+    throw new Error("O formulário não representa uma transferência.");
+  }
+
   return {
-    contaDestinoId: data.contaDestinoId,
-    contaOrigemId: data.contaOrigemId,
-    dataFinanceira: data.dataFinanceira,
+    contaDestinoId: requireFormValue(data.contaDestinoId, "contaDestinoId"),
+    contaOrigemId: requireFormValue(data.contaOrigemId, "contaOrigemId"),
+    dataFinanceira: data.data,
     descricao: data.descricao.trim(),
     observacoes: normalizeOptionalText(data.observacoes),
     situacao: data.situacao,
@@ -505,82 +227,116 @@ export function toCreateTransferRequest(data: TransferFormData): CriarTransferen
   };
 }
 
-export function toEditTransferRequest(data: TransferFormData): AlterarTransferenciaRequest {
-  return toCreateTransferRequest(data);
+export function toEditTransactionRequest(
+  data: FormularioEdicaoOperacaoFinanceira,
+): AlterarTransacaoRequest {
+  if (data.tipoOperacao !== "TRANSACAO") {
+    throw new Error("O formulário não representa uma transação.");
+  }
+
+  return {
+    categoriaId: data.categoriaId ?? undefined,
+    contaId: requireFormValue(data.contaId, "contaId"),
+    dataFinanceira: data.data,
+    descricao: data.descricao.trim(),
+    observacoes: normalizeOptionalText(data.observacoes),
+    situacao: data.situacao,
+    tipo: data.tipo,
+    valor: parseValidatedMoney(data.valor),
+  };
+}
+
+export function toEditTransferRequest(
+  data: FormularioEdicaoOperacaoFinanceira,
+): AlterarTransferenciaRequest {
+  if (data.tipoOperacao !== "TRANSFERENCIA") {
+    throw new Error("O formulário não representa uma transferência.");
+  }
+
+  return {
+    contaDestinoId: requireFormValue(data.contaDestinoId, "contaDestinoId"),
+    contaOrigemId: requireFormValue(data.contaOrigemId, "contaOrigemId"),
+    dataFinanceira: data.data,
+    descricao: data.descricao.trim(),
+    observacoes: normalizeOptionalText(data.observacoes),
+    situacao: data.situacao,
+    valor: parseValidatedMoney(data.valor),
+  };
 }
 
 export function toEditRecurrenceOccurrenceRequest(
-  data: RecurrenceOccurrenceFormData,
+  data: FormularioEdicaoOperacaoFinanceira,
   escopo: RecurrenceScope,
 ): AlterarOcorrenciaRecorrenteRequest {
+  if (data.tipoOperacao !== "RECORRENCIA" && data.tipoOperacao !== "PARCELAMENTO") {
+    throw new Error("O formulário não representa uma recorrência ou parcelamento.");
+  }
+
   return {
     ...buildSharedRecurrenceFields(data),
-    dataFinanceira: data.dataFinanceira,
+    dataFinanceira: data.data,
     escopo,
   };
 }
 
-export function toCreateRecurrenceRequest(data: RecurrenceFormData): CriarRecorrenciaRequest {
+export function toCreateRecurrenceRequest(
+  data: FormularioOperacaoFinanceira,
+): CriarRecorrenciaRequest {
+  if (data.tipoOperacao !== "RECORRENCIA") {
+    throw new Error("O formulário não representa uma recorrência.");
+  }
+
+  const frequency = requireFormValue(data.frequencia, "frequencia");
+  const interval = requireFormValue(data.intervalo, "intervalo");
   const request: CriarRecorrenciaRequest = {
     ...buildSharedRecurrenceFields(data),
-    diasMes: data.frequencia === "MONTHLY" && data.diasMes.length > 0 ? data.diasMes : undefined,
-    diasSemana:
-      data.frequencia === "WEEKLY" && data.diasSemana.length > 0 ? data.diasSemana : undefined,
-    frequencia: data.frequencia,
-    inicio: data.inicio,
-    intervalo: Number(data.intervalo),
+    diasMes: frequency === "MONTHLY" && data.diasMes.length > 0 ? data.diasMes : undefined,
+    diasSemana: frequency === "WEEKLY" && data.diasSemana.length > 0 ? data.diasSemana : undefined,
+    frequencia: frequency,
+    inicio: data.data,
+    intervalo: Number(interval),
     tipoGrupo: "RECORRENCIA",
   };
 
-  switch (data.termino.kind) {
-    case "count":
-      return { ...request, quantidadeOcorrencias: Number(data.termino.value) };
-    case "none":
-      return request;
-    case "until":
-      return { ...request, ate: data.termino.value };
-    default: {
-      const exhaustive: never = data.termino;
-      return exhaustive;
-    }
+  if (data.semTermino) {
+    return request;
   }
+
+  if (data.quantidadeOcorrencias !== "") {
+    return {
+      ...request,
+      quantidadeOcorrencias: Number(data.quantidadeOcorrencias),
+    };
+  }
+
+  if (data.ate !== "") {
+    return { ...request, ate: data.ate };
+  }
+
+  throw new Error("A recorrência precisa ter um término válido.");
 }
 
-export function toCreateInstallmentRequest(data: InstallmentFormData): CriarRecorrenciaRequest {
+export function toCreateInstallmentRequest(
+  data: FormularioOperacaoFinanceira,
+): CriarRecorrenciaRequest {
+  if (data.tipoOperacao !== "PARCELAMENTO") {
+    throw new Error("O formulário não representa um parcelamento.");
+  }
+
+  const interval = requireFormValue(data.intervalo, "intervalo");
+  const firstInstallment = requireFormValue(data.numeroPrimeiraParcela, "numeroPrimeiraParcela");
+  const totalInstallments = requireFormValue(
+    data.quantidadeTotalOriginal,
+    "quantidadeTotalOriginal",
+  );
+
   return {
     ...buildSharedRecurrenceFields(data),
     frequencia: "MONTHLY",
-    inicio: data.inicio,
-    intervalo: Number(data.intervalo),
-    numeroPrimeiraParcela: Number(data.numeroPrimeiraParcela),
-    quantidadeTotalOriginal: Number(data.quantidadeTotalOriginal),
+    inicio: data.data,
+    intervalo: Number(interval),
+    numeroPrimeiraParcela: Number(firstInstallment),
+    quantidadeTotalOriginal: Number(totalInstallments),
     tipoGrupo: "PARCELAMENTO",
   };
-}
-
-export function getEntryModeLabel(mode: TransactionEntryMode) {
-  return (
-    transactionEntryModeOptions.find((option) => option.value === mode)?.label ?? "Movimentação"
-  );
-}
-
-export function getRecurrenceEndTypeLabel(value: RecurrenceEndType) {
-  return recurrenceEndOptions.find((option) => option.value === value)?.label ?? "Sem término";
-}
-
-export function getFormSubmitLabel(mode: TransactionEntryMode) {
-  switch (mode) {
-    case "transaction":
-      return "Cadastrar transação";
-    case "transfer":
-      return "Cadastrar transferência";
-    case "recurrence":
-      return "Cadastrar recorrência";
-    case "installment":
-      return "Cadastrar parcelamento";
-    default: {
-      const exhaustive: never = mode;
-      return exhaustive;
-    }
-  }
 }
