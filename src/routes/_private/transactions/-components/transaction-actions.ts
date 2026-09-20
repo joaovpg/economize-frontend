@@ -35,8 +35,11 @@ function getTransferTarget(item: ConsultaTransacaoItem): TransferActionTarget | 
   if (
     item.origem !== "TRANSFERENCIA" ||
     item.operacaoId === null ||
+    item.operacaoId === undefined ||
     item.contaContraparteId === null ||
+    item.contaContraparteId === undefined ||
     situation === null ||
+    situation === undefined ||
     item.valor === 0
   ) {
     return null;
@@ -65,14 +68,16 @@ function getRecurrenceTarget(item: ConsultaTransacaoItem): RecurrenceActionTarge
   if (
     (item.origem !== "TRANSACAO_RECORRENTE" && item.origem !== "PARCELA") ||
     item.segmentoRecorrenciaId === null ||
+    item.segmentoRecorrenciaId === undefined ||
     item.dataOriginalRecorrencia === null ||
+    item.dataOriginalRecorrencia === undefined ||
     item.valor === 0
   ) {
     return null;
   }
 
   const values: RecurrenceOccurrenceFormData = {
-    categoriaId: item.categoriaId,
+    categoriaId: item.categoriaId ?? null,
     contaId: item.contaId,
     dataFinanceira: item.dataFinanceira,
     descricao: item.descricao,
@@ -94,7 +99,7 @@ function getRecurrenceTarget(item: ConsultaTransacaoItem): RecurrenceActionTarge
 export function getTransactionActionTarget(
   item: ConsultaTransacaoItem,
 ): TransactionActionTarget | null {
-  if (item.origem === "TRANSFERENCIA") {
+  if (item.origem === "TRANSFERENCIA" || item.origem === "TRANSACAO_SIMPLES") {
     return getTransferTarget(item);
   }
 

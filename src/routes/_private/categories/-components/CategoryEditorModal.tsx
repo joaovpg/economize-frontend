@@ -39,7 +39,7 @@ function applyCategoryFormError(
     const message = messages[0];
 
     if (field && message) {
-      setError(field, { type: "server", message });
+      setError(field, { message, type: "server" });
       hasFieldError = true;
     }
   }
@@ -116,6 +116,7 @@ export function CategoryEditorModal({
         });
         successMessage = "Categoria criada com sucesso.";
       }
+      await queryClient.invalidateQueries({ queryKey: [categoriesQueryKey] });
     } catch (error) {
       applyCategoryFormError(
         error,

@@ -25,19 +25,19 @@ const control = tv({
   base: "flex w-full min-w-0 cursor-pointer items-center gap-3 border font-ui text-subtle transition-[background-color,border-color,outline-color] motion-reduce:transition-none",
   variants: {
     appearance: {
-      default:
-        "h-12 min-h-12 rounded-xl bg-[linear-gradient(180deg,rgb(255_255_255_/_0.7),#fffdf8)] px-3.5",
       compact:
         "h-9 min-h-9 rounded-lg !border-transparent bg-transparent px-2.5 data-hovered:bg-surface-muted data-pressed:bg-surface-strong",
-    },
-    invalid: {
-      true: "!border-danger focus-within:!border-danger focus-within:outline-danger focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
-      false:
-        "border-border hover:border-border-strong focus-within:!border-brand focus-within:outline-brand focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
+      default:
+        "h-12 min-h-12 rounded-xl bg-[linear-gradient(180deg,rgb(255_255_255_/_0.7),#fffdf8)] px-3.5",
     },
     disabled: {
-      true: "cursor-not-allowed border-border bg-surface-muted text-subtle hover:!border-border focus-within:!border-border focus-within:!outline-none",
       false: "",
+      true: "cursor-not-allowed border-border bg-surface-muted text-subtle hover:!border-border focus-within:!border-border focus-within:!outline-none",
+    },
+    invalid: {
+      false:
+        "border-border hover:border-border-strong focus-within:!border-brand focus-within:outline-brand focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
+      true: "!border-danger focus-within:!border-danger focus-within:outline-danger focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
     },
   },
 });
@@ -45,14 +45,14 @@ const control = tv({
 const selectValueStyles = tv(
   {
     base: "min-w-0 flex-1 truncate text-left text-body-small data-placeholder:text-subtle",
-    variants: {
-      disabled: {
-        true: "text-subtle",
-        false: "text-foreground",
-      },
-    },
     defaultVariants: {
       disabled: false,
+    },
+    variants: {
+      disabled: {
+        false: "text-foreground",
+        true: "text-subtle",
+      },
     },
   },
   { twMerge: false },
@@ -178,8 +178,8 @@ export function Select<T = object, M extends SelectionMode = "single">({
       <AriaButton
         className={control({
           appearance,
-          invalid: hasVisualError,
           disabled: isDisabled,
+          invalid: hasVisualError,
         })}
       >
         {leadingIcon && <IconSlot>{leadingIcon}</IconSlot>}

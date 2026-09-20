@@ -1,14 +1,27 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc", "import", "jsx-a11y", "promise", "unicorn"],
-  "jsPlugins": ["@shadcn/lint", "oxlint-tailwindcss"],
+  "plugins": [
+    "react",
+    "typescript",
+    "oxc",
+    "import",
+    "jsx-a11y",
+    "promise",
+    "unicorn"
+  ],
+  "jsPlugins": [
+    "@shadcn/lint",
+    "oxlint-tailwindcss"
+  ],
   "options": {
     "typeAware": true,
     "typeCheck": true
   },
   "settings": {
     "shadcn": {
-      "componentImports": ["(^|/)components(/|$)"]
+      "componentImports": [
+        "(^|/)components(/|$)"
+      ]
     },
     "tailwindcss": {
       "entryPoint": "src/styles/index.css"
@@ -28,7 +41,9 @@
     "shadcn/no-restyle": [
       "error",
       {
-        "allow": ["layout"]
+        "allow": [
+          "layout"
+        ]
       }
     ],
     "shadcn/no-raw-colors": [
@@ -62,7 +77,9 @@
     "shadcn/no-arbitrary-values": [
       "error",
       {
-        "allow": ["layout"]
+        "allow": [
+          "layout"
+        ]
       }
     ],
     "shadcn/no-inline-styles": "error",
@@ -104,7 +121,9 @@
   },
   "overrides": [
     {
-      "files": ["src/components/**"],
+      "files": [
+        "src/components/**"
+      ],
       "rules": {
         "shadcn/no-restyle": "off",
         "shadcn/no-arbitrary-values": "off",

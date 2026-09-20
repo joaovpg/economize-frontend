@@ -10,7 +10,7 @@ type CategoriesQueryInput = {
 
 export const categoriesQueryOptions = ({ ativo }: CategoriesQueryInput = {}) =>
   queryOptions({
-    queryKey: [...categoriesQueryKey, "list", { ativo: ativo ?? null }] as const,
     queryFn: ({ signal }) => getCategorias({ ativo, signal }),
+    queryKey: [...categoriesQueryKey, "list", { ativo: ativo ?? null }] as const,
     staleTime: 5 * 60 * 1000,
   });

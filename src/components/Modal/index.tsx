@@ -30,32 +30,32 @@ import { Button } from "../Button";
 
 const overlayStyles = tv({
   base: "fixed inset-0 z-50 grid min-h-[100dvh] w-full place-items-center overflow-y-auto bg-scrim p-4 opacity-100 backdrop-blur-[2px] transition-opacity duration-150 ease-out data-[entering]:opacity-0 data-[exiting]:opacity-0 motion-reduce:transition-none",
-  variants: {
-    size: {
-      sm: "",
-      md: "",
-      lg: "max-[767px]:p-0",
-      fullScreen: "p-0",
-    },
-  },
   defaultVariants: {
     size: "md",
+  },
+  variants: {
+    size: {
+      fullScreen: "p-0",
+      lg: "max-[767px]:p-0",
+      md: "",
+      sm: "",
+    },
   },
 });
 
 const modalStyles = tv({
   base: "group/modal flex min-h-0 max-h-[calc(100dvh-2rem)] w-full min-w-0 flex-col overflow-hidden rounded-[1.125rem] border border-border bg-[linear-gradient(180deg,var(--color-surface-value),color-mix(in_oklch,var(--color-surface-value)_96%,var(--color-canvas-value)))] p-[1.375rem] text-foreground shadow-dialog opacity-100 transition-[opacity,transform] duration-150 ease-out data-[entering]:translate-y-1 data-[entering]:opacity-0 data-[exiting]:translate-y-1 data-[exiting]:opacity-0 motion-reduce:transition-none",
-  variants: {
-    size: {
-      sm: "max-w-[24rem]",
-      md: "max-w-[32rem]",
-      lg: "max-w-[48rem] max-[767px]:h-[100dvh] max-[767px]:max-h-none max-[767px]:max-w-none max-[767px]:rounded-none max-[767px]:border-0 max-[767px]:pb-[max(1rem,env(safe-area-inset-bottom))] max-[767px]:pl-[max(1rem,env(safe-area-inset-left))] max-[767px]:pr-[max(1rem,env(safe-area-inset-right))] max-[767px]:pt-[max(1rem,env(safe-area-inset-top))] max-[767px]:shadow-none",
-      fullScreen:
-        "h-[100dvh] max-h-none max-w-none rounded-none border-0 pb-[max(1.375rem,env(safe-area-inset-bottom))] pl-[max(1.375rem,env(safe-area-inset-left))] pr-[max(1.375rem,env(safe-area-inset-right))] pt-[max(1.375rem,env(safe-area-inset-top))] shadow-none",
-    },
-  },
   defaultVariants: {
     size: "md",
+  },
+  variants: {
+    size: {
+      fullScreen:
+        "h-[100dvh] max-h-none max-w-none rounded-none border-0 pb-[max(1.375rem,env(safe-area-inset-bottom))] pl-[max(1.375rem,env(safe-area-inset-left))] pr-[max(1.375rem,env(safe-area-inset-right))] pt-[max(1.375rem,env(safe-area-inset-top))] shadow-none",
+      lg: "max-w-[48rem] max-[767px]:h-[100dvh] max-[767px]:max-h-none max-[767px]:max-w-none max-[767px]:rounded-none max-[767px]:border-0 max-[767px]:pb-[max(1rem,env(safe-area-inset-bottom))] max-[767px]:pl-[max(1rem,env(safe-area-inset-left))] max-[767px]:pr-[max(1rem,env(safe-area-inset-right))] max-[767px]:pt-[max(1rem,env(safe-area-inset-top))] max-[767px]:shadow-none",
+      md: "max-w-[32rem]",
+      sm: "max-w-[24rem]",
+    },
   },
 });
 

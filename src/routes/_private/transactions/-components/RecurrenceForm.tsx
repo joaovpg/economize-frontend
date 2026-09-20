@@ -11,8 +11,8 @@ import { TextArea } from "../../../../components/TextArea";
 import { TextField } from "../../../../components/TextField";
 import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../../../services/categories/contracts";
-import { postRecorrencia } from "../../../../services/transactions/api";
-import { type DayOfWeek } from "../../../../services/transactions/contracts";
+import { postRecorrencia } from "../../../../services/recurrences/api";
+import { type DayOfWeek } from "../../../../services/recurrences/contracts";
 import { transactionsQueryKey } from "../../../../services/transactions/queries";
 import { applyFormError, getServerFieldName } from "./form-errors";
 import {

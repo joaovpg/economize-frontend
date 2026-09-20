@@ -24,8 +24,8 @@ export const transactionsQueryOptions = (input: TransactionsQueryInput) => {
   const query = normalizeTransactionsQuery(input);
 
   return queryOptions({
-    queryKey: [...transactionsQueryKey, "list", query] as const,
     queryFn: ({ signal }) => getTransacoes({ ...query, signal }),
+    queryKey: [...transactionsQueryKey, "list", query] as const,
     staleTime: 30_000,
   });
 };

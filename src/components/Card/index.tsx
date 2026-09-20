@@ -13,11 +13,11 @@ export type CardProps<T extends CardElement = "div"> = ComponentPropsWithRef<T> 
 export function Card<T extends CardElement = "div">({ as, className, ...props }: CardProps<T>) {
   return createElement(as ?? "div", {
     ...props,
-    "data-slot": "card",
     className: cn(
       "group/card grid w-full min-w-0 content-start gap-3.5 rounded-[1.125rem] border border-border p-[1.375rem] shadow-[0_1px_0_color-mix(in_oklch,white_88%,transparent),0_0.75rem_2.25rem_rgb(15_23_42_/_0.04)] card-background",
       className,
     ),
+    "data-slot": "card",
   });
 }
 
@@ -37,15 +37,15 @@ export function CardHeader({ className, ...props }: ComponentPropsWithRef<"div">
 const cardBodyStyles = tv(
   {
     base: "grid min-w-0",
-    variants: {
-      spacing: {
-        default: "gap-3.5",
-        compact: "gap-2",
-        none: "gap-0",
-      },
-    },
     defaultVariants: {
       spacing: "default",
+    },
+    variants: {
+      spacing: {
+        compact: "gap-2",
+        default: "gap-3.5",
+        none: "gap-0",
+      },
     },
   },
   { twMerge: false },

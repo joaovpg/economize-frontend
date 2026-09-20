@@ -2,18 +2,18 @@ import { isHTTPError, isNetworkError, isTimeoutError, type HTTPError } from "ky"
 import { z } from "zod";
 
 const apiFieldErrorSchema = z.looseObject({
-  field: z.string(),
   detail: z.string(),
+  field: z.string(),
 });
 
 export const apiProblemSchema = z.looseObject({
-  type: z.string().regex(/^urn:economize:problem:.+$/),
-  title: z.string(),
-  status: z.number().int().min(100).max(599),
   detail: z.string(),
-  instance: z.string(),
-  traceId: z.string(),
   errors: z.array(apiFieldErrorSchema).optional(),
+  instance: z.string(),
+  status: z.number().int().min(100).max(599),
+  title: z.string(),
+  traceId: z.string(),
+  type: z.string().regex(/^urn:economize:problem:.+$/),
 });
 
 export type ApiFieldError = z.infer<typeof apiFieldErrorSchema>;

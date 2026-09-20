@@ -19,6 +19,12 @@ import { Label } from "./Label";
 
 const radioOptionsStyles = tv({
   base: "min-w-0",
+  compoundVariants: [
+    {
+      appearance: "segmented",
+      class: "flex-nowrap gap-1",
+    },
+  ],
   variants: {
     appearance: {
       default: "",
@@ -35,12 +41,6 @@ const radioOptionsStyles = tv({
       vertical: "grid gap-1.5",
     },
   },
-  compoundVariants: [
-    {
-      appearance: "segmented",
-      class: "flex-nowrap gap-1",
-    },
-  ],
 });
 
 const radioFieldStyles = tv({

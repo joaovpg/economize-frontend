@@ -6,19 +6,19 @@ import { Button } from "../../../../components/Button";
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../../../../components/Modal";
 import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
 import { isApiError } from "../../../../lib/api-errors";
-import {
-  deleteOcorrenciaRecorrente,
-  deleteTransferencia,
-} from "../../../../services/transactions/api";
-import { type RecurrenceScope } from "../../../../services/transactions/contracts";
+import { deleteOcorrenciaRecorrente } from "../../../../services/recurrences/api";
+import { type RecurrenceScope } from "../../../../services/recurrences/contracts";
+import { deleteTransacao } from "../../../../services/transactions/api";
 import { transactionsQueryKey } from "../../../../services/transactions/queries";
-import { type TransactionActionTarget } from "./transaction-actions";
+import { deleteTransferencia } from "../../../../services/transfers/api";
 import { recurrenceScopeOptions } from "./transaction-form";
+
+import type { ConsultaTransacaoItem } from "../../../../services/transactions/contracts";
 
 type TransactionDeleteModalProps = {
   onClose: () => void;
   onDeleted: (message: string) => Promise<void>;
-  target: TransactionActionTarget;
+  target: ConsultaTransacaoItem;
 };
 
 function getErrorMessage(error: unknown) {
@@ -35,13 +35,23 @@ export function TransactionDeleteModal({
   const [scope, setScope] = useState<RecurrenceScope>("ONLY_THIS");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const queryClient = useQueryClient();
+
+  const deleteTransationMutation = useMutation({
+    mutationFn: (id: string) => deleteTransacao(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: transactionsQueryKey }).catch(() => undefined);
+    },
+  });
+
   const deleteTransferMutation = useMutation({
     mutationFn: (id: string) => deleteTransferencia(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: transactionsQueryKey }).catch(() => undefined);
     },
   });
+
   const deleteRecurrenceMutation = useMutation({
     mutationFn: ({
       dataOriginal,
@@ -56,27 +66,30 @@ export function TransactionDeleteModal({
       void queryClient.invalidateQueries({ queryKey: transactionsQueryKey }).catch(() => undefined);
     },
   });
-  const isRecurrence = target.kind === "recurrence";
-  const label = target.kind === "transfer" ? "transferência" : target.entryLabel;
+  const isRecurrence = ["TRANSACAO_RECORRENTE", "PARCELA"].includes(target.origem);
 
   const handleDelete = async () => {
     setErrorMessage(null);
     setIsSubmitting(true);
 
     try {
-      if (target.kind === "transfer") {
-        await deleteTransferMutation.mutateAsync(target.id);
-      } else {
-        await deleteRecurrenceMutation.mutateAsync({
-          dataOriginal: target.dataOriginal,
-          escopo: scope,
-          segmentoId: target.segmentoId,
-        });
+      switch (target.origem) {
+        case "PARCELA":
+        case "TRANSACAO_RECORRENTE":
+          await deleteRecurrenceMutation.mutateAsync({
+            dataOriginal: target.dataOriginalRecorrencia ?? "",
+            escopo: scope,
+            segmentoId: target.segmentoRecorrenciaId ?? "",
+          });
+          break;
+        case "TRANSFERENCIA":
+          await deleteTransferMutation.mutateAsync(target.operacaoId ?? "");
+          break;
+        default:
+          await deleteTransationMutation.mutateAsync(target.operacaoId ?? "");
       }
 
-      await onDeleted(
-        `${label.charAt(0).toLocaleUpperCase("pt-BR") + label.slice(1)} excluído com sucesso.`,
-      );
+      await onDeleted(`Transação excluída com sucesso.`);
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
       setIsSubmitting(false);
@@ -88,7 +101,7 @@ export function TransactionDeleteModal({
 
   return (
     <Modal
-      description={`Essa ação excluirá o ${label} selecionado.`}
+      description={`Essa ação excluirá a transação selecionada.`}
       isDismissable={!isSubmitting}
       isKeyboardDismissDisabled={isSubmitting}
       isOpen
@@ -100,7 +113,7 @@ export function TransactionDeleteModal({
       role="alertdialog"
       showCloseButton={!isSubmitting}
       size="sm"
-      title={`Excluir ${label}?`}
+      title={`Excluir transação?`}
     >
       <ModalHeader />
       <ModalBody>

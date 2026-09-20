@@ -3,30 +3,34 @@ import { z } from "zod";
 import type { ApiRequestOptions } from "../../lib/api";
 
 export const categoriaResponseSchema = z.looseObject({
+  ativo: z.boolean(),
+  categoriaPaiId: z.uuid().nullable().optional(),
+  cor: z.string().nullable().optional(),
   id: z.uuid(),
   nome: z.string(),
-  cor: z.string().nullable(),
-  categoriaPaiId: z.uuid().nullable(),
-  ativo: z.boolean(),
 });
 
 export const categoriasResponseSchema = z.array(categoriaResponseSchema);
 
 const categoriaNomeSchema = z.string().regex(/\S/);
-const categoriaCorSchema = z.string().regex(/^\s*(#[0-9A-Fa-f]{6})?\s*$/);
+const categoriaCorSchema = z
+  .string()
+  .regex(/^\s*(#[0-9A-Fa-f]{6})?\s*$/)
+  .nullable()
+  .optional();
 const categoriaPaiIdSchema = z.uuid().nullable().optional();
 
 export const cadastrarCategoriaRequestSchema = z.object({
-  nome: categoriaNomeSchema,
-  cor: categoriaCorSchema,
   categoriaPaiId: categoriaPaiIdSchema,
+  cor: categoriaCorSchema,
+  nome: categoriaNomeSchema,
 });
 
 export const editarCategoriaRequestSchema = z.object({
-  nome: categoriaNomeSchema,
-  cor: categoriaCorSchema,
-  categoriaPaiId: categoriaPaiIdSchema,
   ativo: z.boolean(),
+  categoriaPaiId: categoriaPaiIdSchema,
+  cor: categoriaCorSchema,
+  nome: categoriaNomeSchema,
 });
 
 export const getCategoriasQuerySchema = z.object({ ativo: z.boolean().optional() });

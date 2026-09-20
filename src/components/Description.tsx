@@ -6,14 +6,14 @@ import { tv } from "tailwind-variants";
 const descriptionStyles = tv(
   {
     base: "-mt-1 text-caption",
-    variants: {
-      disabled: {
-        true: "text-subtle",
-        false: "text-muted",
-      },
-    },
     defaultVariants: {
       disabled: false,
+    },
+    variants: {
+      disabled: {
+        false: "text-muted",
+        true: "text-subtle",
+      },
     },
   },
   { twMerge: false },

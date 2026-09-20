@@ -12,19 +12,19 @@ import { tv } from "tailwind-variants";
 const checkboxRootStyles = tv(
   {
     base: "group flex min-h-[1.625rem] min-w-0 cursor-pointer select-none items-center gap-2 text-label text-muted outline-none transition-colors duration-150 ease-out data-disabled:cursor-not-allowed data-disabled:opacity-50 max-[48rem]:min-h-11 motion-reduce:transition-none",
+    defaultVariants: {
+      invalid: false,
+      size: "default",
+    },
     variants: {
-      size: {
-        default: "",
-        compact: "mb-1 min-h-8 gap-2.25",
-      },
       invalid: {
         false: "",
         true: "text-danger",
       },
-    },
-    defaultVariants: {
-      size: "default",
-      invalid: false,
+      size: {
+        compact: "mb-1 min-h-8 gap-2.25",
+        default: "",
+      },
     },
   },
   { twMerge: false },
@@ -122,8 +122,8 @@ export function Checkbox({
             <>
               <span
                 className={getIndicatorClassName({
-                  isDisabled,
                   focusRing,
+                  isDisabled,
                   isIndeterminate,
                   isInvalid,
                   isPressed,

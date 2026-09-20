@@ -169,7 +169,7 @@ function SummaryPage({ accounts, categories }: SummaryPageProps) {
 }
 
 export const Route = createFileRoute("/_private/summary")({
-  validateSearch: summarySearchSchema,
+  component: SummaryPageRoute,
   loader: ({ context }) =>
     Promise.all([
       context.queryClient.query({
@@ -181,8 +181,8 @@ export const Route = createFileRoute("/_private/summary")({
         staleTime: "static",
       }),
     ]),
-  component: SummaryPageRoute,
   preloadStaleTime: 30_000,
+  validateSearch: summarySearchSchema,
 });
 
 function SummaryPageRoute() {

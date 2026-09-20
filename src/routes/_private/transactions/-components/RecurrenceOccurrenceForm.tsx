@@ -9,8 +9,8 @@ import { TextArea } from "../../../../components/TextArea";
 import { TextField } from "../../../../components/TextField";
 import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../../../services/categories/contracts";
-import { putOcorrenciaRecorrente } from "../../../../services/transactions/api";
-import { type RecurrenceScope } from "../../../../services/transactions/contracts";
+import { putOcorrenciaRecorrente } from "../../../../services/recurrences/api";
+import { type RecurrenceScope } from "../../../../services/recurrences/contracts";
 import { transactionsQueryKey } from "../../../../services/transactions/queries";
 import { applyFormError, getServerFieldName } from "./form-errors";
 import {

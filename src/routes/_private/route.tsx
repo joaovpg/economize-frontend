@@ -17,9 +17,9 @@ export const Route = createFileRoute("/_private")({
 });
 
 const navigation = [
-  { to: "/summary", label: "Resumo", icon: ChartLineUpIcon },
-  { to: "/transactions", label: "Transações", icon: ListBulletsIcon },
-  { to: "/profile", label: "Perfil", icon: UserCircleIcon },
+  { icon: ChartLineUpIcon, label: "Resumo", to: "/summary" },
+  { icon: ListBulletsIcon, label: "Transações", to: "/transactions" },
+  { icon: UserCircleIcon, label: "Perfil", to: "/profile" },
 ] as const;
 
 function PrivateLayout() {

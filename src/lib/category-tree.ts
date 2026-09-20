@@ -1,5 +1,5 @@
 export type CategoryTreeItem = {
-  categoriaPaiId: string | null;
+  categoriaPaiId?: string | null;
   id: string;
 };
 
@@ -16,13 +16,15 @@ export function buildCategoryTree<TCategory extends CategoryTreeItem>(
   const childrenByParentId = new Map<string, TCategory[]>();
 
   for (const category of categories) {
-    if (category.categoriaPaiId === null) {
+    const parentId = category.categoriaPaiId;
+
+    if (parentId === null || parentId === undefined) {
       continue;
     }
 
-    const children = childrenByParentId.get(category.categoriaPaiId) ?? [];
+    const children = childrenByParentId.get(parentId) ?? [];
     children.push(category);
-    childrenByParentId.set(category.categoriaPaiId, children);
+    childrenByParentId.set(parentId, children);
   }
 
   const builtIds = new Set<string>();
@@ -48,9 +50,11 @@ export function buildCategoryTree<TCategory extends CategoryTreeItem>(
     };
   };
 
-  const rootCategories = categories.filter(
-    (category) => category.categoriaPaiId === null || !categoryById.has(category.categoriaPaiId),
-  );
+  const rootCategories = categories.filter((category) => {
+    const parentId = category.categoriaPaiId;
+
+    return parentId === null || parentId === undefined || !categoryById.has(parentId);
+  });
 
   const tree: CategoryTreeNode<TCategory>[] = [];
 

@@ -8,25 +8,25 @@ import { IconSlot } from "./IconSlot";
 
 const linkStyles = tv(
   {
+    defaultVariants: {
+      active: false,
+      linkVariant: "default",
+    },
     extend: buttonStyles,
     variants: {
-      linkVariant: {
-        default: "",
-        brand: "gap-3 font-bold tracking-tight",
-        compactBrand: "gap-2.5 text-title-compact tracking-tight text-foreground! no-underline",
-        header: "font-bold [&>span>svg]:size-4",
-        back: "text-caption",
-        navigation:
-          "!h-11 !min-h-11 !rounded-full !px-3 text-button !text-muted no-underline data-hovered:!text-foreground data-hovered:no-underline max-[28rem]:!px-2.5 max-[28rem]:[&>span>svg]:hidden",
-      },
       active: {
         false: "",
         true: "!bg-brand-soft !text-brand-hover shadow-nav-active",
       },
-    },
-    defaultVariants: {
-      linkVariant: "default",
-      active: false,
+      linkVariant: {
+        back: "text-caption",
+        brand: "gap-3 font-bold tracking-tight",
+        compactBrand: "gap-2.5 text-title-compact tracking-tight text-foreground! no-underline",
+        default: "",
+        header: "font-bold [&>span>svg]:size-4",
+        navigation:
+          "!h-11 !min-h-11 !rounded-full !px-3 text-button !text-muted no-underline data-hovered:!text-foreground data-hovered:no-underline max-[28rem]:!px-2.5 max-[28rem]:[&>span>svg]:hidden",
+      },
     },
   },
   { twMerge: false },

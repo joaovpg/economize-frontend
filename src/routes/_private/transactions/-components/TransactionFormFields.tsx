@@ -5,7 +5,7 @@ import { type CategoriaResponse } from "../../../../services/categories/contract
 import {
   type TransactionSituation,
   type TransactionType,
-} from "../../../../services/transactions/contracts";
+} from "../../../../services/transactions/shared";
 
 const NO_ACCOUNT_OPTION = "__no_active_account__";
 const NO_CATEGORY_OPTION = "__no_category__";
@@ -22,7 +22,7 @@ type AccountSelectProps = {
   name?: string;
   onBlur?: () => void;
   onChange: (value: string) => void;
-  value: string;
+  value?: string;
 };
 
 export function AccountSelect({
@@ -94,7 +94,7 @@ type CategorySelectProps = {
   name?: string;
   onBlur?: () => void;
   onChange: (value: string | null) => void;
-  value: string | null;
+  value?: string | null;
 };
 
 export function CategorySelect({

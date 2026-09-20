@@ -6,14 +6,14 @@ import { tv } from "tailwind-variants";
 const labelStyles = tv(
   {
     base: "text-label",
-    variants: {
-      disabled: {
-        true: "text-subtle",
-        false: "text-foreground",
-      },
-    },
     defaultVariants: {
       disabled: false,
+    },
+    variants: {
+      disabled: {
+        false: "text-foreground",
+        true: "text-subtle",
+      },
     },
   },
   { twMerge: false },

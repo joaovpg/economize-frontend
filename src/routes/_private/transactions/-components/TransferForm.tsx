@@ -7,8 +7,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TextArea } from "../../../../components/TextArea";
 import { TextField } from "../../../../components/TextField";
 import { type ContaResponse } from "../../../../services/accounts/contracts";
-import { postTransferencia, putTransferencia } from "../../../../services/transactions/api";
 import { transactionsQueryKey } from "../../../../services/transactions/queries";
+import { postTransferencia, putTransferencia } from "../../../../services/transfers/api";
 import { applyFormError, getServerFieldName } from "./form-errors";
 import {
   formatFormDate,

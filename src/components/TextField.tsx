@@ -7,6 +7,7 @@ import {
 
 import { EyeIcon } from "@phosphor-icons/react/dist/csr/Eye";
 import { EyeSlashIcon } from "@phosphor-icons/react/dist/csr/EyeSlash";
+import { twMerge } from "tailwind-merge";
 import { tv } from "tailwind-variants";
 
 import { Button } from "./Button";
@@ -18,14 +19,14 @@ import { Label } from "./Label";
 const control = tv({
   base: "flex h-12 min-h-12 min-w-0 items-center gap-2.5 rounded-xl border bg-[linear-gradient(180deg,rgb(255_255_255_/_0.7),#fffdf8)] px-3.5 font-ui text-subtle transition-[background-color,border-color,outline-color] motion-reduce:transition-none",
   variants: {
+    disabled: {
+      false: "",
+      true: "cursor-not-allowed border-border bg-surface-muted text-subtle hover:!border-border focus-within:!border-border focus-within:!outline-none",
+    },
     invalid: {
-      true: "border-danger focus-within:!border-danger focus-within:outline-danger focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
       false:
         "border-border hover:border-border-strong focus-within:!border-brand focus-within:outline-brand focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
-    },
-    disabled: {
-      true: "cursor-not-allowed border-border bg-surface-muted text-subtle hover:!border-border focus-within:!border-border focus-within:!outline-none",
-      false: "",
+      true: "border-danger focus-within:!border-danger focus-within:outline-danger focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
     },
   },
 });
@@ -33,14 +34,14 @@ const control = tv({
 const inputStyles = tv(
   {
     base: "min-w-0 flex-1 border-0 bg-transparent text-body-small caret-brand outline-none placeholder:text-subtle",
-    variants: {
-      disabled: {
-        true: "text-subtle",
-        false: "text-foreground",
-      },
-    },
     defaultVariants: {
       disabled: false,
+    },
+    variants: {
+      disabled: {
+        false: "text-foreground",
+        true: "text-subtle",
+      },
     },
   },
   { twMerge: false },
@@ -48,19 +49,19 @@ const inputStyles = tv(
 
 const passwordToggleStyles = tv({
   base: "![--button-height:2rem] rounded-lg text-subtle data-focus-visible:!outline-offset-0",
-  variants: {
-    invalid: {
-      true: "data-focus-visible:outline-danger",
-      false: "data-focus-visible:outline-brand",
-    },
-    disabled: {
-      true: "data-disabled:!opacity-100",
-      false: "",
-    },
-  },
   defaultVariants: {
-    invalid: false,
     disabled: false,
+    invalid: false,
+  },
+  variants: {
+    disabled: {
+      false: "",
+      true: "data-disabled:!opacity-100",
+    },
+    invalid: {
+      false: "data-focus-visible:outline-brand",
+      true: "data-focus-visible:outline-danger",
+    },
   },
 });
 
@@ -84,7 +85,7 @@ const passwordToggleStyles = tv({
  *
  * @see https://react-aria.adobe.com/TextField
  */
-export type TextFieldProps = Omit<AriaTextFieldProps, "children"> & {
+export type TextFieldProps = Omit<AriaTextFieldProps, "children" | "className"> & {
   /** Texto exibido acima do input. */
   label: string;
   /** Texto auxiliar opcional exibido logo abaixo da label. */
@@ -101,6 +102,8 @@ export type TextFieldProps = Omit<AriaTextFieldProps, "children"> & {
   trailingIcon?: ReactNode;
   /** Referência encaminhada ao elemento input pelo contexto do React Aria. */
   inputRef?: Ref<HTMLInputElement>;
+  /** Estilos */
+  className?: string;
 };
 
 /**
@@ -120,6 +123,7 @@ export function TextField({
   inputRef,
   type = "text",
   isDisabled = false,
+  className,
   ...textFieldProps
 }: TextFieldProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -134,14 +138,14 @@ export function TextField({
       isInvalid={hasError}
       isDisabled={isDisabled}
       type={inputType}
-      className="grid min-w-0 gap-1"
+      className={twMerge("grid min-w-0 gap-1", className)}
     >
       <Label isDisabled={isDisabled}>{label}</Label>
       {description && <Description isDisabled={isDisabled}>{description}</Description>}
       <div
         className={control({
-          invalid: hasVisualError,
           disabled: isDisabled,
+          invalid: hasVisualError,
         })}
       >
         {leadingIcon && <IconSlot>{leadingIcon}</IconSlot>}
@@ -154,8 +158,8 @@ export function TextField({
           <Button
             type="button"
             className={passwordToggleStyles({
-              invalid: hasVisualError,
               disabled: isDisabled,
+              invalid: hasVisualError,
             })}
             variant="ghost"
             size="sm"

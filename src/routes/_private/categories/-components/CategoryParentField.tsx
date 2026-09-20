@@ -13,13 +13,15 @@ function getCategoryDescendantIds(categories: readonly CategoriaResponse[], cate
   const childrenByParentId = new Map<string, string[]>();
 
   for (const category of categories) {
-    if (category.categoriaPaiId === null) {
+    const parentId = category.categoriaPaiId;
+
+    if (parentId === null || parentId === undefined) {
       continue;
     }
 
-    const children = childrenByParentId.get(category.categoriaPaiId) ?? [];
+    const children = childrenByParentId.get(parentId) ?? [];
     children.push(category.id);
-    childrenByParentId.set(category.categoriaPaiId, children);
+    childrenByParentId.set(parentId, children);
   }
 
   const descendants = new Set<string>();

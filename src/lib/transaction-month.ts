@@ -44,7 +44,7 @@ export function formatYear(year: number) {
 }
 
 export function getMonthName(month: number) {
-  const date = Temporal.PlainYearMonth.from({ year: 2020, month }).toPlainDate({ day: 1 });
+  const date = Temporal.PlainYearMonth.from({ month, year: 2020 }).toPlainDate({ day: 1 });
   const label = date.toLocaleString("pt-BR", { month: "long" });
 
   return `${label.slice(0, 1).toLocaleUpperCase("pt-BR")}${label.slice(1)}`;

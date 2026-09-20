@@ -21,7 +21,7 @@ export function applyFormError<TFieldValues extends FieldValues>(
     const message = messages[0];
 
     if (field && message) {
-      setError(field, { type: "server", message });
+      setError(field, { message, type: "server" });
       hasFieldError = true;
     }
   }

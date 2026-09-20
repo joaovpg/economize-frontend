@@ -29,24 +29,8 @@ function isPublicAuthenticationRequest(request: Request): boolean {
 }
 
 export const api = ky.create({
-  prefix: import.meta.env.VITE_API_URL,
   credentials: "include",
-  retry: {
-    methods: ["get", "head", "options", "trace", "put", "delete"],
-  },
   hooks: {
-    beforeRequest: [
-      ({ request }) => {
-        if (!MUTATING_METHODS.has(request.method) || isPublicAuthenticationRequest(request)) {
-          return;
-        }
-
-        const csrfToken = getCsrfToken();
-        if (csrfToken) {
-          request.headers.set("X-CSRF-Token", csrfToken);
-        }
-      },
-    ],
     afterResponse: [
       async ({ response }) => {
         if (response.status !== UNAUTHORIZED) {
@@ -61,6 +45,22 @@ export const api = ky.create({
       },
     ],
     beforeError: [({ error }) => normalizeKyError(error)],
+    beforeRequest: [
+      ({ request }) => {
+        if (!MUTATING_METHODS.has(request.method) || isPublicAuthenticationRequest(request)) {
+          return;
+        }
+
+        const csrfToken = getCsrfToken();
+        if (csrfToken) {
+          request.headers.set("X-CSRF-Token", csrfToken);
+        }
+      },
+    ],
+  },
+  prefix: import.meta.env.VITE_API_URL,
+  retry: {
+    methods: ["get", "head", "options", "trace", "put", "delete"],
   },
 });
 

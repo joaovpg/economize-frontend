@@ -17,16 +17,16 @@ export const Route = createFileRoute("/_public/cadastro")({
 
 const cadastroSchema = z
   .object({
-    nome: z.string().trim().min(1, "Digite seu nome.").max(120, "Use até 120 caracteres."),
+    confirmacao: z.string(),
     email: emailSchema,
+    nome: z.string().trim().min(1, "Digite seu nome.").max(120, "Use até 120 caracteres."),
     senha: passwordSchema
       .min(8, "A senha deve ter entre 8 e 128 caracteres.")
       .max(128, "A senha deve ter entre 8 e 128 caracteres."),
-    confirmacao: z.string(),
   })
   .refine((data) => data.senha === data.confirmacao, {
-    path: ["confirmacao"],
     message: "As senhas não coincidem.",
+    path: ["confirmacao"],
   });
 
 type RegisterFormData = {

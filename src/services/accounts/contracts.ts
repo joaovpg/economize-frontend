@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 export const contaResponseSchema = z.looseObject({
-  id: z.uuid(),
-  nome: z.string(),
-  moeda: z.string(),
-  saldoInicial: z.number(),
-  dataSaldoInicial: z.iso.date(),
   ativo: z.boolean(),
+  dataSaldoInicial: z.iso.date(),
+  id: z.uuid(),
+  moeda: z.string(),
+  nome: z.string(),
+  saldoInicial: z.number(),
 });
 
 export const contasResponseSchema = z.array(contaResponseSchema);

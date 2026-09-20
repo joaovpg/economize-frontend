@@ -15,14 +15,14 @@ import { Label } from "./Label";
 const control = tv({
   base: "min-h-28 min-w-0 resize-y rounded-xl border bg-[linear-gradient(180deg,rgb(255_255_255_/_0.7),#fffdf8)] px-3.5 py-3 text-body-small text-foreground caret-brand outline-none transition-[background-color,border-color,outline-color] placeholder:text-subtle motion-reduce:transition-none",
   variants: {
+    disabled: {
+      false: "",
+      true: "cursor-not-allowed border-border bg-surface-muted text-subtle hover:border-border focus:border-border focus:outline-none",
+    },
     invalid: {
-      true: "border-danger focus:border-danger focus:outline-danger focus:outline-2 focus:outline-solid focus:outline-offset-0",
       false:
         "border-border hover:border-border-strong focus:border-brand focus:outline-brand focus:outline-2 focus:outline-solid focus:outline-offset-0",
-    },
-    disabled: {
-      true: "cursor-not-allowed border-border bg-surface-muted text-subtle hover:border-border focus:border-border focus:outline-none",
-      false: "",
+      true: "border-danger focus:border-danger focus:outline-danger focus:outline-2 focus:outline-solid focus:outline-offset-0",
     },
   },
 });

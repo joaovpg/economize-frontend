@@ -6,21 +6,25 @@ import {
   type TransactionMonth,
 } from "../../../../lib/transaction-month";
 import {
-  dayOfWeekSchema,
-  recurrenceFrequencySchema,
-  transactionSituationSchema,
-  transactionTypeSchema,
   type AlterarOcorrenciaRecorrenteRequest,
-  type AlterarTransferenciaRequest,
   type CriarRecorrenciaRequest,
-  type CriarTransacaoRequest,
-  type CriarTransferenciaRequest,
   type DayOfWeek,
   type RecurrenceFrequency,
   type RecurrenceScope,
+  dayOfWeekSchema,
+  recurrenceFrequencySchema,
+} from "../../../../services/recurrences/contracts";
+import { type CriarTransacaoRequest } from "../../../../services/transactions/contracts";
+import {
+  transactionSituationSchema,
+  transactionTypeSchema,
   type TransactionSituation,
   type TransactionType,
-} from "../../../../services/transactions/contracts";
+} from "../../../../services/transactions/shared";
+import {
+  type AlterarTransferenciaRequest,
+  type CriarTransferenciaRequest,
+} from "../../../../services/transfers/contracts";
 
 const transactionTimeZone = "America/Sao_Paulo";
 
@@ -202,6 +206,7 @@ const financialFields = {
   tipo: transactionTypeSchema,
   valor: moneyInputSchema,
 };
+export const transactionBaseFormSchema = z.object({});
 
 export const transactionFormSchema = z
   .object({

@@ -6,7 +6,7 @@ export const accountsQueryKey = ["accounts"] as const;
 
 export const accountsQueryOptions = () =>
   queryOptions({
-    queryKey: accountsQueryKey,
     queryFn: ({ signal }) => getContas({ signal }),
+    queryKey: accountsQueryKey,
     staleTime: 5 * 60 * 1000,
   });
