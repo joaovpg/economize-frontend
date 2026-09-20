@@ -1,34 +1,21 @@
-## Agent skills
+# Economize frontend
 
-This repository is the React frontend for `Economize`, an application for recording and controlling expenses.
+Frontend React do Economize, uma aplicação web para registrar, entender e controlar finanças pessoais.
 
-- User-facing UI copy, labels, validation messages, and documentation for the product must use Brazilian Portuguese (`pt-BR`).
-- Follow Brazilian conventions for displayed currency, dates, and numbers.
+## Essencial
 
-## Development
+- Use `pnpm` como gerenciador de pacotes.
+- Antes de concluir uma alteração, execute, nesta ordem: `pnpm fmt:check`, `pnpm lint` e
+  `pnpm build`.
+- `pnpm build` é também a verificação de tipos: ele executa `tsc -b` antes do build do Vite.
+- O projeto ainda não possui script ou framework de testes; não declare testes como executados.
 
-- Use `pnpm`; the repository is single-package and is pinned by `pnpm-lock.yaml`.
-- Run `pnpm dev` to start the Vite development server with HMR.
-- Run `pnpm lint` to run Oxlint.
-- Run `pnpm build` for the required verification: it runs `tsc -b` and then `vite build`.
-- Run `pnpm preview` only after `pnpm build` to serve the production build locally.
-- There is currently no test script or test framework configured.
+## Instruções por contexto
 
-## Structure
-
-- `src/main.tsx` is the browser entrypoint and renders `src/App.tsx`.
-- `src/` contains the application code; `public/` contains static assets served from the site root.
-- Vite is configured with the React Compiler natively through Oxc (`oxc-transform-react`); do not disable or bypass that setup without a concrete reason.
-- TypeScript checks both app and Vite config code with `noUnusedLocals`, `noUnusedParameters`, `erasableSyntaxOnly`, and `noFallthroughCasesInSwitch`.
-
-### Issue tracker
-
-Issues and specs live as local markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
-
-### Triage labels
-
-Uses the default canonical labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
-
-### Domain docs
-
-Single-context domain documentation uses root `CONTEXT.md` and `docs/adr/`. See `docs/agents/domain.md`.
+- Ao configurar o ambiente ou validar alterações, consulte
+  [Desenvolvimento e validação](docs/agent-guidelines/development.md).
+- Ao alterar rotas, layouts, estado na URL ou acesso a dados, consulte
+  [Arquitetura frontend](docs/agent-guidelines/frontend-architecture.md).
+- Ao criar componentes, formulários ou estilos, consulte
+  [Interface e estilos](docs/agent-guidelines/ui-and-styling.md).
+- Antes de mudar uma decisão arquitetural, consulte os [ADRs aceitos](docs/adr/).

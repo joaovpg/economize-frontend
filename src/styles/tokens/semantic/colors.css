@@ -1,13 +1,19 @@
 @theme {
   --color-canvas: var(--color-canvas-value);
+  --color-canvas-overlay: color-mix(in oklch, var(--color-canvas-value) 34%, transparent);
+  --color-canvas-panel: color-mix(in oklch, var(--color-canvas-value) 76%, transparent);
   --color-surface: var(--color-surface-value);
+  --color-surface-overlay: color-mix(in oklch, var(--color-surface-value) 58%, transparent);
+  --color-surface-overlay-strong: color-mix(in oklch, var(--color-surface-value) 60%, transparent);
   --color-surface-muted: var(--color-surface-muted-value);
+  --color-scrim: var(--color-scrim-value);
 
   --color-foreground: var(--color-foreground-value);
   --color-muted: var(--color-muted-value);
   --color-subtle: var(--color-subtle-value);
 
   --color-border: var(--color-border-value);
+  --color-border-overlay: color-mix(in oklch, var(--color-border-value) 72%, transparent);
   --color-border-strong: var(--color-border-strong-value);
 
   --color-brand: var(--color-brand-value);

@@ -7,5 +7,6 @@
 
 @import "./semantic/colors.css";
 
+@import "./utilities/surfaces.css";
 @import "./utilities/typography.css";
 @import "./base/reset.css";
