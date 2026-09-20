@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../../../../components/Modal";
+import { NumberField } from "../../../../components/NumberField";
 import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
 import { TextArea } from "../../../../components/TextArea";
 import { TextField } from "../../../../components/TextField";
@@ -19,6 +20,7 @@ import {
   type ConsultaTransacaoItem,
   type FormularioEdicaoOperacaoFinanceira,
   type FormularioTipoOperacao,
+  parseMoneyInput,
 } from "../../../../services/transactions/contracts";
 import { transactionsQueryKey } from "../../../../services/transactions/queries";
 import { putTransferencia } from "../../../../services/transfers/api";
@@ -453,20 +455,22 @@ export function TransactionEditModal({
                 control={control}
                 name="valor"
                 render={({ field }) => (
-                  <TextField
+                  <NumberField
                     autoComplete="off"
                     className="min-w-0"
                     errorMessage={errors.valor?.message}
+                    formatOptions={{ currency: "BRL", maximumFractionDigits: 4, style: "currency" }}
                     inputMode="decimal"
                     isDisabled={isSubmitting}
                     label={operation === "PARCELAMENTO" ? "Valor da parcela" : "Valor"}
                     maxLength={24}
                     name={field.name}
                     onBlur={field.onBlur}
-                    onInput={field.onChange}
+                    onChange={(value) => field.onChange(Number.isNaN(value) ? "" : String(value))}
                     inputRef={field.ref}
-                    placeholder="0,00"
-                    value={field.value}
+                    placeholder="R$ 0,00"
+                    showStepperButton
+                    value={parseMoneyInput(field.value) ?? undefined}
                   />
                 )}
               />
