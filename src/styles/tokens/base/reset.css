@@ -1,6 +1,8 @@
 @layer base {
   html {
     @apply bg-canvas font-sans text-foreground;
+    height: 100%;
+    overflow: hidden;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -8,6 +10,8 @@
 
   body {
     @apply bg-canvas text-foreground;
+    height: 100%;
+    overflow: hidden;
   }
 
   ::selection {

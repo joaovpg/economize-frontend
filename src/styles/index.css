@@ -2,7 +2,13 @@
 @import "./tokens/index.css";
 
 #root {
+  height: 100dvh;
   min-height: 100svh;
+  overflow: auto;
+}
+
+body:has([data-slot="modal-overlay"]) #root {
+  overflow: hidden;
 }
 
 body {

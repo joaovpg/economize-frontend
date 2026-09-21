@@ -5,7 +5,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
-import { Modal, ModalBody, ModalFooter } from "../../../../components/Modal";
+import {
+  Modal,
+  ModalBody,
+  ModalClose,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "../../../../components/Modal";
 import { NumberField } from "../../../../components/NumberField";
 import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
 import { TextArea } from "../../../../components/TextArea";
@@ -355,10 +362,12 @@ export function TransactionCreationModal({
             requestClose();
           }
         }}
-        showCloseButton={!isSubmitting && discardAction === null}
         size="lg"
-        title="Nova movimentação"
       >
+        <ModalHeader>
+          <ModalTitle>Nova movimentação</ModalTitle>
+          {!isSubmitting && discardAction === null && <ModalClose />}
+        </ModalHeader>
         <form className="contents" noValidate onSubmit={handleSubmit(handleFormSubmit)}>
           <ModalBody>
             {submitError && (

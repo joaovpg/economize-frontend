@@ -5,7 +5,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
-import { Modal, ModalBody, ModalFooter, ModalHeader } from "../../../../components/Modal";
+import {
+  Modal,
+  ModalBody,
+  ModalClose,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "../../../../components/Modal";
 import { NumberField } from "../../../../components/NumberField";
 import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
 import { TextArea } from "../../../../components/TextArea";
@@ -361,7 +369,6 @@ export function TransactionEditModal({
   return (
     <>
       <Modal
-        description="Atualize os dados da movimentação selecionada."
         isDismissable={!isSubmitting && discardAction === null}
         isKeyboardDismissDisabled={isSubmitting}
         isOpen
@@ -370,11 +377,13 @@ export function TransactionEditModal({
             requestClose();
           }
         }}
-        showCloseButton={!isSubmitting && discardAction === null}
         size="lg"
-        title={`Editar ${operationLabel}`}
       >
-        <ModalHeader />
+        <ModalHeader>
+          <ModalTitle>Editar {operationLabel}</ModalTitle>
+          <ModalDescription>Atualize os dados da movimentação selecionada.</ModalDescription>
+          {!isSubmitting && discardAction === null && <ModalClose />}
+        </ModalHeader>
         <form className="contents" noValidate onSubmit={handleSubmit(handleFormSubmit)}>
           <ModalBody>
             {submitError && (
