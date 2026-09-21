@@ -1,5 +1,13 @@
 import { Button } from "../../../../components/Button";
-import { Modal, ModalBody, ModalFooter, ModalHeader } from "../../../../components/Modal";
+import {
+  Modal,
+  ModalBody,
+  ModalClose,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "../../../../components/Modal";
 
 export type DiscardAction = { kind: "close" } | null;
 
@@ -24,10 +32,12 @@ export function DiscardChangesModal({ action, onCancel, onConfirm }: DiscardChan
       }}
       role="alertdialog"
       size="sm"
-      title="Descartar alterações?"
-      description={description}
     >
-      <ModalHeader />
+      <ModalHeader>
+        <ModalTitle>Descartar alterações?</ModalTitle>
+        <ModalDescription>{description}</ModalDescription>
+        <ModalClose />
+      </ModalHeader>
       <ModalBody>
         <p className="m-0 text-body-small text-muted">
           Você pode cancelar e continuar editando ou descartar este formulário.

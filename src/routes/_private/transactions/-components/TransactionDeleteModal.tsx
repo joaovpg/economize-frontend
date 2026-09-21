@@ -3,7 +3,15 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
-import { Modal, ModalBody, ModalFooter, ModalHeader } from "../../../../components/Modal";
+import {
+  Modal,
+  ModalBody,
+  ModalClose,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "../../../../components/Modal";
 import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
 import { isApiError } from "../../../../lib/api-errors";
 import { deleteOcorrenciaRecorrente } from "../../../../services/recurrences/api";
@@ -101,7 +109,6 @@ export function TransactionDeleteModal({
 
   return (
     <Modal
-      description={`Essa ação excluirá a transação selecionada.`}
       isDismissable={!isSubmitting}
       isKeyboardDismissDisabled={isSubmitting}
       isOpen
@@ -111,11 +118,13 @@ export function TransactionDeleteModal({
         }
       }}
       role="alertdialog"
-      showCloseButton={!isSubmitting}
       size="sm"
-      title={`Excluir transação?`}
     >
-      <ModalHeader />
+      <ModalHeader>
+        <ModalTitle>Excluir transação?</ModalTitle>
+        <ModalDescription>Essa ação excluirá a transação selecionada.</ModalDescription>
+        {!isSubmitting && <ModalClose />}
+      </ModalHeader>
       <ModalBody>
         {isRecurrence && (
           <RadioGroup

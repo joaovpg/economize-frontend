@@ -1,14 +1,4 @@
-import {
-  Children,
-  Fragment,
-  createContext,
-  isValidElement,
-  useContext,
-  type ComponentPropsWithRef,
-  type ReactElement,
-  type ReactNode,
-  type Ref,
-} from "react";
+import { type ComponentPropsWithRef, type ReactNode, type Ref } from "react";
 import {
   Dialog as AriaDialog,
   DialogTrigger as AriaDialogTrigger,
@@ -19,20 +9,32 @@ import {
   composeRenderProps,
   type DialogProps as AriaDialogProps,
   type DialogTriggerProps,
+  type HeadingProps as AriaHeadingProps,
   type ModalOverlayProps as AriaModalOverlayProps,
   type ModalRenderProps,
+  type TextProps as AriaTextProps,
 } from "react-aria-components";
 
 import { XIcon } from "@phosphor-icons/react/dist/csr/X";
-import { cn, tv } from "tailwind-variants";
+import { twMerge } from "tailwind-merge";
+import { tv } from "tailwind-variants";
 
-import { Button } from "../Button";
+import { Button, type ButtonProps } from "../Button";
 
 const overlayStyles = tv({
-  base: "fixed inset-0 z-50 grid min-h-[100dvh] w-full place-items-center overflow-y-auto bg-scrim p-4 opacity-100 backdrop-blur-[2px] transition-opacity duration-150 ease-out data-[entering]:opacity-0 data-[exiting]:opacity-0 motion-reduce:transition-none",
-  defaultVariants: {
-    size: "md",
+  base: "fixed inset-0 isolate z-20 w-full max-w-full overflow-x-hidden overflow-y-auto bg-scrim backdrop-blur-lg opacity-100 transition-opacity duration-150 ease-out motion-reduce:transition-none",
+  variants: {
+    isEntering: {
+      true: "opacity-0",
+    },
+    isExiting: {
+      true: "opacity-0",
+    },
   },
+});
+
+const modalWrapperStyles = tv({
+  base: "box-border flex min-h-full min-w-0 w-full items-center justify-center p-4 text-center",
   variants: {
     size: {
       fullScreen: "p-0",
@@ -44,7 +46,7 @@ const overlayStyles = tv({
 });
 
 const modalStyles = tv({
-  base: "group/modal flex min-h-0 max-h-[calc(100dvh-2rem)] w-full min-w-0 flex-col overflow-hidden rounded-[1.125rem] border border-border bg-[linear-gradient(180deg,var(--color-surface-value),color-mix(in_oklch,var(--color-surface-value)_96%,var(--color-canvas-value)))] p-[1.375rem] text-foreground shadow-dialog opacity-100 transition-[opacity,transform] duration-150 ease-out data-[entering]:translate-y-1 data-[entering]:opacity-0 data-[exiting]:translate-y-1 data-[exiting]:opacity-0 motion-reduce:transition-none",
+  base: "group/modal flex min-h-0 max-h-[calc(100dvh-2rem)] w-full min-w-0 flex-col overflow-hidden rounded-[1.125rem] border border-border bg-[linear-gradient(180deg,var(--color-surface-value),color-mix(in_oklch,var(--color-surface-value)_96%,var(--color-canvas-value)))] p-[1.375rem] text-left text-foreground shadow-dialog opacity-100 transition-[opacity,transform] duration-150 ease-out data-[entering]:translate-y-1 data-[entering]:opacity-0 data-[exiting]:translate-y-1 data-[exiting]:opacity-0 motion-reduce:transition-none",
   defaultVariants: {
     size: "md",
   },
@@ -60,7 +62,6 @@ const modalStyles = tv({
 });
 
 export type ModalSize = "sm" | "md" | "lg" | "fullScreen";
-type ModalTitle = string | number | ReactElement;
 
 type ModalPropsBase = Omit<
   AriaModalOverlayProps,
@@ -73,13 +74,11 @@ type ModalPropsBase = Omit<
   | "role"
   | "title"
 > &
-  Pick<AriaDialogProps, "aria-describedby"> & {
+  Pick<AriaDialogProps, "aria-describedby" | "aria-label" | "aria-labelledby"> & {
     /** Conteúdo do diálogo, normalmente composto por ModalBody e ModalFooter. */
     children?: ReactNode;
     /** Classes aplicadas à superfície do diálogo. */
     className?: string;
-    /** Descrição opcional renderizada no cabeçalho acessível. */
-    description?: ReactNode;
     /** Classes aplicadas ao elemento semântico do diálogo. */
     dialogClassName?: string;
     /** Identificador aplicado ao elemento semântico do diálogo. */
@@ -88,146 +87,101 @@ type ModalPropsBase = Omit<
     overlayClassName?: AriaModalOverlayProps["className"];
     /** Papel semântico do diálogo. Use alertdialog somente para confirmações críticas. */
     role?: "alertdialog" | "dialog";
-    /** Exibe o botão de fechamento no cabeçalho automático. */
-    showCloseButton?: boolean;
     /** Tamanho visual do diálogo. */
     size?: ModalSize;
     ref?: Ref<HTMLDivElement>;
   };
 
-type ModalAccessibleNameProps =
-  | {
-      /** Título visível usado para nomear o diálogo. */
-      title: ModalTitle;
-      "aria-label"?: string;
-      "aria-labelledby"?: string;
-    }
-  | {
-      title?: never;
-      "aria-label": string;
-      "aria-labelledby"?: string;
-    }
-  | {
-      title?: never;
-      "aria-label"?: string;
-      "aria-labelledby": string;
-    };
+export type ModalProps = ModalPropsBase;
 
-export type ModalProps = ModalPropsBase & ModalAccessibleNameProps;
-
-export type ModalHeaderProps = Omit<ComponentPropsWithRef<"div">, "children" | "title"> & {
-  children?: ReactNode;
-  description?: ReactNode;
-  showCloseButton?: boolean;
-  title?: ModalTitle;
+export type ModalHeaderProps = ComponentPropsWithRef<"div">;
+export type ModalTitleProps = Omit<AriaHeadingProps, "children" | "slot"> & {
+  children: ReactNode;
 };
+export type ModalDescriptionProps = Omit<AriaTextProps, "children" | "elementType" | "slot"> & {
+  children: ReactNode;
+};
+export type ModalCloseProps = Omit<ButtonProps, "slot">;
 
 export type ModalBodyProps = ComponentPropsWithRef<"div">;
 export type ModalFooterProps = ComponentPropsWithRef<"div">;
 export type ModalTriggerProps = DialogTriggerProps;
 
-const ModalCloseContext = createContext<(() => void) | null>(null);
-const ModalCloseVisibilityContext = createContext(true);
-const ModalDescriptionContext = createContext<ReactNode>(undefined);
-const ModalTitleContext = createContext<ModalTitle | undefined>(undefined);
+const defaultModalCloseIcon = <XIcon aria-hidden="true" />;
 
-function ModalCloseButton({ onPress }: { onPress: () => void }) {
+/** Título semântico que nomeia o diálogo pelo slot `title` do React Aria. */
+export function ModalTitle({ children, className, ...props }: ModalTitleProps) {
+  return (
+    <AriaHeading
+      {...props}
+      className={twMerge("m-0 text-card-title", className)}
+      data-slot="modal-title"
+      slot="title"
+    >
+      {children}
+    </AriaHeading>
+  );
+}
+
+/** Descrição semântica associada ao diálogo pelo slot `description` do React Aria. */
+export function ModalDescription({ children, className, ...props }: ModalDescriptionProps) {
+  return (
+    <AriaText
+      {...props}
+      className={twMerge("m-0 text-body-small text-muted", className)}
+      data-slot="modal-description"
+      elementType="p"
+      slot="description"
+    >
+      {children}
+    </AriaText>
+  );
+}
+
+/** Botão explícito de fechamento conectado ao estado do diálogo pelo slot `close`. */
+export function ModalClose({
+  "aria-label": ariaLabel = "Fechar modal",
+  children = defaultModalCloseIcon,
+  className,
+  isIconOnly = true,
+  size = "sm",
+  variant = "ghost",
+  ...props
+}: ModalCloseProps) {
+  const resolvedClassName = composeRenderProps(
+    className,
+    (userClassName: string | undefined) =>
+      twMerge("absolute top-0 right-0 shrink-0", userClassName) ?? "",
+  );
+
   return (
     <Button
-      aria-label="Fechar modal"
-      className="ml-auto shrink-0"
-      isIconOnly
-      onPress={onPress}
-      size="sm"
+      {...props}
+      aria-label={ariaLabel}
+      className={resolvedClassName}
+      data-slot="modal-close"
+      isIconOnly={isIconOnly}
+      size={size}
       slot="close"
-      variant="ghost"
+      variant={variant}
     >
-      <XIcon aria-hidden="true" />
+      {children}
     </Button>
   );
 }
 
-function hasRenderableContent(value: ReactNode) {
-  if (value === null || value === undefined || value === false) {
-    return false;
-  }
-
-  if (typeof value === "string") {
-    return value.trim().length > 0;
-  }
-
-  if (Array.isArray(value)) {
-    return value.some(hasRenderableContent);
-  }
-
-  return true;
-}
-
-function hasModalHeader(children: ReactNode): boolean {
-  return Children.toArray(children).some((child) => {
-    if (!isValidElement(child)) {
-      return false;
-    }
-
-    if (child.type === ModalHeader) {
-      return true;
-    }
-
-    return (
-      child.type === Fragment &&
-      isValidElement<{ children?: ReactNode }>(child) &&
-      hasModalHeader(child.props.children)
-    );
-  });
-}
-
-/**
- * Cabeçalho visual do Modal. Quando usado dentro de um Modal, o botão de fechar usa o estado do
- * React Aria automaticamente por meio do slot close.
- */
-export function ModalHeader({
-  children,
-  className,
-  description,
-  showCloseButton,
-  title,
-  ...props
-}: ModalHeaderProps) {
-  const close = useContext(ModalCloseContext);
-  const inheritedShowCloseButton = useContext(ModalCloseVisibilityContext);
-  const inheritedDescription = useContext(ModalDescriptionContext);
-  const inheritedTitle = useContext(ModalTitleContext);
-  const shouldShowCloseButton = showCloseButton ?? inheritedShowCloseButton;
-  const resolvedDescription = description ?? inheritedDescription;
-  const resolvedTitle = title ?? inheritedTitle;
-
+/** Cabeçalho visual do Modal. Componha-o com ModalTitle, ModalDescription e ModalClose. */
+export function ModalHeader({ children, className, ...props }: ModalHeaderProps) {
   return (
     <div
       {...props}
       data-slot="modal-header"
-      className={cn(
-        "flex min-w-0 shrink-0 items-start justify-between gap-4 border-border group-has-data-[slot=modal-body]/modal:border-b group-has-data-[slot=modal-body]/modal:pb-3.5",
+      className={twMerge(
+        "group/modal-header relative flex min-w-0 shrink-0 flex-col gap-1.5 border-border group-has-data-[slot=modal-body]/modal:border-b group-has-data-[slot=modal-body]/modal:pb-3.5 group-has-data-[slot=modal-close]/modal-header:pr-12",
         className,
       )}
     >
-      {(hasRenderableContent(resolvedTitle) ||
-        resolvedDescription !== undefined ||
-        children !== undefined) && (
-        <div className="grid min-w-0 gap-1.5">
-          {hasRenderableContent(resolvedTitle) && (
-            <AriaHeading className="m-0 text-card-title" slot="title">
-              {resolvedTitle}
-            </AriaHeading>
-          )}
-          {resolvedDescription !== undefined && (
-            <AriaText className="m-0 text-body-small text-muted" elementType="p" slot="description">
-              {resolvedDescription}
-            </AriaText>
-          )}
-          {children}
-        </div>
-      )}
-      {shouldShowCloseButton && close && <ModalCloseButton onPress={close} />}
+      {children}
     </div>
   );
 }
@@ -238,8 +192,8 @@ export function ModalBody({ className, ...props }: ModalBodyProps) {
     <div
       {...props}
       data-slot="modal-body"
-      className={cn(
-        "grid min-h-0 min-w-0 flex-1 gap-3.5 overflow-y-auto overscroll-contain",
+      className={twMerge(
+        "flex min-h-0 min-w-0 flex-1 flex-col gap-3.5 overflow-x-hidden overflow-y-auto overscroll-contain",
         className,
       )}
     />
@@ -252,8 +206,8 @@ export function ModalFooter({ className, ...props }: ModalFooterProps) {
     <div
       {...props}
       data-slot="modal-footer"
-      className={cn(
-        "grid min-w-0 shrink-0 grid-cols-1 gap-2 border-border group-has-[[data-slot=modal-body],[data-slot=modal-header]]/modal:border-t group-has-[[data-slot=modal-body],[data-slot=modal-header]]/modal:pt-3.5 md:flex md:flex-wrap md:justify-end",
+      className={twMerge(
+        "flex min-w-0 shrink-0 flex-col gap-2 border-border group-has-[[data-slot=modal-body],[data-slot=modal-header]]/modal:border-t group-has-[[data-slot=modal-body],[data-slot=modal-header]]/modal:pt-3.5 md:flex-row md:flex-wrap md:justify-end",
         className,
       )}
     />
@@ -278,7 +232,6 @@ export function Modal({
   children,
   className,
   defaultOpen,
-  description,
   dialogClassName,
   id,
   isDismissable = false,
@@ -289,34 +242,20 @@ export function Modal({
   ref,
   role = "dialog",
   shouldCloseOnInteractOutside,
-  showCloseButton = true,
   size = "md",
-  title,
   ...overlayProps
 }: ModalProps) {
-  const shouldRenderDefaultHeader =
-    !hasModalHeader(children) &&
-    (hasRenderableContent(title) || description !== undefined || showCloseButton);
-  const hasValidAriaLabel = typeof ariaLabel === "string" && ariaLabel.trim().length > 0;
-  const hasValidAriaLabelledby =
-    typeof ariaLabelledby === "string" && ariaLabelledby.trim().length > 0;
-  const resolvedAriaLabel =
-    hasValidAriaLabel || hasValidAriaLabelledby || hasRenderableContent(title)
-      ? hasValidAriaLabel
-        ? ariaLabel
-        : undefined
-      : "Modal";
-  const resolvedAriaLabelledby = hasValidAriaLabelledby ? ariaLabelledby : undefined;
   const resolvedOverlayClassName = composeRenderProps(
     overlayClassName,
-    (userClassName: string | undefined, _renderProps: ModalRenderProps) =>
-      overlayStyles({ className: userClassName, size }),
+    (userClassName: string | undefined, { isEntering, isExiting }: ModalRenderProps) =>
+      overlayStyles({ className: userClassName, isEntering, isExiting }),
   );
 
   return (
     <AriaModalOverlay
       {...overlayProps}
       className={resolvedOverlayClassName}
+      data-slot="modal-overlay"
       defaultOpen={defaultOpen}
       isDismissable={isDismissable}
       isKeyboardDismissDisabled={isKeyboardDismissDisabled}
@@ -324,43 +263,28 @@ export function Modal({
       onOpenChange={onOpenChange}
       shouldCloseOnInteractOutside={shouldCloseOnInteractOutside}
     >
-      <AriaModal
-        className={modalStyles({ className, size })}
-        data-size={size}
-        data-slot="modal"
-        ref={ref}
-      >
-        <AriaDialog
-          aria-describedby={ariaDescribedby}
-          aria-label={resolvedAriaLabel}
-          aria-labelledby={resolvedAriaLabelledby}
-          className={cn(
-            "flex max-h-full min-h-0 min-w-0 flex-1 flex-col gap-3.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand",
-            dialogClassName,
-          )}
-          id={id}
-          role={role}
+      <div className={modalWrapperStyles({ size })}>
+        <AriaModal
+          className={modalStyles({ className, size })}
+          data-size={size}
+          data-slot="modal"
+          ref={ref}
         >
-          {({ close }) => (
-            <ModalCloseVisibilityContext.Provider value={showCloseButton}>
-              <ModalTitleContext.Provider value={title}>
-                <ModalDescriptionContext.Provider value={description}>
-                  <ModalCloseContext.Provider value={close}>
-                    {shouldRenderDefaultHeader && (
-                      <ModalHeader
-                        description={description}
-                        showCloseButton={showCloseButton}
-                        title={title}
-                      />
-                    )}
-                    {children}
-                  </ModalCloseContext.Provider>
-                </ModalDescriptionContext.Provider>
-              </ModalTitleContext.Provider>
-            </ModalCloseVisibilityContext.Provider>
-          )}
-        </AriaDialog>
-      </AriaModal>
+          <AriaDialog
+            aria-describedby={ariaDescribedby}
+            aria-label={ariaLabel}
+            aria-labelledby={ariaLabelledby}
+            className={twMerge(
+              "flex max-h-full min-h-0 min-w-0 flex-1 flex-col gap-3.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand",
+              dialogClassName,
+            )}
+            id={id}
+            role={role}
+          >
+            {children}
+          </AriaDialog>
+        </AriaModal>
+      </div>
     </AriaModalOverlay>
   );
 }

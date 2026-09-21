@@ -1,5 +1,12 @@
 import { Button } from "../../../../components/Button";
-import { Modal, ModalBody, ModalFooter, ModalHeader } from "../../../../components/Modal";
+import {
+  Modal,
+  ModalBody,
+  ModalClose,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "../../../../components/Modal";
 
 import type { PendingCategoryToggle } from "./category-types";
 
@@ -34,11 +41,12 @@ export function CategoryToggleConfirmation({
         }
       }}
       role="alertdialog"
-      showCloseButton={!isPending}
       size="sm"
-      title="Inativar categoria?"
     >
-      <ModalHeader />
+      <ModalHeader>
+        <ModalTitle>Inativar categoria?</ModalTitle>
+        {!isPending && <ModalClose />}
+      </ModalHeader>
       <ModalBody>
         <p className="text-body-small text-muted" id="category-toggle-description">
           “{pendingToggle.category.nome}” deixará de aparecer nos filtros e nos novos cadastros de

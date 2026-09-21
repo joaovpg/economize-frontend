@@ -5,7 +5,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
-import { Modal, ModalBody, ModalFooter, ModalHeader } from "../../../../components/Modal";
+import {
+  Modal,
+  ModalBody,
+  ModalClose,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "../../../../components/Modal";
 import { TextField } from "../../../../components/TextField";
 import { isApiError } from "../../../../lib/api-errors";
 import { postCategoria, putCategoria } from "../../../../services/categories/api";
@@ -143,16 +151,17 @@ export function CategoryEditorModal({
           onClose();
         }
       }}
-      showCloseButton={!isSubmitting}
       size="md"
-      title={isEditing ? "Editar categoria" : "Nova categoria"}
-      description={
-        isEditing
-          ? "Atualize o nome e a organização desta categoria."
-          : "Crie uma categoria para organizar suas transações."
-      }
     >
-      <ModalHeader />
+      <ModalHeader>
+        <ModalTitle>{isEditing ? "Editar categoria" : "Nova categoria"}</ModalTitle>
+        <ModalDescription>
+          {isEditing
+            ? "Atualize o nome e a organização desta categoria."
+            : "Crie uma categoria para organizar suas transações."}
+        </ModalDescription>
+        {!isSubmitting && <ModalClose />}
+      </ModalHeader>
       <form
         className="contents"
         id="category-editor-form"
