@@ -1,47 +1,52 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/csr/ArrowRight";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { AuthConsent } from "../../components/AuthConsent";
 import { Button } from "../../components/Button";
 import { Card, CardBody } from "../../components/Card";
 import { TextField } from "../../components/TextField";
-import { emailSchema, passwordSchema } from "../../lib/auth";
+import { isApiError } from "../../lib/api-errors";
+import { postCadastro, postLogin } from "../../services/auth/api";
+import { cadastroRequestSchema } from "../../services/auth/contracts";
 
 export const Route = createFileRoute("/_public/cadastro")({
   component: RegisterPage,
 });
 
-const cadastroSchema = z
-  .object({
+const cadastroSchema = cadastroRequestSchema
+  .omit({ timezone: true })
+  .extend({
     confirmacao: z.string(),
-    email: emailSchema,
-    nome: z.string().trim().min(1, "Digite seu nome.").max(120, "Use até 120 caracteres."),
-    senha: passwordSchema
-      .min(8, "A senha deve ter entre 8 e 128 caracteres.")
-      .max(128, "A senha deve ter entre 8 e 128 caracteres."),
   })
   .refine((data) => data.senha === data.confirmacao, {
     message: "As senhas não coincidem.",
     path: ["confirmacao"],
   });
 
-type RegisterFormData = {
-  nome: string;
-  email: string;
-  senha: string;
-  confirmacao: string;
-};
+type RegisterFormData = z.infer<typeof cadastroSchema>;
+
+const cadastroRoute = getRouteApi("/_public/cadastro");
+
+function getFieldName(field: string | undefined): keyof RegisterFormData | null {
+  const name = field?.split("#").pop()?.split("/").pop();
+
+  return name === "nome" || name === "email" || name === "senha" ? name : null;
+}
 
 function RegisterPage() {
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const navigate = cadastroRoute.useNavigate();
   const timezone = new Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
   const {
     formState: { errors, isSubmitting },
     handleSubmit,
     register,
+    setError,
   } = useForm<RegisterFormData>({
     mode: "onSubmit",
     resolver: zodResolver(cadastroSchema),
@@ -50,6 +55,46 @@ function RegisterPage() {
   const emailField = register("email");
   const senhaField = register("senha");
   const confirmacaoField = register("confirmacao");
+
+  const handleFormSubmit = async (data: RegisterFormData) => {
+    setSubmitError(null);
+
+    try {
+      await postCadastro({
+        email: data.email,
+        nome: data.nome,
+        senha: data.senha,
+        timezone,
+      });
+
+      await postLogin({
+        email: data.email,
+        senha: data.senha,
+      });
+
+      await navigate({ replace: true, to: "/summary" });
+    } catch (error) {
+      if (!isApiError(error)) {
+        setSubmitError("Não foi possível conectar ao servidor. Tente novamente.");
+        return;
+      }
+
+      let hasFieldError = false;
+      for (const [fieldName, messages] of Object.entries(error.fieldErrors)) {
+        const field = getFieldName(fieldName);
+        const message = messages[0];
+
+        if (field && message) {
+          setError(field, { message, type: "server" });
+          hasFieldError = true;
+        }
+      }
+
+      if (!hasFieldError || error.problem?.detail) {
+        setSubmitError(error.problem?.detail ?? "Não foi possível criar sua conta. Tente novamente.");
+      }
+    }
+  };
 
   return (
     <section
@@ -70,8 +115,17 @@ function RegisterPage() {
         </p>
       </div>
 
-      <Card as="form" onSubmit={handleSubmit((data) => data)} noValidate>
+      <Card as="form" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
         <CardBody spacing="compact">
+          {submitError && (
+            <p
+              className="m-0 rounded-md bg-danger-soft px-3 py-2 text-validation text-danger"
+              role="alert"
+              aria-live="assertive"
+            >
+              {submitError}
+            </p>
+          )}
           <TextField
             label="Nome completo"
             name={nomeField.name}
