@@ -275,8 +275,19 @@ export function TransactionFilters({
           </fieldset>
 
           <fieldset className="grid min-w-0 gap-2.5 border-0 p-0">
-            <legend className="m-0 text-caption-strong tracking-label text-muted uppercase">
-              Contas
+            <legend className="m-0 flex items-center justify-between gap-2 text-caption-strong tracking-label text-muted uppercase">
+              <span>Contas</span>
+              <Link
+                aria-label="Gerenciar contas"
+                className="size-8! min-h-8! rounded-lg!"
+                isIconOnly
+                preload="intent"
+                size="sm"
+                to="/accounts"
+                variant="ghost"
+              >
+                <GearSixIcon aria-hidden="true" />
+              </Link>
             </legend>
             <FilterTree
               ariaLabel="Contas"
