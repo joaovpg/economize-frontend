@@ -18,6 +18,7 @@ type TransactionTableProps = {
   onDelete: (target: ConsultaTransacaoItem) => void;
   onEdit: (target: ConsultaTransacaoItem) => void;
   openingBalance: number;
+  title: string;
 };
 
 type TransactionDayGroup = {
@@ -79,6 +80,7 @@ export function TransactionTable({
   onDelete,
   onEdit,
   openingBalance,
+  title,
 }: TransactionTableProps) {
   const dayGroups = useMemo(
     () => groupTransactionsByDay(items, openingBalance),
@@ -86,37 +88,46 @@ export function TransactionTable({
   );
 
   return (
-    <div className="min-w-0 overflow-hidden">
+    <div className="min-w-0 overflow-hidden max-[48rem]:px-4 max-[48rem]:pb-4">
       <table className="block w-full border-collapse text-left md:table">
-        <caption className="sr-only">Movimentações financeiras agrupadas por dia</caption>
+        <caption className="block border-b border-border p-5.5 text-left md:table-caption">
+          <span className="flex items-baseline justify-between gap-4">
+            <span className="text-card-title text-foreground" id="transactions-list-title">
+              {title}
+            </span>
+            <span className="text-meta text-subtle">
+              {items.length} {items.length === 1 ? "item" : "itens"}
+            </span>
+          </span>
+        </caption>
         <thead className="hidden md:table-header-group">
           <tr className="border-b border-border-strong">
             <th
-              className="pr-5.5 pb-3.5 text-caption-strong tracking-label text-muted uppercase"
+              className="px-5.5 pb-3.5 text-caption-strong tracking-label text-muted uppercase"
               scope="col"
             >
               Descrição
             </th>
             <th
-              className="pr-5.5 pb-3.5 text-caption-strong tracking-label text-muted uppercase"
+              className="px-5.5 pb-3.5 text-caption-strong tracking-label text-muted uppercase"
               scope="col"
             >
               Categoria
             </th>
             <th
-              className="pr-5.5 pb-3.5 text-caption-strong tracking-label text-muted uppercase"
+              className="px-5.5 pb-3.5 text-caption-strong tracking-label text-muted uppercase"
               scope="col"
             >
               Conta
             </th>
             <th
-              className="pb-3.5 text-right text-caption-strong tracking-label text-muted uppercase"
+              className="px-5.5 pb-3.5 text-right text-caption-strong tracking-label text-muted uppercase"
               scope="col"
             >
               Valor
             </th>
             <th
-              className="pb-3.5 pl-5.5 text-right text-caption-strong tracking-label text-muted uppercase"
+              className="px-5.5 pb-3.5 text-right text-caption-strong tracking-label text-muted uppercase"
               scope="col"
             >
               Ações
@@ -131,7 +142,7 @@ export function TransactionTable({
               <tr className="grid w-full md:table-row">
                 <th
                   aria-label={`Dia ${formatTransactionDate(group.date)}`}
-                  className={`block p-0 text-left text-caption-strong text-foreground md:table-cell md:py-3.5 ${groupIndex > 0 ? "md:pt-7" : ""}`}
+                  className={`block p-0 text-left text-caption-strong text-foreground md:table-cell md:px-5.5 md:py-3.5 ${groupIndex > 0 ? "md:pt-7" : ""}`}
                   colSpan={5}
                   scope="rowgroup"
                 >
@@ -152,7 +163,7 @@ export function TransactionTable({
                     className={`grid gap-3 rounded-xl border border-border bg-surface-muted/45 p-3.5 md:table-row md:rounded-none md:border-0 md:border-b md:border-border md:bg-transparent md:p-0 ${itemIndex === group.items.length - 1 ? "md:border-b-0" : ""}`}
                     key={getItemKey(item)}
                   >
-                    <td className="flex items-start justify-between gap-4 border-0 p-0 md:table-cell md:max-w-0 md:py-4 md:pr-5.5 md:align-top">
+                    <td className="flex items-start justify-between gap-4 border-0 p-0 md:table-cell md:max-w-0 md:px-5.5 md:py-4 md:align-top">
                       <span className="block text-meta text-subtle uppercase md:hidden">
                         Descrição
                       </span>
@@ -173,7 +184,7 @@ export function TransactionTable({
                         </div>
                       </div>
                     </td>
-                    <td className="flex items-start justify-between gap-4 border-0 p-0 text-caption text-muted md:table-cell md:py-4 md:pr-5.5 md:align-top">
+                    <td className="flex items-start justify-between gap-4 border-0 p-0 text-caption text-muted md:table-cell md:px-5.5 md:py-4 md:align-top">
                       <span className="block text-meta text-subtle uppercase md:hidden">
                         Categoria
                       </span>
@@ -181,19 +192,19 @@ export function TransactionTable({
                         {getCategoryLabel(item, categories)}
                       </span>
                     </td>
-                    <td className="flex items-start justify-between gap-4 border-0 p-0 text-caption text-muted md:table-cell md:py-4 md:pr-5.5 md:align-top">
+                    <td className="flex items-start justify-between gap-4 border-0 p-0 text-caption text-muted md:table-cell md:px-5.5 md:py-4 md:align-top">
                       <span className="block text-meta text-subtle uppercase md:hidden">Conta</span>
                       <span className="max-w-[60%] text-right md:max-w-none">
                         {getAccountLabel(item, accounts)}
                       </span>
                     </td>
-                    <td className="flex items-start justify-between gap-4 border-0 p-0 text-right tabular-nums md:table-cell md:py-4 md:align-top">
+                    <td className="flex items-start justify-between gap-4 border-0 p-0 text-right tabular-nums md:table-cell md:px-5.5 md:py-4 md:align-top">
                       <span className="block text-meta text-subtle uppercase md:hidden">Valor</span>
                       <strong className={`font-semibold whitespace-nowrap ${valueClassName}`}>
                         {formatSignedCurrency(item.valor)}
                       </strong>
                     </td>
-                    <td className="flex items-center justify-between gap-4 border-0 p-0 md:table-cell md:py-4 md:pl-5.5 md:align-top">
+                    <td className="flex items-center justify-between gap-4 border-0 p-0 md:table-cell md:px-5.5 md:py-4 md:align-top">
                       {shouldRenderActions && (
                         <>
                           <span className="block text-meta text-subtle uppercase md:hidden">
@@ -233,7 +244,7 @@ export function TransactionTable({
               <tr className="block border-t border-dashed border-border-strong md:table-row">
                 <td
                   aria-label={`Saldo do dia ${formatCurrency(group.balance)}`}
-                  className="block p-0 text-right md:table-cell md:py-3.5"
+                  className="block p-0 text-right md:table-cell md:px-5.5 md:py-3.5"
                   colSpan={5}
                 >
                   <div className="flex items-baseline justify-end gap-2 py-3.5 md:p-0">

@@ -266,32 +266,31 @@ function TransactionList({
 }) {
   return (
     <Card as="section" aria-labelledby="transactions-list-title">
-      <CardHeader className="items-baseline">
-        <h2 className="m-0 text-card-title text-foreground" id="transactions-list-title">
-          {title}
-        </h2>
-        <span className="text-meta text-subtle">
-          {items.length} {items.length === 1 ? "item" : "itens"}
-        </span>
-      </CardHeader>
-      <CardBody spacing="none">
-        {items.length > 0 ? (
-          <div className="px-5.5 pb-5.5 max-[48rem]:px-4 max-[48rem]:pb-4">
-            <TransactionTable
-              accounts={accounts}
-              categories={categories}
-              items={items}
-              onDelete={onDelete}
-              onEdit={onEdit}
-              openingBalance={openingBalance}
-            />
-          </div>
-        ) : (
-          <p className="m-0 p-5.5 text-body-small text-muted">
-            Nenhuma movimentação encontrada com esses filtros.
-          </p>
-        )}
-      </CardBody>
+      {items.length > 0 ? (
+        <TransactionTable
+          accounts={accounts}
+          categories={categories}
+          items={items}
+          onDelete={onDelete}
+          onEdit={onEdit}
+          openingBalance={openingBalance}
+          title={title}
+        />
+      ) : (
+        <>
+          <CardHeader className="items-baseline">
+            <h2 className="m-0 text-card-title text-foreground" id="transactions-list-title">
+              {title}
+            </h2>
+            <span className="text-meta text-subtle">0 itens</span>
+          </CardHeader>
+          <CardBody spacing="none">
+            <p className="m-0 p-5.5 text-body-small text-muted">
+              Nenhuma movimentação encontrada com esses filtros.
+            </p>
+          </CardBody>
+        </>
+      )}
     </Card>
   );
 }
@@ -411,7 +410,7 @@ function ReferenceVariant(props: TransactionsPrototypeProps) {
         onDelete={props.onDelete}
         onEdit={props.onEdit}
         openingBalance={props.data.saldoAbertura}
-        title="Movimentações do período"
+        title="Movimentações"
       />
     </PrototypeFrame>
   );
