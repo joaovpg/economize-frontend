@@ -103,31 +103,31 @@ export function TransactionTable({
         <thead className="hidden md:table-header-group">
           <tr className="border-b border-border-strong">
             <th
-              className="px-5.5 pb-3.5 text-caption-strong tracking-label text-muted uppercase"
+              className="px-5.5 pb-5.5 text-caption-strong tracking-label text-muted uppercase"
               scope="col"
             >
               Descrição
             </th>
             <th
-              className="px-5.5 pb-3.5 text-caption-strong tracking-label text-muted uppercase"
+              className="px-5.5 pb-5.5 text-caption-strong tracking-label text-muted uppercase"
               scope="col"
             >
               Categoria
             </th>
             <th
-              className="px-5.5 pb-3.5 text-caption-strong tracking-label text-muted uppercase"
+              className="px-5.5 pb-5.5 text-caption-strong tracking-label text-muted uppercase"
               scope="col"
             >
               Conta
             </th>
             <th
-              className="px-5.5 pb-3.5 text-right text-caption-strong tracking-label text-muted uppercase"
+              className="px-5.5 pb-5.5 text-right text-caption-strong tracking-label text-muted uppercase"
               scope="col"
             >
               Valor
             </th>
             <th
-              className="px-5.5 pb-3.5 text-right text-caption-strong tracking-label text-muted uppercase"
+              className="px-5.5 pb-5.5 text-right text-caption-strong tracking-label text-muted uppercase"
               scope="col"
             >
               Ações
