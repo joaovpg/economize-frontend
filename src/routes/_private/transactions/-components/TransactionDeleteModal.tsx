@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
+import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
   ModalBody,
@@ -43,6 +44,7 @@ export function TransactionDeleteModal({
   const [scope, setScope] = useState<RecurrenceScope>("ONLY_THIS");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
   const queryClient = useQueryClient();
 
@@ -118,7 +120,8 @@ export function TransactionDeleteModal({
         }
       }}
       role="alertdialog"
-      size="sm"
+      size={isRecurrence ? "md" : "sm"}
+      initialFocus={cancelButtonRef}
     >
       <ModalHeader>
         <ModalTitle>Excluir transação?</ModalTitle>
@@ -160,18 +163,16 @@ export function TransactionDeleteModal({
         <p className="m-0 text-body-small text-muted">
           Essa ação não pode ser desfeita. Os dados serão removidos da API.
         </p>
-        {errorMessage && (
-          <p
-            aria-live="assertive"
-            className="m-0 rounded-xl border border-danger/25 bg-danger-soft px-3.5 py-3 text-body-small text-danger"
-            role="alert"
-          >
-            {errorMessage}
-          </p>
-        )}
+        {errorMessage && <InlineMessage tone="danger">{errorMessage}</InlineMessage>}
       </ModalBody>
       <ModalFooter>
-        <Button isDisabled={isSubmitting} onPress={onClose} size="sm" variant="secondary">
+        <Button
+          ref={cancelButtonRef}
+          isDisabled={isSubmitting}
+          onPress={onClose}
+          size="sm"
+          variant="secondary"
+        >
           Cancelar
         </Button>
         <Button

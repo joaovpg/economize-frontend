@@ -1,8 +1,5 @@
 import { Suspense } from "react";
 
-import { ChartLineUpIcon } from "@phosphor-icons/react/dist/csr/ChartLineUp";
-import { ListBulletsIcon } from "@phosphor-icons/react/dist/csr/ListBullets";
-import { UserCircleIcon } from "@phosphor-icons/react/dist/csr/UserCircle";
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 
 import { Link } from "../../components/Link";
@@ -17,9 +14,9 @@ export const Route = createFileRoute("/_private")({
 });
 
 const navigation = [
-  { icon: ChartLineUpIcon, label: "Resumo", to: "/summary" },
-  { icon: ListBulletsIcon, label: "Transações", to: "/transactions" },
-  { icon: UserCircleIcon, label: "Perfil", to: "/profile" },
+  { label: "Resumo", to: "/summary" },
+  { label: "Transações", to: "/transactions" },
+  { label: "Contas", to: "/accounts" },
 ] as const;
 
 function PrivateLayout() {
@@ -29,11 +26,11 @@ function PrivateLayout() {
     to === "/summary" ? pathname === "/summary" : pathname === to || pathname.startsWith(`${to}/`);
 
   return (
-    <div className="app-background relative isolate min-h-svh overflow-hidden bg-canvas text-foreground selection:bg-brand-soft selection:text-brand-hover">
-      <div className="relative z-1 mx-auto min-h-svh w-full max-w-310 border-x border-border-overlay bg-canvas-overlay max-[48rem]:border-x-0">
-        <header className="flex items-center justify-between gap-4.5 border-b border-border bg-canvas-panel px-6 py-4.5 backdrop-blur-header max-[60rem]:px-5 max-[48rem]:grid max-[48rem]:grid-cols-[minmax(0,1fr)_auto] max-[48rem]:gap-3.5 max-[48rem]:p-4">
+    <div className="app-background relative isolate min-h-svh overflow-hidden text-foreground selection:bg-brand-soft selection:text-brand-hover">
+      <div className="relative z-1 min-h-svh w-full">
+        <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border bg-canvas-panel px-5 py-4.5 backdrop-blur-header max-[48rem]:grid max-[48rem]:grid-cols-[minmax(0,1fr)_auto] max-[48rem]:gap-3.5 max-[48rem]:p-4">
           <Link
-            className="whitespace-nowrap"
+            className="justify-start! whitespace-nowrap"
             linkVariant="compactBrand"
             preload="intent"
             to="/summary"
@@ -47,7 +44,7 @@ function PrivateLayout() {
             className="flex items-center justify-center gap-1.5 rounded-full border border-border bg-surface-overlay p-1 max-[48rem]:col-span-2 max-[48rem]:w-full max-[48rem]:justify-start max-[48rem]:overflow-x-auto"
             aria-label="Navegação principal"
           >
-            {navigation.map(({ to, icon: Icon, label }) => {
+            {navigation.map(({ to, label }) => {
               const active = isActive(to);
 
               return (
@@ -59,7 +56,6 @@ function PrivateLayout() {
                   to={to}
                   aria-current={active ? "page" : undefined}
                   variant="link"
-                  leadingIcon={<Icon weight={active ? "fill" : "regular"} />}
                 >
                   {label}
                 </Link>
@@ -67,12 +63,7 @@ function PrivateLayout() {
             })}
           </nav>
 
-          <Link
-            className="whitespace-nowrap max-[60rem]:hidden"
-            preload="intent"
-            to="/profile"
-            leadingIcon={<UserCircleIcon aria-hidden="true" />}
-          >
+          <Link className="whitespace-nowrap max-[60rem]:hidden" preload="intent" to="/profile">
             Minha conta
           </Link>
         </header>

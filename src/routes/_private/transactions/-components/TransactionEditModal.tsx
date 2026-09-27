@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
+import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
   ModalBody,
@@ -209,6 +210,7 @@ export function TransactionEditModal({
   const [isScopeDirty, setIsScopeDirty] = useState(false);
   const [scope, setScope] = useState<RecurrenceScope>("ONLY_THIS");
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const descriptionInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const editMutation = useMutation<
     EditOperationResponse,
@@ -372,6 +374,7 @@ export function TransactionEditModal({
         isDismissable={!isSubmitting && discardAction === null}
         isKeyboardDismissDisabled={isSubmitting}
         isOpen
+        initialFocus={isTransfer ? descriptionInputRef : undefined}
         onOpenChange={(open) => {
           if (!open) {
             requestClose();
@@ -386,15 +389,7 @@ export function TransactionEditModal({
         </ModalHeader>
         <form className="contents" noValidate onSubmit={handleSubmit(handleFormSubmit)}>
           <ModalBody>
-            {submitError && (
-              <p
-                aria-live="assertive"
-                className="m-0 rounded-xl border border-danger/25 bg-danger-soft px-3.5 py-3 text-body-small text-danger"
-                role="alert"
-              >
-                {submitError}
-              </p>
-            )}
+            {submitError && <InlineMessage tone="danger">{submitError}</InlineMessage>}
 
             {isRecurring && (
               <RadioGroup
@@ -415,6 +410,7 @@ export function TransactionEditModal({
               >
                 {recurrenceScopeOptions.map((option) => (
                   <RadioItem
+                    focusOnOpen={option.value === "ONLY_THIS"}
                     description={option.description}
                     key={option.value}
                     value={option.value}
@@ -431,6 +427,7 @@ export function TransactionEditModal({
                 name="tipo"
                 render={({ field }) => (
                   <TransactionTypeField
+                    focusOnOpen={!isRecurring}
                     isDisabled={isSubmitting}
                     onChange={field.onChange}
                     value={field.value}
@@ -454,7 +451,10 @@ export function TransactionEditModal({
                     name={field.name}
                     onBlur={field.onBlur}
                     onInput={field.onChange}
-                    inputRef={field.ref}
+                    inputRef={(input) => {
+                      descriptionInputRef.current = input;
+                      field.ref(input);
+                    }}
                     placeholder="Ex.: Supermercado"
                     value={field.value}
                   />

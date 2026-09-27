@@ -16,38 +16,14 @@ body {
 }
 
 @layer components {
-  .app-background::before,
-  .app-background::after {
-    position: absolute;
-    pointer-events: none;
-    inset: 0;
-    z-index: -1;
-    content: "";
-  }
-
-  .app-background::before {
+  .app-background {
     background:
-      linear-gradient(
-        color-mix(in oklch, var(--color-border-value) 70%, transparent) 1px,
-        transparent 1px
-      ),
+      radial-gradient(circle at 0% 0%, var(--color-page-glow-value), transparent 28rem),
       linear-gradient(
         180deg,
-        color-mix(in oklch, var(--color-surface-value) 70%, transparent),
-        transparent 22rem
+        var(--color-canvas-value) 0%,
+        color-mix(in oklch, var(--color-surface-muted-value) 88%, var(--color-brand-soft-value))
+          100%
       );
-    background-size:
-      100% 32px,
-      100% 100%;
-    mask-image: linear-gradient(to bottom, transparent, black 13%, black 80%, transparent);
-    opacity: 0.42;
-  }
-
-  .app-background::after {
-    background: linear-gradient(
-      115deg,
-      color-mix(in oklch, var(--color-brand-soft-value) 72%, transparent),
-      transparent 36%
-    );
   }
 }

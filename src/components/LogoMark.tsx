@@ -3,10 +3,10 @@ import { TrendUpIcon } from "@phosphor-icons/react/dist/csr/TrendUp";
 export default function LogoMark() {
   return (
     <span
-      className="grid size-7.75 place-items-center rounded-[10px] bg-brand text-brand-foreground shadow-[0_12px_28px_color-mix(in_oklch,var(--color-brand)_18%,transparent)]"
+      className="grid size-7 place-items-center rounded-[9px] bg-brand text-brand-foreground"
       aria-hidden="true"
     >
-      <TrendUpIcon size={18} weight="bold" />
+      <TrendUpIcon size={16} weight="bold" />
     </span>
   );
 }

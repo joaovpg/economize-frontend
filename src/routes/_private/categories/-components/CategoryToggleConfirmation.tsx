@@ -1,8 +1,12 @@
+import { useRef } from "react";
+
 import { Button } from "../../../../components/Button";
+import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
   ModalBody,
   ModalClose,
+  ModalDescription,
   ModalFooter,
   ModalHeader,
   ModalTitle,
@@ -25,16 +29,18 @@ export function CategoryToggleConfirmation({
   onConfirm,
   pendingToggle,
 }: CategoryToggleConfirmationProps) {
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+
   if (!pendingToggle) {
     return null;
   }
 
   return (
     <Modal
-      aria-describedby="category-toggle-description"
       isDismissable={!isPending}
       isKeyboardDismissDisabled={isPending}
       isOpen
+      initialFocus={cancelButtonRef}
       onOpenChange={(open) => {
         if (!open && !isPending) {
           onCancel();
@@ -45,25 +51,25 @@ export function CategoryToggleConfirmation({
     >
       <ModalHeader>
         <ModalTitle>Inativar categoria?</ModalTitle>
-        {!isPending && <ModalClose />}
-      </ModalHeader>
-      <ModalBody>
-        <p className="text-body-small text-muted" id="category-toggle-description">
+        <ModalDescription>
           “{pendingToggle.category.nome}” deixará de aparecer nos filtros e nos novos cadastros de
           transações. As transações existentes serão preservadas.
-        </p>
-        {errorMessage && (
-          <p
-            aria-live="assertive"
-            className="block rounded-xl border border-danger/25 bg-danger-soft px-3.5 py-3 text-body-small text-danger"
-            role="alert"
-          >
-            {errorMessage}
-          </p>
-        )}
-      </ModalBody>
+        </ModalDescription>
+        {!isPending && <ModalClose />}
+      </ModalHeader>
+      {errorMessage && (
+        <ModalBody>
+          <InlineMessage tone="danger">{errorMessage}</InlineMessage>
+        </ModalBody>
+      )}
       <ModalFooter>
-        <Button isDisabled={isPending} onPress={onCancel} size="sm" variant="secondary">
+        <Button
+          ref={cancelButtonRef}
+          isDisabled={isPending}
+          onPress={onCancel}
+          size="sm"
+          variant="secondary"
+        >
           Cancelar
         </Button>
         <Button

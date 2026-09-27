@@ -1,21 +1,120 @@
 import { useState } from "react";
 
 import { ArrowLeftIcon } from "@phosphor-icons/react/dist/csr/ArrowLeft";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/csr/MagnifyingGlass";
 import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { Button } from "../../../components/Button";
 import { Card, CardBody, CardHeader } from "../../../components/Card";
+import { IconSlot } from "../../../components/IconSlot";
+import { InlineMessage } from "../../../components/InlineMessage";
 import { Link } from "../../../components/Link";
-import { formatCurrency } from "../../../lib/formatters";
+import { PageHeading } from "../../../components/PageHeading";
+import { type ContaResponse } from "../../../services/accounts/contracts";
 import { accountsQueryOptions } from "../../../services/accounts/queries";
 import { AccountEditorModal } from "./-components/AccountEditorModal";
 
+const accountStatusFilters = [
+  { label: "Todas", value: "all" },
+  { label: "Ativas", value: "active" },
+  { label: "Inativas", value: "inactive" },
+] as const;
+
+type AccountStatusFilter = (typeof accountStatusFilters)[number]["value"];
+
+const shortDateFormatter = new Intl.DateTimeFormat("pt-BR", {
+  dateStyle: "short",
+  timeZone: "UTC",
+});
+
+function formatInitialBalanceDate(value: string) {
+  return shortDateFormatter.format(new Date(`${value}T00:00:00Z`));
+}
+
+function formatAccountBalance(value: number, currency: string) {
+  try {
+    return new Intl.NumberFormat("pt-BR", {
+      currency,
+      currencyDisplay: "symbol",
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
+      style: "currency",
+    }).format(value);
+  } catch {
+    return `${currency} ${value.toLocaleString("pt-BR", {
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
+    })}`;
+  }
+}
+
+function filterAccounts(accounts: readonly ContaResponse[], status: AccountStatusFilter) {
+  switch (status) {
+    case "all":
+      return accounts;
+    case "active":
+      return accounts.filter((account) => account.ativo);
+    case "inactive":
+      return accounts.filter((account) => !account.ativo);
+  }
+
+  const exhaustive: never = status;
+  return exhaustive;
+}
+
+function AccountStatus({ isActive }: { isActive: boolean }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-caption-strong ${isActive ? "border-success/25 bg-success-soft text-success" : "border-warning/25 bg-warning-soft text-warning"}`}
+    >
+      <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
+      {isActive ? "Ativa" : "Inativa"}
+    </span>
+  );
+}
+
+function AccountsEmptyState({
+  hasAccounts,
+  status,
+}: {
+  hasAccounts: boolean;
+  status: AccountStatusFilter;
+}) {
+  const isFiltered = status !== "all";
+
+  return (
+    <div className="grid justify-items-center gap-3.5 px-4 py-10 text-center">
+      <div className="grid size-12 place-items-center rounded-2xl bg-brand-soft text-xl text-brand-hover">
+        <IconSlot>
+          {isFiltered ? (
+            <MagnifyingGlassIcon aria-hidden="true" />
+          ) : (
+            <PlusIcon aria-hidden="true" />
+          )}
+        </IconSlot>
+      </div>
+      <div className="grid gap-1.5">
+        <h3 className="text-title-compact text-foreground">
+          {hasAccounts && isFiltered ? "Nenhuma conta nesse filtro" : "Nenhuma conta cadastrada"}
+        </h3>
+        <p className="m-0 max-w-[36ch] text-body-small text-muted">
+          {hasAccounts && isFiltered
+            ? "Altere o filtro para visualizar outras contas."
+            : "Crie uma conta para começar a registrar suas movimentações."}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function AccountsPage() {
   const { data: accounts } = useSuspenseQuery(accountsQueryOptions());
+  const [accountStatus, setAccountStatus] = useState<AccountStatusFilter>("all");
   const [isCreationOpen, setIsCreationOpen] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const filteredAccounts = filterAccounts(accounts, accountStatus);
 
   const handleSaved = async (message: string) => {
     setFeedback(message);
@@ -24,10 +123,11 @@ function AccountsPage() {
   return (
     <section
       aria-labelledby="accounts-title"
-      className="flex min-w-0 flex-col pt-8 pr-7 pb-10 pl-7 max-[48rem]:pt-6 max-[48rem]:pr-4 max-[48rem]:pb-8 max-[48rem]:pl-4"
+      className="flex min-w-0 flex-col px-0 pt-7 pb-10 max-[64rem]:px-4 max-[48rem]:pt-5.5 max-[48rem]:pb-8"
     >
-      <div className="flex w-full max-w-5xl flex-col gap-5.5 self-center">
+      <div className="flex w-full max-w-260 flex-col gap-7 self-center">
         <Link
+          className="justify-start! self-start"
           leadingIcon={<ArrowLeftIcon aria-hidden="true" />}
           linkVariant="back"
           to="/summary"
@@ -38,14 +138,12 @@ function AccountsPage() {
         </Link>
 
         <header className="flex items-end justify-between gap-5 max-[40rem]:flex-col max-[40rem]:items-start max-[40rem]:gap-4">
-          <div className="flex min-w-0 flex-col gap-2.5">
-            <h1 className="text-page-title" id="accounts-title">
-              Contas
-            </h1>
-            <p className="max-w-[48ch] text-body-small text-muted">
-              Gerencie as contas usadas nas suas movimentações.
-            </p>
-          </div>
+          <PageHeading
+            description="Tenha suas contas em um só lugar para registrar movimentações com mais contexto."
+            eyebrow="Organização financeira"
+            id="accounts-title"
+            title="Contas"
+          />
           <Button
             className="w-full md:w-auto"
             leadingIcon={<PlusIcon aria-hidden="true" />}
@@ -53,71 +151,109 @@ function AccountsPage() {
               setFeedback(null);
               setIsCreationOpen(true);
             }}
-            size="sm"
+            size="md"
           >
             Nova conta
           </Button>
         </header>
 
-        {feedback && (
-          <output
-            aria-live="polite"
-            className="block rounded-xl border border-success/25 bg-success-soft px-3.5 py-3 text-body-small text-success"
-          >
-            {feedback}
-          </output>
-        )}
+        {feedback && <InlineMessage>{feedback}</InlineMessage>}
 
         <Card as="section" aria-labelledby="accounts-list-title">
-          <CardHeader>
-            <div>
-              <h2 className="text-title-compact text-foreground" id="accounts-list-title">
-                Suas contas
+          <CardHeader className="flex-col items-start md:flex-row md:items-center">
+            <div className="min-w-0">
+              <h2 className="m-0 text-title-compact text-foreground" id="accounts-list-title">
+                Todas as contas
               </h2>
-              <p className="text-caption text-muted">
-                O saldo inicial é considerado a partir da data cadastrada.
+              <p className="m-0 mt-1.5 text-caption text-muted">
+                {filteredAccounts.length}{" "}
+                {filteredAccounts.length === 1 ? "registro encontrado" : "registros encontrados"}
               </p>
             </div>
-            <span className="text-meta text-subtle">
-              {accounts.length} {accounts.length === 1 ? "conta" : "contas"}
-            </span>
-          </CardHeader>
-          <CardBody>
-            {accounts.length > 0 ? (
-              <ul className="m-0 grid list-none gap-2.5 p-0">
-                {accounts.map((account) => (
-                  <li
-                    className="flex items-center justify-between gap-4 rounded-xl border border-border px-3.5 py-3"
-                    key={account.id}
+            <fieldset className="flex flex-wrap gap-2 border-0 p-0">
+              <legend className="sr-only">Filtrar contas por status</legend>
+              {accountStatusFilters.map((filter) => {
+                return (
+                  <Button
+                    aria-pressed={filter.value === accountStatus}
+                    key={filter.value}
+                    onPress={() => setAccountStatus(filter.value)}
+                    size="sm"
+                    variant="filter"
                   >
-                    <div className="min-w-0">
-                      <strong className="block truncate text-body-small text-foreground">
-                        {account.nome}
-                      </strong>
-                      <span className="text-caption text-muted">
-                        {account.moeda} · desde {account.dataSaldoInicial}
-                      </span>
-                    </div>
-                    <strong className="shrink-0 text-body-small tabular-nums text-foreground">
-                      {formatCurrency(account.saldoInicial)}
-                    </strong>
-                  </li>
-                ))}
-              </ul>
+                    {filter.label}
+                  </Button>
+                );
+              })}
+            </fieldset>
+          </CardHeader>
+          <CardBody spacing="none">
+            {filteredAccounts.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <caption className="sr-only">Contas cadastradas</caption>
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th
+                        className="px-5.5 py-3.5 text-left text-caption-strong tracking-label text-subtle uppercase max-[40rem]:px-4"
+                        scope="col"
+                      >
+                        Conta
+                      </th>
+                      <th
+                        className="px-5.5 py-3.5 text-left text-caption-strong tracking-label text-subtle uppercase max-[40rem]:px-4"
+                        scope="col"
+                      >
+                        Status
+                      </th>
+                      <th
+                        className="px-5.5 py-3.5 text-left text-caption-strong tracking-label text-subtle uppercase max-[40rem]:hidden"
+                        scope="col"
+                      >
+                        Data inicial
+                      </th>
+                      <th
+                        className="px-5.5 py-3.5 text-right text-caption-strong tracking-label text-subtle uppercase max-[40rem]:px-4"
+                        scope="col"
+                      >
+                        Saldo inicial
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredAccounts.map((account) => (
+                      <tr className="border-b border-border last:border-b-0" key={account.id}>
+                        <td className="min-w-0 px-5.5 py-4 align-middle max-[40rem]:px-4">
+                          <span className="block truncate text-label text-foreground">
+                            {account.nome}
+                          </span>
+                          <span className="mt-1 block text-caption text-subtle">
+                            {account.moeda}
+                          </span>
+                        </td>
+                        <td className="px-5.5 py-4 align-middle max-[40rem]:px-4">
+                          <AccountStatus isActive={account.ativo} />
+                        </td>
+                        <td className="px-5.5 py-4 align-middle text-body-small text-muted max-[40rem]:hidden">
+                          {formatInitialBalanceDate(account.dataSaldoInicial)}
+                        </td>
+                        <td className="px-5.5 py-4 text-right align-middle text-label text-foreground tabular-nums max-[40rem]:px-4">
+                          {formatAccountBalance(account.saldoInicial, account.moeda)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             ) : (
-              <p className="m-0 rounded-xl border border-dashed border-border-strong p-3.5 text-body-small text-muted">
-                Nenhuma conta cadastrada.
-              </p>
+              <AccountsEmptyState hasAccounts={accounts.length > 0} status={accountStatus} />
             )}
           </CardBody>
         </Card>
       </div>
 
       {isCreationOpen && (
-        <AccountEditorModal
-          onClose={() => setIsCreationOpen(false)}
-          onSaved={handleSaved}
-        />
+        <AccountEditorModal onClose={() => setIsCreationOpen(false)} onSaved={handleSaved} />
       )}
     </section>
   );

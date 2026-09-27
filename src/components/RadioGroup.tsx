@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
 import {
   composeRenderProps,
   RadioButton as AriaRadioButton,
@@ -203,6 +203,8 @@ export type RadioGroupProps = Omit<
 export type RadioItemProps = Omit<AriaRadioFieldProps, "children" | "className" | "isInvalid"> & {
   /** Conteúdo que nomeia visualmente a opção. */
   children: ReactNode;
+  /** Move o foco inicial para esta opção quando o diálogo é aberto. */
+  focusOnOpen?: boolean;
   /** Descrição opcional associada semanticamente à opção. */
   description?: ReactNode;
   /** Ícone decorativo exibido entre o indicador e o conteúdo da opção. */
@@ -285,6 +287,7 @@ export function RadioItem({
   children,
   className,
   description,
+  focusOnOpen = false,
   isDisabled = false,
   labelClassName,
   leadingIcon,
@@ -293,6 +296,13 @@ export function RadioItem({
   const { appearance, isDisabled: isGroupDisabled } = useContext(RadioContext);
   const isOptionDisabled = isDisabled || isGroupDisabled;
   const hasDescription = hasRenderableDescription(description);
+  const radioButtonRef = useRef<HTMLLabelElement>(null);
+
+  useEffect(() => {
+    if (focusOnOpen && !isOptionDisabled) {
+      radioButtonRef.current?.focus();
+    }
+  }, [focusOnOpen, isOptionDisabled]);
 
   return (
     <AriaRadioField
@@ -310,6 +320,7 @@ export function RadioItem({
             isInvalid: renderProps.isInvalid,
           }),
         )}
+        ref={radioButtonRef}
       >
         {({ isDisabled: isRadioDisabled, isFocusVisible, isInvalid, isPressed, isSelected }) => (
           <>

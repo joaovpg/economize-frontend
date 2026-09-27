@@ -5,10 +5,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
+import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
   ModalBody,
   ModalClose,
+  ModalDescription,
   ModalFooter,
   ModalHeader,
   ModalTitle,
@@ -366,19 +368,14 @@ export function TransactionCreationModal({
       >
         <ModalHeader>
           <ModalTitle>Nova movimentação</ModalTitle>
+          <ModalDescription>
+            Informe os dados da movimentação que deseja cadastrar.
+          </ModalDescription>
           {!isSubmitting && discardAction === null && <ModalClose />}
         </ModalHeader>
         <form className="contents" noValidate onSubmit={handleSubmit(handleFormSubmit)}>
           <ModalBody>
-            {submitError && (
-              <p
-                aria-live="assertive"
-                className="m-0 rounded-xl border border-danger/25 bg-danger-soft px-3.5 py-3 text-body-small text-danger"
-                role="alert"
-              >
-                {submitError}
-              </p>
-            )}
+            {submitError && <InlineMessage tone="danger">{submitError}</InlineMessage>}
             <Controller
               control={control}
               name="tipoOperacao"
@@ -401,7 +398,9 @@ export function TransactionCreationModal({
                   }}
                   value={field.value}
                 >
-                  <RadioItem value="TRANSACAO">Transação</RadioItem>
+                  <RadioItem focusOnOpen value="TRANSACAO">
+                    Transação
+                  </RadioItem>
                   <RadioItem value="TRANSFERENCIA">Transferência</RadioItem>
                   <RadioItem value="RECORRENCIA">Recorrência</RadioItem>
                   <RadioItem value="PARCELAMENTO">Parcelamento</RadioItem>

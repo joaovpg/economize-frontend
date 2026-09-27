@@ -8,7 +8,9 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { Button } from "../../../components/Button";
 import { Card, CardBody, CardHeader } from "../../../components/Card";
+import { InlineMessage } from "../../../components/InlineMessage";
 import { Link } from "../../../components/Link";
+import { PageHeading } from "../../../components/PageHeading";
 import { TextField } from "../../../components/TextField";
 import { isApiError } from "../../../lib/api-errors";
 import { putCategoria } from "../../../services/categories/api";
@@ -134,14 +136,11 @@ function CategoriesPage() {
         </Link>
 
         <header className="flex items-end justify-between gap-5 max-[40rem]:flex-col max-[40rem]:items-start max-[40rem]:gap-4">
-          <div className="flex min-w-0 flex-col gap-2.5">
-            <h1 className="text-page-title" id="categories-title">
-              Categorias
-            </h1>
-            <p className="max-w-[48ch] text-body-small text-muted">
-              Organize a forma como suas transações aparecem no Economize.
-            </p>
-          </div>
+          <PageHeading
+            description="Organize a forma como suas transações aparecem no Economize."
+            id="categories-title"
+            title="Categorias"
+          />
           <Button
             className={"w-full md:w-auto"}
             isDisabled={pendingCategoryId !== null}
@@ -153,22 +152,9 @@ function CategoriesPage() {
           </Button>
         </header>
 
-        {feedback && (
-          <output
-            aria-live="polite"
-            className="block rounded-xl border border-success/25 bg-success-soft px-3.5 py-3 text-body-small text-success"
-          >
-            {feedback}
-          </output>
-        )}
+        {feedback && <InlineMessage>{feedback}</InlineMessage>}
         {toggleError && !pendingToggle && (
-          <p
-            aria-live="assertive"
-            className="block rounded-xl border border-danger/25 bg-danger-soft px-3.5 py-3 text-body-small text-danger"
-            role="alert"
-          >
-            {toggleError}
-          </p>
+          <InlineMessage tone="danger">{toggleError}</InlineMessage>
         )}
 
         <Card as="section" aria-labelledby="categories-list-title">
