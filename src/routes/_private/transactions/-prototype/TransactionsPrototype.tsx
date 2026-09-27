@@ -145,7 +145,7 @@ function BalanceHero({
   return (
     <section
       aria-labelledby={`${variant}-projected-balance-title`}
-      className={`overflow-hidden rounded-3xl bg-brand text-brand-foreground ${variant === "reference" ? "p-5.5 md:p-6" : "p-6 md:p-7"}`}
+      className={`overflow-hidden rounded-3xl bg-brand text-brand-foreground ${variant === "reference" ? "p-5.5 min-[60rem]:p-7" : "p-6 min-[60rem]:p-7"}`}
     >
       <div
         className={`grid grid-cols-2 gap-4 ${variant === "reference" ? "min-[60rem]:grid-cols-[minmax(10rem,1.35fr)_repeat(3,minmax(0,1fr))] min-[60rem]:items-center" : "min-[60rem]:grid-cols-[minmax(12rem,1.45fr)_repeat(3,minmax(0,1fr))] min-[60rem]:items-center"}`}
@@ -383,12 +383,12 @@ function PrototypeFrame({
 }) {
   return (
     <>
-      <div className="mx-auto grid w-full max-w-260 min-w-0 items-start min-[60rem]:grid-cols-[18.25rem_minmax(0,1fr)]">
+      <div className="mx-auto grid w-full max-w-320 min-w-0 items-start min-[60rem]:grid-cols-[18.25rem_minmax(0,1fr)]">
         <div className="hidden min-[60rem]:block">
           <FiltersRail {...props} />
         </div>
-        <main className="min-w-0 px-4 pt-5.5 pb-8 sm:px-6 min-[60rem]:px-7 min-[60rem]:pt-7 min-[60rem]:pb-10">
-          <div className="flex w-full min-w-0 flex-col gap-5.5">{children}</div>
+        <main className="min-w-0 px-4 pt-5.5 pb-8 sm:px-6 min-[60rem]:px-7 min-[60rem]:pt-8 min-[60rem]:pb-10">
+          <div className="flex w-full min-w-0 flex-col gap-5.5 min-[60rem]:gap-7">{children}</div>
         </main>
       </div>
       <div className="min-[60rem]:hidden">
