@@ -28,11 +28,19 @@ import { Link } from "../Link";
 import { MonthYearFilter } from "../MonthYearFilter";
 
 const filtersStyles = tv({
-  base: "sticky top-6 w-auto self-start m-[1.5rem_0_1.5rem_1.5rem] max-h-[calc(100svh-3rem)] overflow-auto max-[48rem]:static max-[48rem]:m-[0_1rem_1rem] max-[48rem]:max-h-none max-[48rem]:hidden",
+  base: "sticky top-6 w-auto self-start m-[1.5rem_0_1.5rem_1.5rem] max-h-[calc(100svh-3rem)] overflow-auto",
+  defaultVariants: {
+    presentation: "sidebar",
+  },
   variants: {
     open: {
-      false: "",
-      true: "max-[48rem]:!grid",
+      false: "max-[48rem]:hidden",
+      true: "max-[48rem]:grid",
+    },
+    presentation: {
+      modal:
+        "!static !m-0 !max-h-none !overflow-visible !rounded-none !border-0 !bg-transparent !shadow-none",
+      sidebar: "max-[48rem]:static max-[48rem]:m-[0_1rem_1rem] max-[48rem]:max-h-none",
     },
   },
 });
@@ -111,6 +119,7 @@ export type TransactionFiltersProps = {
   onApply: (values: TransactionFilterFormData) => void;
   onClear: () => void;
   onClose: () => void;
+  presentation?: "modal" | "sidebar";
   showMonth?: boolean;
   value: TransactionFilterState;
 };
@@ -124,6 +133,7 @@ export function TransactionFilters({
   onApply,
   onClear,
   onClose,
+  presentation = "sidebar",
   showMonth = true,
   value,
 }: TransactionFiltersProps) {
@@ -209,7 +219,8 @@ export function TransactionFilters({
     <Card
       as="aside"
       aria-label={ariaLabel}
-      className={filtersStyles({ open: isOpen })}
+      className={filtersStyles({ open: isOpen, presentation })}
+      data-presentation={presentation}
       id={filterId}
     >
       <CardHeader>
@@ -220,7 +231,7 @@ export function TransactionFilters({
           </p>
         </div>
         <Button
-          className="hidden! max-[48rem]:inline-flex!"
+          className={presentation === "modal" ? "inline-flex!" : "hidden! max-[48rem]:inline-flex!"}
           variant="ghost"
           size="sm"
           isIconOnly
