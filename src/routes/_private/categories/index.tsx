@@ -124,7 +124,7 @@ function CategoriesPage() {
       aria-labelledby="categories-title"
       className="flex min-w-0 flex-col pt-8 pr-7 pb-10 pl-7 max-[48rem]:pt-6 max-[48rem]:pr-4 max-[48rem]:pb-8 max-[48rem]:pl-4"
     >
-      <div className="flex w-full max-w-5xl flex-col gap-5.5 self-center">
+      <div className="flex w-full max-w-320 flex-col gap-5.5 self-center">
         <Link
           leadingIcon={<ArrowLeftIcon aria-hidden="true" />}
           linkVariant="back"

@@ -125,7 +125,7 @@ function AccountsPage() {
       aria-labelledby="accounts-title"
       className="flex min-w-0 flex-col px-0 pt-7 pb-10 max-[64rem]:px-4 max-[48rem]:pt-5.5 max-[48rem]:pb-8"
     >
-      <div className="flex w-full max-w-260 flex-col gap-7 self-center">
+      <div className="flex w-full max-w-320 flex-col gap-7 self-center">
         <Link
           className="justify-start! self-start"
           leadingIcon={<ArrowLeftIcon aria-hidden="true" />}
