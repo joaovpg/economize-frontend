@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, getRouteApi } from "@tanstack/react-router";
-import { z } from "zod";
 
 import {
   allAccountsFilterValue,
@@ -27,18 +26,9 @@ import { getAccountLabel, getCategoryLabel } from "./-components/transaction-lab
 import { TransactionCreationModal } from "./-components/TransactionCreationModal";
 import { TransactionDeleteModal } from "./-components/TransactionDeleteModal";
 import { TransactionEditModal } from "./-components/TransactionEditModal";
-import { prototypeVariantValues, type PrototypeVariant } from "./-prototype/prototype-variants";
-import {
-  prototypeAccounts,
-  prototypeCategories,
-  prototypeTransactions,
-} from "./-prototype/reference-prototype-data";
-import { TransactionsPrototype } from "./-prototype/TransactionsPrototype";
+import { TransactionsView } from "./-components/TransactionsView";
 
 const transactionsRoute = getRouteApi("/_private/transactions/");
-const prototypeTransactionSearchSchema = transactionSearchSchema.extend({
-  variant: z.enum(prototypeVariantValues).catch("reference").default("reference"),
-});
 
 type TransactionsPageProps = {
   accounts: readonly ContaResponse[];
@@ -149,7 +139,7 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
 
   return (
     <section className="min-w-0" aria-labelledby="transactions-title">
-      <TransactionsPrototype
+      <TransactionsView
         accounts={accounts}
         categories={categories}
         data={data}
@@ -158,11 +148,6 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
         isFiltersOpen={isFiltersOpen}
         items={visibleItems}
         onApplyFilters={handleApplyFilters}
-        onChangeVariant={(variant: PrototypeVariant) => {
-          void navigate({
-            search: (current) => ({ ...current, variant }),
-          });
-        }}
         onClearFilters={handleClearFilters}
         onCloseFilters={() => setIsFiltersOpen(false)}
         onDelete={handleDelete}
@@ -172,7 +157,6 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
         onOpenFilters={() => setIsFiltersOpen(true)}
         search={search}
         selectedMonth={selectedMonth}
-        variant={search.variant}
       />
       {isCreationOpen && (
         <TransactionCreationModal
@@ -209,7 +193,6 @@ export const Route = createFileRoute("/_private/transactions/")({
     accounts: search.accounts,
     categories: search.categories,
     month: search.month,
-    variant: search.variant,
   }),
   loader: ({ context, deps }) => {
     const transactionQuery = transactionsQueryOptions({
@@ -221,18 +204,6 @@ export const Route = createFileRoute("/_private/transactions/")({
     const categoryQuery = categoriesQueryOptions({ ativo: true });
     const accountQuery = accountsQueryOptions();
 
-    if (import.meta.env.DEV) {
-      context.queryClient.setQueryData(transactionQuery.queryKey, prototypeTransactions);
-      context.queryClient.setQueryData(categoryQuery.queryKey, prototypeCategories);
-      context.queryClient.setQueryData(accountQuery.queryKey, prototypeAccounts);
-
-      return Promise.resolve([
-        prototypeTransactions,
-        prototypeCategories,
-        prototypeAccounts,
-      ] as const);
-    }
-
     return Promise.all([
       context.queryClient.query({ ...transactionQuery, staleTime: "static" }),
       context.queryClient.query({ ...categoryQuery, staleTime: "static" }),
@@ -240,7 +211,7 @@ export const Route = createFileRoute("/_private/transactions/")({
     ]);
   },
   preloadStaleTime: 30_000,
-  validateSearch: prototypeTransactionSearchSchema,
+  validateSearch: transactionSearchSchema,
 });
 
 function TransactionsPageRoute() {

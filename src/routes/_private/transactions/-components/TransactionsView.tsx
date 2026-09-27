@@ -4,9 +4,7 @@ import { CaretLeftIcon } from "@phosphor-icons/react/dist/csr/CaretLeft";
 import { CaretRightIcon } from "@phosphor-icons/react/dist/csr/CaretRight";
 import { FunnelIcon } from "@phosphor-icons/react/dist/csr/Funnel";
 import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
-import { useLocation } from "@tanstack/react-router";
 
-import { TransactionTable } from "../-components/TransactionTable";
 import { Button } from "../../../../components/Button";
 import { Card, CardBody, CardHeader } from "../../../../components/Card";
 import { FilterChip } from "../../../../components/FilterChip";
@@ -31,11 +29,8 @@ import {
   type ConsultaTransacaoItem,
   type ConsultaTransacoesResponse,
 } from "../../../../services/transactions/contracts";
-import { PrototypeSwitcher } from "./PrototypeSwitcher";
-
-import type { PrototypeVariant } from "./prototype-variants";
-
-type TransactionsPrototypeProps = {
+import { TransactionTable } from "./TransactionTable";
+type TransactionsViewProps = {
   accounts: readonly ContaResponse[];
   categories: readonly CategoriaResponse[];
   data: ConsultaTransacoesResponse;
@@ -44,7 +39,6 @@ type TransactionsPrototypeProps = {
   isFiltersOpen: boolean;
   items: readonly ConsultaTransacaoItem[];
   onApplyFilters: (values: TransactionFilterFormData) => void;
-  onChangeVariant: (variant: PrototypeVariant) => void;
   onClearFilters: () => void;
   onCloseFilters: () => void;
   onDelete: (target: ConsultaTransacaoItem) => void;
@@ -54,7 +48,6 @@ type TransactionsPrototypeProps = {
   onOpenFilters: () => void;
   search: TransactionSearch;
   selectedMonth: TransactionMonth;
-  variant: PrototypeVariant;
 };
 
 type TransactionMetrics = {
@@ -134,27 +127,23 @@ function MonthStepper({
 function BalanceHero({
   data,
   items,
-  variant,
 }: {
   data: ConsultaTransacoesResponse;
   items: readonly ConsultaTransacaoItem[];
-  variant: Extract<PrototypeVariant, "reference" | "ledger">;
 }) {
   const metrics = getTransactionMetrics(items, data.saldoAbertura);
 
   return (
     <section
-      aria-labelledby={`${variant}-projected-balance-title`}
-      className={`overflow-hidden rounded-3xl bg-brand text-brand-foreground ${variant === "reference" ? "p-5.5 min-[60rem]:p-7" : "p-6 min-[60rem]:p-7"}`}
+      aria-labelledby="transactions-projected-balance-title"
+      className="overflow-hidden rounded-3xl bg-brand p-5.5 text-brand-foreground min-[60rem]:p-7"
     >
-      <div
-        className={`grid grid-cols-2 gap-4 ${variant === "reference" ? "min-[60rem]:grid-cols-[minmax(10rem,1.35fr)_repeat(3,minmax(0,1fr))] min-[60rem]:items-center" : "min-[60rem]:grid-cols-[minmax(12rem,1.45fr)_repeat(3,minmax(0,1fr))] min-[60rem]:items-center"}`}
-      >
+      <div className="grid grid-cols-2 gap-4 min-[60rem]:grid-cols-[minmax(10rem,1.35fr)_repeat(3,minmax(0,1fr))] min-[60rem]:items-center">
         <div className="col-span-2 min-w-0 min-[60rem]:col-span-1">
           <p className="m-0 text-caption-strong tracking-label text-brand-foreground/80 uppercase">
             Saldo projetado em {getMonthLabel(data.fim)}
           </p>
-          <h2 className="m-0 mt-2 text-metric" id={`${variant}-projected-balance-title`}>
+          <h2 className="m-0 mt-2 text-metric" id="transactions-projected-balance-title">
             {formatCurrency(metrics.projectedBalance)}
           </h2>
         </div>
@@ -185,7 +174,7 @@ function Metric({ className, label, value }: { className?: string; label: string
   );
 }
 
-function PrototypeHeader({
+function TransactionsHeader({
   data,
   filterTriggerRef,
   isFiltersOpen,
@@ -195,7 +184,7 @@ function PrototypeHeader({
   search,
   selectedMonth,
 }: Pick<
-  TransactionsPrototypeProps,
+  TransactionsViewProps,
   | "data"
   | "filterTriggerRef"
   | "isFiltersOpen"
@@ -260,7 +249,7 @@ function TransactionList({
   onEdit,
   openingBalance,
   title,
-}: Pick<TransactionsPrototypeProps, "accounts" | "categories" | "items" | "onDelete" | "onEdit"> & {
+}: Pick<TransactionsViewProps, "accounts" | "categories" | "items" | "onDelete" | "onEdit"> & {
   openingBalance: number;
   title: string;
 }) {
@@ -304,7 +293,7 @@ function FiltersRail({
   onCloseFilters,
   search,
 }: Pick<
-  TransactionsPrototypeProps,
+  TransactionsViewProps,
   | "accounts"
   | "categories"
   | "isFiltersOpen"
@@ -339,7 +328,7 @@ function MobileFilterModal({
   onClose,
   search,
 }: Pick<
-  TransactionsPrototypeProps,
+  TransactionsViewProps,
   "accounts" | "categories" | "isFiltersOpen" | "onApplyFilters" | "onClearFilters" | "search"
 > & { onClose: () => void }) {
   return (
@@ -373,12 +362,12 @@ function MobileFilterModal({
   );
 }
 
-function PrototypeFrame({
+function TransactionsFrame({
   children,
   props,
 }: {
   children: ReactNode;
-  props: TransactionsPrototypeProps;
+  props: TransactionsViewProps;
 }) {
   return (
     <>
@@ -397,11 +386,11 @@ function PrototypeFrame({
   );
 }
 
-function ReferenceVariant(props: TransactionsPrototypeProps) {
+export function TransactionsView(props: TransactionsViewProps) {
   return (
-    <PrototypeFrame props={props}>
-      <PrototypeHeader {...props} />
-      <BalanceHero data={props.data} items={props.data.itens} variant="reference" />
+    <TransactionsFrame props={props}>
+      <TransactionsHeader {...props} />
+      <BalanceHero data={props.data} items={props.data.itens} />
       {props.feedback && <p className="m-0 text-body-small text-success">{props.feedback}</p>}
       <TransactionList
         accounts={props.accounts}
@@ -412,97 +401,6 @@ function ReferenceVariant(props: TransactionsPrototypeProps) {
         openingBalance={props.data.saldoAbertura}
         title="Movimentações"
       />
-    </PrototypeFrame>
-  );
-}
-
-function LedgerVariant(props: TransactionsPrototypeProps) {
-  return (
-    <PrototypeFrame props={props}>
-      <PrototypeHeader {...props} />
-      <BalanceHero data={props.data} items={props.data.itens} variant="ledger" />
-      <TransactionList
-        accounts={props.accounts}
-        categories={props.categories}
-        items={props.items}
-        onDelete={props.onDelete}
-        onEdit={props.onEdit}
-        openingBalance={props.data.saldoAbertura}
-        title="Livro de movimentações"
-      />
-    </PrototypeFrame>
-  );
-}
-
-function FocusVariant(props: TransactionsPrototypeProps) {
-  return (
-    <PrototypeFrame props={props}>
-      <PrototypeHeader {...props} />
-      <FocusHero data={props.data} items={props.data.itens} />
-      <TransactionList
-        accounts={props.accounts}
-        categories={props.categories}
-        items={props.items}
-        onDelete={props.onDelete}
-        onEdit={props.onEdit}
-        openingBalance={props.data.saldoAbertura}
-        title="Movimentações"
-      />
-    </PrototypeFrame>
-  );
-}
-
-function FocusHero({
-  data,
-  items,
-}: {
-  data: ConsultaTransacoesResponse;
-  items: readonly ConsultaTransacaoItem[];
-}) {
-  const metrics = getTransactionMetrics(items, data.saldoAbertura);
-
-  return (
-    <section
-      aria-labelledby="focus-balance-title"
-      className="overflow-hidden rounded-3xl bg-brand p-5.5 text-brand-foreground min-[60rem]:p-6"
-    >
-      <div className="grid gap-6 min-[60rem]:grid-cols-[minmax(0,1.1fr)_minmax(20rem,0.9fr)] min-[60rem]:items-center">
-        <div className="min-w-0">
-          <p className="m-0 text-caption-strong tracking-label text-brand-foreground/80 uppercase">
-            Saldo projetado em {getMonthLabel(data.fim)}
-          </p>
-          <h2 className="m-0 mt-2 text-display-hero" id="focus-balance-title">
-            {formatCurrency(metrics.projectedBalance)}
-          </h2>
-          <p className="m-0 mt-4 text-body-small text-brand-foreground/80">
-            O mês fecha {metrics.projectedBalance >= 0 ? "positivo" : "negativo"} com os dados
-            selecionados.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 min-[60rem]:grid-cols-1">
-          <Metric label="Entradas" value={metrics.entries} />
-          <Metric label="Saídas" value={-metrics.exits} />
-          <Metric
-            className="hidden min-[40rem]:block"
-            label="Saldo anterior"
-            value={metrics.openingBalance}
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-export function TransactionsPrototype(props: TransactionsPrototypeProps) {
-  const { pathname } = useLocation();
-
-  return (
-    <>
-      {props.variant === "reference" && <ReferenceVariant {...props} />}
-      {props.variant === "ledger" && <LedgerVariant {...props} />}
-      {props.variant === "focus" && <FocusVariant {...props} />}
-      <PrototypeSwitcher current={props.variant} onChange={props.onChangeVariant} />
-      <p className="sr-only">Protótipo descartável ativo na rota {pathname}.</p>
-    </>
+    </TransactionsFrame>
   );
 }
