@@ -128,11 +128,11 @@ function CategoriesPage() {
         <Link
           leadingIcon={<ArrowLeftIcon aria-hidden="true" />}
           linkVariant="back"
-          to="/summary"
+          to="/transactions"
           size="sm"
           variant="link"
         >
-          Voltar ao resumo
+          Voltar para transações
         </Link>
 
         <header className="flex items-end justify-between gap-5 max-[40rem]:flex-col max-[40rem]:items-start max-[40rem]:gap-4">
