@@ -47,7 +47,7 @@ function LoginPage() {
 
     try {
       await postLogin(data);
-      await navigate({ replace: true, to: "/summary" });
+      await navigate({ replace: true, to: "/transactions" });
     } catch (error) {
       if (!isApiError(error)) {
         setSubmitError("Não foi possível conectar ao servidor. Tente novamente.");
