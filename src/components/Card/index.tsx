@@ -15,7 +15,7 @@ export function Card<T extends CardElement = "div">({ as, className, ...props }:
   return createElement(as ?? "div", {
     ...props,
     className: twMerge(
-      "group/card grid w-full min-w-0 content-start gap-3.5 rounded-[1.125rem] border border-border p-[1.375rem] shadow-[0_1px_0_color-mix(in_oklch,white_88%,transparent),0_0.75rem_2.25rem_rgb(15_23_42_/_0.04)] card-background",
+      "group/card grid w-full min-w-0 content-start gap-0 overflow-hidden rounded-3xl border border-border bg-surface",
       className,
     ),
     "data-slot": "card",
@@ -28,7 +28,7 @@ export function CardHeader({ className, ...props }: ComponentPropsWithRef<"div">
       {...props}
       data-slot="card-header"
       className={twMerge(
-        "flex min-w-0 items-start justify-between gap-4 border-border group-has-data-[slot=card-body]/card:border-b group-has-data-[slot=card-body]/card:pb-3.5",
+        "flex min-w-0 items-start justify-between gap-4 border-border p-5.5 group-has-data-[slot=card-body]/card:border-b group-has-data-[slot=card-body]/card:pb-3.5",
         className,
       )}
     />
@@ -37,7 +37,7 @@ export function CardHeader({ className, ...props }: ComponentPropsWithRef<"div">
 
 const cardBodyStyles = tv(
   {
-    base: "grid min-w-0",
+    base: "grid min-w-0 p-5.5",
     defaultVariants: {
       spacing: "default",
     },
@@ -45,7 +45,7 @@ const cardBodyStyles = tv(
       spacing: {
         compact: "gap-2",
         default: "gap-3.5",
-        none: "gap-0",
+        none: "gap-0 p-0!",
       },
     },
   },
@@ -66,7 +66,7 @@ export function CardFooter({ className, ...props }: ComponentPropsWithRef<"div">
       {...props}
       data-slot="card-footer"
       className={twMerge(
-        "grid min-w-0 gap-3.5 border-border group-has-[[data-slot=card-body],[data-slot=card-header]]/card:border-t group-has-[[data-slot=card-body],[data-slot=card-header]]/card:pt-3.5 md:flex md:flex-wrap md:justify-end",
+        "grid min-w-0 gap-3.5 border-border px-5.5 pb-5.5 group-has-[[data-slot=card-body],[data-slot=card-header]]/card:border-t group-has-[[data-slot=card-body],[data-slot=card-header]]/card:pt-3.5 md:flex md:flex-wrap md:justify-end",
         className,
       )}
     />

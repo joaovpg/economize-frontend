@@ -3,7 +3,7 @@
 }
 
 @utility text-page-title {
-  @apply font-display text-[clamp(2rem,4vw,3rem)] leading-tight font-semibold tracking-display;
+  @apply font-display text-[clamp(2.375rem,7vw,3.625rem)] leading-[0.98] font-semibold tracking-display;
 }
 
 @utility text-section-title {

@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Economize — protótipo de linguagem visual</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: oklch(98.415% 0.00341 247.858);
+        --paper-muted: oklch(96.826% 0.00685 247.896);
+        --paper-deep: oklch(92.876% 0.01262 255.508);
+        --ink: oklch(20.768% 0.03982 265.755);
+        --muted: oklch(44.553% 0.03745 257.281);
+        --subtle: oklch(55.439% 0.04072 257.417);
+        --teal: oklch(51.094% 0.08606 186.391);
+        --teal-deep: oklch(43.697% 0.07052 188.216);
+        --teal-soft: oklch(95.265% 0.0498 180.801);
+        --line: oklch(92.876% 0.01262 255.508);
+        --line-strong: oklch(86.898% 0.01985 252.894);
+        --success: oklch(52.73% 0.1371 150.069);
+        --danger: oklch(50.542% 0.19049 27.518);
+        --display: "Literata", Georgia, serif;
+        --ui: "Geist Sans", "Geist", Inter, system-ui, sans-serif;
+        --mono: "Geist Mono", "SFMono-Regular", Consolas, monospace;
+        --radius-control: 10px;
+        --radius-field: 12px;
+        --radius-panel: 24px;
+        --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px rgb(15 23 42 / 0.04);
+        --shadow-popover: 0 12px 32px rgb(15 23 42 / 0.12);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-width: 320px;
+        margin: 0;
+        background:
+          radial-gradient(
+            circle at 0% 0%,
+            oklch(70.375% 0.12302 182.503 / 0.08),
+            transparent 28rem
+          ),
+          linear-gradient(180deg, var(--paper-muted), oklch(97.7% 0.012 180));
+        color: var(--ink);
+        font-family: var(--ui);
+        line-height: 1.5;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      button:focus-visible,
+      input:focus-visible {
+        outline: 2px solid var(--teal);
+        outline-offset: 3px;
+      }
+
+      .page {
+        width: min(100% - 40px, 1160px);
+        margin: 0 auto;
+        padding: 32px 0 64px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 72px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--teal-deep);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border-radius: 10px;
+        background: var(--teal);
+        color: var(--paper);
+      }
+
+      .brand-mark svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .topbar-note {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.8125rem;
+      }
+
+      .hero {
+        max-width: 760px;
+        margin-bottom: 64px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: var(--display);
+        font-weight: 600;
+        letter-spacing: -0.035em;
+      }
+
+      h1 {
+        max-width: 13ch;
+        margin-bottom: 20px;
+        font-size: clamp(2.75rem, 6vw, 4.5rem);
+        line-height: 1.05;
+      }
+
+      .hero p {
+        max-width: 60ch;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 1.0625rem;
+        line-height: 1.65;
+      }
+
+      .section {
+        margin-top: 64px;
+      }
+
+      .section-heading {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 32px;
+        margin-bottom: 20px;
+      }
+
+      .section-heading h2 {
+        margin-bottom: 0;
+        font-size: clamp(1.75rem, 4vw, 2.375rem);
+        line-height: 1.05;
+      }
+
+      .section-heading p {
+        max-width: 44ch;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 0.9375rem;
+      }
+
+      .comparison-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+
+      .comparison-card {
+        min-width: 0;
+        padding: 20px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-panel);
+        background: color-mix(in oklch, var(--paper) 70%, transparent);
+      }
+
+      .comparison-card__head {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 18px;
+      }
+
+      .comparison-card h3 {
+        margin-bottom: 6px;
+        font-size: 1.375rem;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+      }
+
+      .comparison-card__head p {
+        max-width: 35ch;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 0.8125rem;
+        line-height: 1.45;
+      }
+
+      .badge {
+        flex: none;
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: var(--teal-soft);
+        color: var(--teal-deep);
+        font-family: var(--mono);
+        font-size: 0.6875rem;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+      }
+
+      .preview-shell {
+        overflow: hidden;
+        border-radius: 18px;
+        background: var(--paper);
+      }
+
+      .preview-shell.layered {
+        border: 1px solid var(--line);
+      }
+
+      .preview-shell.elevated {
+        box-shadow: var(--shadow-card);
+      }
+
+      .preview-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
+        background: color-mix(in oklch, var(--paper-muted) 72%, transparent);
+      }
+
+      .preview-nav__brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--teal-deep);
+        font-size: 0.6875rem;
+        font-weight: 700;
+      }
+
+      .preview-nav__brand-mark {
+        display: grid;
+        width: 20px;
+        height: 20px;
+        place-items: center;
+        border-radius: 6px;
+        background: var(--teal);
+        color: var(--paper);
+      }
+
+      .preview-nav__brand-mark svg {
+        width: 12px;
+        height: 12px;
+      }
+
+      .preview-nav__user {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--teal-soft);
+      }
+
+      .preview-content {
+        display: grid;
+        gap: 16px;
+        padding: 18px;
+        background: var(--paper);
+      }
+
+      .preview-title {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .preview-title h4 {
+        margin: 0;
+        font-family: var(--display);
+        font-size: 1.35rem;
+        font-weight: 600;
+        letter-spacing: -0.025em;
+        line-height: 1.1;
+      }
+
+      .preview-title span {
+        color: var(--subtle);
+        font-family: var(--mono);
+        font-size: 0.625rem;
+      }
+
+      .summary-object {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: 12px;
+        padding: 14px;
+        border-radius: 14px;
+      }
+
+      .layered .summary-object {
+        border: 1px solid var(--line);
+        background: var(--paper-muted);
+      }
+
+      .elevated .summary-object {
+        background: var(--paper);
+        box-shadow: var(--shadow-popover);
+      }
+
+      .summary-object__label {
+        margin-bottom: 3px;
+        color: var(--subtle);
+        font-family: var(--mono);
+        font-size: 0.625rem;
+        text-transform: uppercase;
+      }
+
+      .summary-object__value {
+        color: var(--ink);
+        font-size: 1.4rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1;
+      }
+
+      .summary-object__delta {
+        padding: 4px 7px;
+        border-radius: 999px;
+        background: oklch(96.241% 0.04338 156.743);
+        color: var(--success);
+        font-size: 0.625rem;
+        font-weight: 700;
+      }
+
+      .transaction-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .transaction-row {
+        display: grid;
+        grid-template-columns: 24px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 0;
+      }
+
+      .transaction-row + .transaction-row {
+        border-top: 1px solid color-mix(in oklch, var(--line) 70%, transparent);
+      }
+
+      .transaction-icon {
+        display: grid;
+        width: 24px;
+        height: 24px;
+        place-items: center;
+        border-radius: 8px;
+        background: var(--teal-soft);
+        color: var(--teal-deep);
+      }
+
+      .transaction-icon svg {
+        width: 13px;
+        height: 13px;
+      }
+
+      .transaction-name,
+      .transaction-detail,
+      .transaction-value {
+        display: block;
+      }
+
+      .transaction-name {
+        overflow: hidden;
+        color: var(--ink);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .transaction-detail {
+        color: var(--subtle);
+        font-size: 0.625rem;
+      }
+
+      .transaction-value {
+        color: var(--ink);
+        font-size: 0.75rem;
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+      }
+
+      .depth-caption {
+        display: flex;
+        align-items: start;
+        gap: 8px;
+        margin: 14px 2px 0;
+        color: var(--muted);
+        font-size: 0.75rem;
+        line-height: 1.45;
+      }
+
+      .depth-caption::before {
+        content: "";
+        flex: none;
+        width: 6px;
+        height: 6px;
+        margin-top: 6px;
+        border-radius: 50%;
+        background: var(--teal);
+      }
+
+      .component-preview {
+        display: grid;
+        gap: 18px;
+        padding: 20px;
+        border-radius: 18px;
+        background: var(--paper-muted);
+      }
+
+      .component-preview__title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .component-preview__title span {
+        color: var(--subtle);
+        font-family: var(--mono);
+        font-size: 0.6875rem;
+      }
+
+      .component-preview__title strong {
+        font-family: var(--display);
+        font-size: 1.25rem;
+        letter-spacing: -0.02em;
+      }
+
+      .form-stack {
+        display: grid;
+        gap: 10px;
+      }
+
+      .form-label {
+        color: var(--ink);
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+
+      .form-field {
+        width: 100%;
+        height: 44px;
+        padding: 0 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-field);
+        background: var(--paper);
+        color: var(--ink);
+        font-size: 0.8125rem;
+      }
+
+      .form-field::placeholder {
+        color: var(--subtle);
+      }
+
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .button {
+        min-height: 42px;
+        padding: 0 14px;
+        border: 1px solid transparent;
+        border-radius: var(--radius-control);
+        font-size: 0.8125rem;
+        font-weight: 700;
+        transition: 150ms ease-out;
+      }
+
+      .button--primary {
+        background: var(--teal);
+        color: var(--paper);
+      }
+
+      .button--secondary {
+        border-color: var(--line);
+        background: var(--paper);
+        color: var(--ink);
+      }
+
+      .refined .button:hover,
+      .refined .form-field:hover {
+        border-color: var(--line-strong);
+      }
+
+      .tactile .button {
+        box-shadow: 0 2px 0 var(--teal-deep);
+        transform: translateY(-1px);
+      }
+
+      .tactile .button--secondary {
+        border-color: var(--line-strong);
+        box-shadow: 0 2px 0 var(--line-strong);
+      }
+
+      .tactile .button:hover {
+        background: var(--teal-deep);
+        color: var(--paper);
+        transform: translateY(-2px);
+      }
+
+      .tactile .button--secondary:hover {
+        background: var(--paper);
+        color: var(--ink);
+      }
+
+      .tactile .form-field:focus {
+        border-color: var(--teal);
+        box-shadow: 0 0 0 3px var(--teal-soft);
+        outline: none;
+      }
+
+      .component-note {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.75rem;
+        line-height: 1.45;
+      }
+
+      .recommendation {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 16px;
+        align-items: start;
+        margin-top: 64px;
+        padding: 20px;
+        border: 1px solid color-mix(in oklch, var(--teal) 22%, var(--line));
+        border-radius: var(--radius-panel);
+        background: color-mix(in oklch, var(--teal-soft) 62%, var(--paper));
+      }
+
+      .recommendation__mark {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        place-items: center;
+        border-radius: 12px;
+        background: var(--teal);
+        color: var(--paper);
+      }
+
+      .recommendation__mark svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .recommendation h2 {
+        margin-bottom: 5px;
+        font-family: var(--ui);
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+
+      .recommendation p {
+        max-width: 70ch;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 0.875rem;
+      }
+
+      @media (max-width: 760px) {
+        .page {
+          width: min(100% - 28px, 560px);
+          padding-top: 20px;
+        }
+
+        .topbar {
+          margin-bottom: 52px;
+        }
+
+        .topbar-note {
+          display: none;
+        }
+
+        .hero,
+        .section {
+          margin-bottom: 48px;
+        }
+
+        .section {
+          margin-top: 48px;
+        }
+
+        .section-heading {
+          display: grid;
+          gap: 10px;
+        }
+
+        .comparison-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 420px) {
+        .page {
+          width: min(100% - 24px, 560px);
+        }
+
+        .comparison-card,
+        .component-preview {
+          padding: 16px;
+        }
+
+        .comparison-card__head {
+          display: grid;
+          gap: 8px;
+        }
+
+        .badge {
+          justify-self: start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M5 16 10 11l3 3 6-7" />
+              <path d="M15 7h4v4" />
+            </svg>
+          </span>
+          <span>economize</span>
+        </div>
+        <p class="topbar-note">Protótipo de linguagem visual · comparação de possibilidades</p>
+      </header>
+
+      <section class="hero" aria-labelledby="page-title">
+        <h1 id="page-title">Como o Economize pode se sentir?</h1>
+        <p>
+          Estas duas comparações isolam as escolhas que ainda faltam para documentar o sistema
+          visual: como a interface cria profundidade e como seus controles respondem à pessoa.
+        </p>
+      </section>
+
+      <section class="section" aria-labelledby="depth-title">
+        <div class="section-heading">
+          <h2 id="depth-title">1. Profundidade</h2>
+          <p>O mesmo resumo financeiro, com duas maneiras de separar o primeiro plano do fundo.</p>
+        </div>
+
+        <div class="comparison-grid">
+          <article class="comparison-card">
+            <div class="comparison-card__head">
+              <div>
+                <h3>Em camadas</h3>
+                <p>
+                  A hierarquia nasce de tonalidades, bordas finas e mudanças sutis de superfície.
+                </p>
+              </div>
+              <span class="badge">calma</span>
+            </div>
+
+            <div class="preview-shell layered">
+              <div class="preview-nav">
+                <div class="preview-nav__brand">
+                  <span class="preview-nav__brand-mark" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M5 16 10 11l3 3 6-7" />
+                      <path d="M15 7h4v4" />
+                    </svg>
+                  </span>
+                  economize
+                </div>
+                <span class="preview-nav__user" aria-hidden="true"></span>
+              </div>
+              <div class="preview-content">
+                <div class="preview-title">
+                  <h4>Visão do mês</h4>
+                  <span>MAI 2026</span>
+                </div>
+                <div class="summary-object">
+                  <div>
+                    <span class="summary-object__label">Saldo disponível</span>
+                    <strong class="summary-object__value">R$ 4.280,40</strong>
+                  </div>
+                  <span class="summary-object__delta">+8,4%</span>
+                </div>
+                <div class="transaction-list">
+                  <div class="transaction-row">
+                    <span class="transaction-icon" aria-hidden="true">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M4 10h16M6 10v8m4-8v8m4-8v8m4-8v8M3 18h18M5 10l7-5 7 5" />
+                      </svg>
+                    </span>
+                    <span
+                      ><strong class="transaction-name">Moradia</strong
+                      ><small class="transaction-detail">Conta principal</small></span
+                    >
+                    <strong class="transaction-value">R$ 1.200</strong>
+                  </div>
+                  <div class="transaction-row">
+                    <span class="transaction-icon" aria-hidden="true">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M3 6h18v12H3zM3 10h18M7 14h3" />
+                      </svg>
+                    </span>
+                    <span
+                      ><strong class="transaction-name">Supermercado</strong
+                      ><small class="transaction-detail">Cartão principal</small></span
+                    >
+                    <strong class="transaction-value">R$ 486,70</strong>
+                  </div>
+                  <div class="transaction-row">
+                    <span class="transaction-icon" aria-hidden="true">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="m4 19 5-5 3 3 7-8" />
+                        <path d="M15 9h4v4" />
+                      </svg>
+                    </span>
+                    <span
+                      ><strong class="transaction-name">Investimentos</strong
+                      ><small class="transaction-detail">Reserva mensal</small></span
+                    >
+                    <strong class="transaction-value">R$ 650</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="depth-caption">
+              Mais silenciosa e próxima do sistema atual: a informação fica em primeiro plano.
+            </p>
+          </article>
+
+          <article class="comparison-card">
+            <div class="comparison-card__head">
+              <div>
+                <h3>Elevada</h3>
+                <p>
+                  Cartões e grupos sobem visualmente com sombras suaves e separação mais explícita.
+                </p>
+              </div>
+              <span class="badge">presença</span>
+            </div>
+
+            <div class="preview-shell elevated">
+              <div class="preview-nav">
+                <div class="preview-nav__brand">
+                  <span class="preview-nav__brand-mark" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M5 16 10 11l3 3 6-7" />
+                      <path d="M15 7h4v4" />
+                    </svg>
+                  </span>
+                  economize
+                </div>
+                <span class="preview-nav__user" aria-hidden="true"></span>
+              </div>
+              <div class="preview-content">
+                <div class="preview-title">
+                  <h4>Visão do mês</h4>
+                  <span>MAI 2026</span>
+                </div>
+                <div class="summary-object">
+                  <div>
+                    <span class="summary-object__label">Saldo disponível</span>
+                    <strong class="summary-object__value">R$ 4.280,40</strong>
+                  </div>
+                  <span class="summary-object__delta">+8,4%</span>
+                </div>
+                <div class="transaction-list">
+                  <div class="transaction-row">
+                    <span class="transaction-icon" aria-hidden="true">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M4 10h16M6 10v8m4-8v8m4-8v8m4-8v8M3 18h18M5 10l7-5 7 5" />
+                      </svg>
+                    </span>
+                    <span
+                      ><strong class="transaction-name">Moradia</strong
+                      ><small class="transaction-detail">Conta principal</small></span
+                    >
+                    <strong class="transaction-value">R$ 1.200</strong>
+                  </div>
+                  <div class="transaction-row">
+                    <span class="transaction-icon" aria-hidden="true">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M3 6h18v12H3zM3 10h18M7 14h3" />
+                      </svg>
+                    </span>
+                    <span
+                      ><strong class="transaction-name">Supermercado</strong
+                      ><small class="transaction-detail">Cartão principal</small></span
+                    >
+                    <strong class="transaction-value">R$ 486,70</strong>
+                  </div>
+                  <div class="transaction-row">
+                    <span class="transaction-icon" aria-hidden="true">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="m4 19 5-5 3 3 7-8" />
+                        <path d="M15 9h4v4" />
+                      </svg>
+                    </span>
+                    <span
+                      ><strong class="transaction-name">Investimentos</strong
+                      ><small class="transaction-detail">Reserva mensal</small></span
+                    >
+                    <strong class="transaction-value">R$ 650</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="depth-caption">
+              Mais hierárquica e guiada: cada grupo pede um pouco mais de atenção visual.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="components-title">
+        <div class="section-heading">
+          <h2 id="components-title">2. Componentes</h2>
+          <p>A mesma tarefa de editar um orçamento, com duas intensidades de resposta.</p>
+        </div>
+
+        <div class="comparison-grid">
+          <article class="comparison-card refined">
+            <div class="comparison-card__head">
+              <div>
+                <h3>Refinados e contidos</h3>
+                <p>O componente sustenta a tarefa sem disputar atenção com os dados.</p>
+              </div>
+              <span class="badge">silêncio</span>
+            </div>
+            <div class="component-preview">
+              <div class="component-preview__title">
+                <strong>Novo orçamento</strong>
+                <span>01 / 03</span>
+              </div>
+              <div class="form-stack">
+                <label class="form-label" for="refined-name">Nome do orçamento</label>
+                <input class="form-field" id="refined-name" value="Alimentação" />
+                <label class="form-label" for="refined-value">Limite mensal</label>
+                <input class="form-field" id="refined-value" value="R$ 900,00" />
+              </div>
+              <div class="button-row">
+                <button class="button button--secondary" type="button">Cancelar</button>
+                <button class="button button--primary" type="button">Continuar</button>
+              </div>
+              <p class="component-note">Bordas discretas, estados baixos e ação principal clara.</p>
+            </div>
+          </article>
+
+          <article class="comparison-card tactile">
+            <div class="comparison-card__head">
+              <div>
+                <h3>Tácteis e confiantes</h3>
+                <p>O componente responde com mais contraste, movimento e sensação de ação.</p>
+              </div>
+              <span class="badge">resposta</span>
+            </div>
+            <div class="component-preview">
+              <div class="component-preview__title">
+                <strong>Novo orçamento</strong>
+                <span>01 / 03</span>
+              </div>
+              <div class="form-stack">
+                <label class="form-label" for="tactile-name">Nome do orçamento</label>
+                <input class="form-field" id="tactile-name" value="Alimentação" />
+                <label class="form-label" for="tactile-value">Limite mensal</label>
+                <input class="form-field" id="tactile-value" value="R$ 900,00" />
+              </div>
+              <div class="button-row">
+                <button class="button button--secondary" type="button">Cancelar</button>
+                <button class="button button--primary" type="button">Continuar</button>
+              </div>
+              <p class="component-note">
+                Hover, foco e pressão mais perceptíveis; a tarefa parece mais física.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <aside class="recommendation" aria-label="Leitura do sistema atual">
+        <span class="recommendation__mark" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m5 12 4 4L19 6" />
+          </svg>
+        </span>
+        <div>
+          <h2>Leitura do sistema atual</h2>
+          <p>
+            O código existente já se aproxima de <strong>em camadas + refinados e contidos</strong>:
+            usa superfícies tonais, bordas leves, controles firmes e movimento reduzido. A opção
+            elevada ou táctil seria uma mudança de personalidade, não apenas um ajuste de
+            acabamento.
+          </p>
+        </div>
+      </aside>
+    </main>
+  </body>
+</html>

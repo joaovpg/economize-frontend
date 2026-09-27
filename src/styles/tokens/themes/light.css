@@ -1,7 +1,7 @@
 :root {
   color-scheme: light;
 
-  --color-canvas-value: var(--color-slate-50);
+  --color-canvas-value: var(--color-slate-100);
   --color-surface-value: var(--color-slate-50);
   --color-surface-muted-value: var(--color-slate-100);
   --color-scrim-value: color-mix(in oklch, var(--color-slate-950) 58%, transparent);
@@ -16,7 +16,7 @@
   --color-brand-value: var(--color-teal-700);
   --color-brand-hover-value: var(--color-teal-800);
   --color-brand-pressed-value: var(--color-teal-900);
-  --color-brand-soft-value: var(--color-teal-50);
+  --color-brand-soft-value: var(--color-teal-100);
   --color-brand-foreground-value: var(--color-slate-50);
   --color-page-glow-value: color-mix(in oklch, var(--color-teal-500) 8%, transparent);
 

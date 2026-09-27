@@ -6,6 +6,8 @@ import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 
 import { Button } from "../../components/Button";
 import { Card, CardBody, CardHeader } from "../../components/Card";
+import { FilterChip } from "../../components/FilterChip";
+import { PageHeading } from "../../components/PageHeading";
 import { TransactionFilters } from "../../components/TransactionFilters";
 import {
   allAccountsFilterValue,
@@ -97,14 +99,11 @@ function SummaryPage({ accounts, categories }: SummaryPageProps) {
 
         <div className="min-w-0 pt-8 pr-7 pb-10 pl-7 max-[48rem]:pt-6 max-[48rem]:pr-4 max-[48rem]:pb-8 max-[48rem]:pl-4">
           <header className="mb-5.5 flex items-end justify-between gap-4 max-[48rem]:mb-4 max-[48rem]:grid max-[48rem]:items-start max-[48rem]:gap-4">
-            <div>
-              <h1 className="m-0 text-page-title" id="summary-title">
-                Resumo
-              </h1>
-              <p className="m-0 mt-2.5 text-body-small text-muted">
-                Resumo financeiro do mês selecionado.
-              </p>
-            </div>
+            <PageHeading
+              description="Resumo financeiro do mês selecionado."
+              id="summary-title"
+              title="Resumo"
+            />
             <Button
               className="hidden! max-[48rem]:inline-flex!"
               variant="secondary"
@@ -126,19 +125,11 @@ function SummaryPage({ accounts, categories }: SummaryPageProps) {
           >
             <span className="text-meta text-subtle uppercase">Filtros ativos</span>
             <div className="flex flex-wrap gap-2">
-              <span className="rounded-full border border-border bg-surface-overlay-strong px-2.5 py-1.5 text-caption text-muted">
-                Mês: {getMonthLabel(search.month)}
-              </span>
+              <FilterChip>Mês: {getMonthLabel(search.month)}</FilterChip>
               {search.categories.length > 0 && (
-                <span className="rounded-full border border-border bg-surface-overlay-strong px-2.5 py-1.5 text-caption text-muted">
-                  Categorias: {selectedCategoryNames.join(", ")}
-                </span>
+                <FilterChip>Categorias: {selectedCategoryNames.join(", ")}</FilterChip>
               )}
-              {hasAccountFilter && (
-                <span className="rounded-full border border-border bg-surface-overlay-strong px-2.5 py-1.5 text-caption text-muted">
-                  {`${search.accounts.length} contas`}
-                </span>
-              )}
+              {hasAccountFilter && <FilterChip>{`${search.accounts.length} contas`}</FilterChip>}
             </div>
           </section>
 

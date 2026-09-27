@@ -13,7 +13,7 @@ import { FieldError } from "./FieldError";
 import { Label } from "./Label";
 
 const control = tv({
-  base: "min-h-28 min-w-0 resize-y rounded-xl border bg-[linear-gradient(180deg,rgb(255_255_255_/_0.7),#fffdf8)] px-3.5 py-3 text-body-small text-foreground caret-brand outline-none transition-[background-color,border-color,outline-color] placeholder:text-subtle motion-reduce:transition-none",
+  base: "min-h-28 min-w-0 resize-y rounded-xl border bg-surface px-3.5 py-3 text-body-small text-foreground caret-brand outline-none transition-[background-color,border-color,outline-color] placeholder:text-subtle motion-reduce:transition-none",
   variants: {
     disabled: {
       false: "",

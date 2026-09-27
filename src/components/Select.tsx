@@ -26,18 +26,17 @@ const control = tv({
   variants: {
     appearance: {
       compact:
-        "h-9 min-h-9 rounded-lg !border-transparent bg-transparent px-2.5 data-hovered:bg-surface-muted data-pressed:bg-surface-strong",
-      default:
-        "h-12 min-h-12 rounded-xl bg-[linear-gradient(180deg,rgb(255_255_255_/_0.7),#fffdf8)] px-3.5",
+        "h-9 min-h-9 rounded-lg border-transparent! bg-transparent px-2.5 data-hovered:bg-surface-muted data-pressed:bg-surface-strong",
+      default: "h-12 min-h-12 rounded-xl bg-surface px-3.5",
     },
     disabled: {
       false: "",
-      true: "cursor-not-allowed border-border bg-surface-muted text-subtle hover:!border-border focus-within:!border-border focus-within:!outline-none",
+      true: "cursor-not-allowed border-border bg-surface-muted text-subtle hover:border-border! focus-within:border-border! focus-within:outline-none!",
     },
     invalid: {
       false:
-        "border-border hover:border-border-strong focus-within:!border-brand focus-within:outline-brand focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
-      true: "!border-danger focus-within:!border-danger focus-within:outline-danger focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
+        "border-border hover:border-border-strong focus-within:border-brand! focus-within:outline-brand focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
+      true: "border-danger! focus-within:border-danger! focus-within:outline-danger focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
     },
   },
 });

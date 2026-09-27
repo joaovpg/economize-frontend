@@ -164,10 +164,12 @@ const transactionSituationChoices = [
 ] satisfies readonly Choice<TransactionSituation>[];
 
 export function TransactionTypeField({
+  focusOnOpen = false,
   isDisabled = false,
   onChange,
   value,
 }: {
+  focusOnOpen?: boolean;
   isDisabled?: boolean;
   onChange: (value: TransactionType) => void;
   value: TransactionType;
@@ -188,7 +190,11 @@ export function TransactionTypeField({
       value={value}
     >
       {transactionTypeChoices.map((choice) => (
-        <RadioItem key={choice.value} value={choice.value}>
+        <RadioItem
+          focusOnOpen={focusOnOpen && choice.value === value}
+          key={choice.value}
+          value={choice.value}
+        >
           {choice.label}
         </RadioItem>
       ))}

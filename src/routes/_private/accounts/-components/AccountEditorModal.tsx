@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Controller, useForm, type UseFormSetError } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
+import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
   ModalBody,
   ModalClose,
   ModalDescription,
+  DiscardChangesModal,
   ModalFooter,
   ModalHeader,
   ModalTitle,
@@ -67,7 +69,9 @@ type AccountEditorModalProps = {
 };
 
 export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps) {
+  const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const createAccountMutation = useMutation({
     mutationFn: (input: Parameters<typeof postConta>[0]) => postConta(input),
@@ -77,7 +81,7 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
   });
   const {
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors, isDirty, isSubmitting },
     handleSubmit,
     register,
     setError,
@@ -94,6 +98,19 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
   const nameField = register("nome");
   const currencyField = register("moeda");
   const dateField = register("dataSaldoInicial");
+
+  const requestClose = () => {
+    if (isSubmitting) {
+      return;
+    }
+
+    if (isDirty) {
+      setIsDiscardModalOpen(true);
+      return;
+    }
+
+    onClose();
+  };
 
   const handleFormSubmit = async (data: AccountFormData) => {
     setSubmitError(null);
@@ -116,105 +133,115 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
   };
 
   return (
-    <Modal
-      isDismissable={!isSubmitting}
-      isKeyboardDismissDisabled={isSubmitting}
-      isOpen
-      onOpenChange={(open) => {
-        if (!open && !isSubmitting) {
-          onClose();
-        }
-      }}
-      size="md"
-    >
-      <ModalHeader>
-        <ModalTitle>Nova conta</ModalTitle>
-        <ModalDescription>
-          Cadastre uma conta e informe o saldo a partir da data escolhida.
-        </ModalDescription>
-        {!isSubmitting && <ModalClose />}
-      </ModalHeader>
-
-      <form
-        className="contents"
-        id="account-editor-form"
-        noValidate
-        onSubmit={handleSubmit(handleFormSubmit)}
+    <>
+      <Modal
+        isDismissable={!isSubmitting && !isDiscardModalOpen}
+        isKeyboardDismissDisabled={isSubmitting || isDiscardModalOpen}
+        isOpen
+        initialFocus={nameInputRef}
+        onOpenChange={(open) => {
+          if (!open) {
+            requestClose();
+          }
+        }}
+        size="md"
       >
-        <ModalBody>
-          {submitError && (
-            <p
-              aria-live="assertive"
-              className="block rounded-xl border border-danger/25 bg-danger-soft px-3.5 py-3 text-body-small text-danger"
-              role="alert"
+        <ModalHeader>
+          <ModalTitle>Nova conta</ModalTitle>
+          <ModalDescription>
+            Cadastre uma conta e informe o saldo a partir da data escolhida.
+          </ModalDescription>
+          {!isSubmitting && !isDiscardModalOpen && <ModalClose />}
+        </ModalHeader>
+
+        <form
+          className="contents"
+          id="account-editor-form"
+          noValidate
+          onSubmit={handleSubmit(handleFormSubmit)}
+        >
+          <ModalBody>
+            {submitError && <InlineMessage tone="danger">{submitError}</InlineMessage>}
+
+            <TextField
+              errorMessage={errors.nome?.message}
+              inputRef={(input) => {
+                nameInputRef.current = input;
+                nameField.ref(input);
+              }}
+              isDisabled={isSubmitting}
+              label="Nome"
+              maxLength={120}
+              name={nameField.name}
+              onBlur={nameField.onBlur}
+              onInput={nameField.onChange}
+              placeholder="Ex.: Conta corrente"
+            />
+
+            <TextField
+              errorMessage={errors.moeda?.message}
+              inputRef={currencyField.ref}
+              isDisabled={isSubmitting}
+              label="Moeda"
+              maxLength={3}
+              name={currencyField.name}
+              onBlur={currencyField.onBlur}
+              onInput={currencyField.onChange}
+              placeholder="BRL"
+            />
+
+            <Controller
+              control={control}
+              name="saldoInicial"
+              render={({ field }) => (
+                <NumberField
+                  errorMessage={errors.saldoInicial?.message}
+                  formatOptions={{ maximumFractionDigits: 4 }}
+                  isDisabled={isSubmitting}
+                  label="Saldo inicial"
+                  onBlur={field.onBlur}
+                  onChange={field.onChange}
+                  value={field.value}
+                />
+              )}
+            />
+
+            <TextField
+              errorMessage={errors.dataSaldoInicial?.message}
+              inputRef={dateField.ref}
+              isDisabled={isSubmitting}
+              label="Data do saldo inicial"
+              name={dateField.name}
+              onBlur={dateField.onBlur}
+              onInput={dateField.onChange}
+              type="date"
+            />
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              isDisabled={isSubmitting}
+              onPress={requestClose}
+              size="sm"
+              type="button"
+              variant="secondary"
             >
-              {submitError}
-            </p>
-          )}
-
-          <TextField
-            errorMessage={errors.nome?.message}
-            inputRef={nameField.ref}
-            label="Nome"
-            maxLength={120}
-            name={nameField.name}
-            onBlur={nameField.onBlur}
-            onInput={nameField.onChange}
-            placeholder="Ex.: Conta corrente"
-          />
-
-          <TextField
-            errorMessage={errors.moeda?.message}
-            inputRef={currencyField.ref}
-            label="Moeda"
-            maxLength={3}
-            name={currencyField.name}
-            onBlur={currencyField.onBlur}
-            onInput={currencyField.onChange}
-            placeholder="BRL"
-          />
-
-          <Controller
-            control={control}
-            name="saldoInicial"
-            render={({ field }) => (
-              <NumberField
-                errorMessage={errors.saldoInicial?.message}
-                formatOptions={{ maximumFractionDigits: 4 }}
-                label="Saldo inicial"
-                onBlur={field.onBlur}
-                onChange={field.onChange}
-                value={field.value}
-              />
-            )}
-          />
-
-          <TextField
-            errorMessage={errors.dataSaldoInicial?.message}
-            inputRef={dateField.ref}
-            label="Data do saldo inicial"
-            name={dateField.name}
-            onBlur={dateField.onBlur}
-            onInput={dateField.onChange}
-            type="date"
-          />
-        </ModalBody>
-
-        <ModalFooter>
-          <Button
-            isDisabled={isSubmitting}
-            onPress={onClose}
-            size="sm"
-            type="button"
-            variant="secondary"
-          >
-            Cancelar
-          </Button>
-          <Button form="account-editor-form" isPending={isSubmitting} size="sm" type="submit">
-            Cadastrar conta
-          </Button>
-        </ModalFooter>
-      </form>
-    </Modal>
+              Cancelar
+            </Button>
+            <Button form="account-editor-form" isPending={isSubmitting} size="sm" type="submit">
+              Cadastrar conta
+            </Button>
+          </ModalFooter>
+        </form>
+      </Modal>
+      <DiscardChangesModal
+        isOpen={isDiscardModalOpen}
+        onCancel={() => setIsDiscardModalOpen(false)}
+        onConfirm={() => {
+          setIsDiscardModalOpen(false);
+          onClose();
+        }}
+      />
+    </>
   );
 }

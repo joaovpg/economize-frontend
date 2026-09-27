@@ -1,0 +1,434 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-27T10:51:01.5991775-03:00",
+  "title": "Design System: Economize",
+  "extensions": {
+    "colorMeta": {
+      "verde-petroleo": {
+        "role": "primary",
+        "displayName": "Verde-petróleo de orientação",
+        "canonical": "oklch(51.094% 0.08606 186.391)",
+        "tonalRamp": [
+          "oklch(27.726% 0.04466 192.524)",
+          "oklch(38.606% 0.05902 188.416)",
+          "oklch(43.697% 0.07052 188.216)",
+          "oklch(51.094% 0.08606 186.391)",
+          "oklch(60.022% 0.10384 184.704)",
+          "oklch(70.375% 0.12302 182.503)",
+          "oklch(78.452% 0.13253 181.912)",
+          "oklch(90.996% 0.0927 180.426)"
+        ]
+      },
+      "verde-petroleo-hover": {
+        "role": "primary",
+        "displayName": "Verde-petróleo profundo",
+        "canonical": "oklch(43.697% 0.07052 188.216)",
+        "tonalRamp": [
+          "oklch(27.726% 0.04466 192.524)",
+          "oklch(38.606% 0.05902 188.416)",
+          "oklch(43.697% 0.07052 188.216)",
+          "oklch(51.094% 0.08606 186.391)",
+          "oklch(60.022% 0.10384 184.704)",
+          "oklch(70.375% 0.12302 182.503)",
+          "oklch(78.452% 0.13253 181.912)",
+          "oklch(90.996% 0.0927 180.426)"
+        ]
+      },
+      "verde-petroleo-suave": {
+        "role": "primary",
+        "displayName": "Verde-petróleo suave",
+        "canonical": "oklch(95.265% 0.0498 180.801)",
+        "tonalRamp": [
+          "oklch(27.726% 0.04466 192.524)",
+          "oklch(38.606% 0.05902 188.416)",
+          "oklch(43.697% 0.07052 188.216)",
+          "oklch(51.094% 0.08606 186.391)",
+          "oklch(60.022% 0.10384 184.704)",
+          "oklch(70.375% 0.12302 182.503)",
+          "oklch(85.488% 0.12508 181.071)",
+          "oklch(95.265% 0.0498 180.801)"
+        ]
+      },
+      "fundo-ardosia": {
+        "role": "neutral",
+        "displayName": "Fundo ardósia",
+        "canonical": "oklch(96.826% 0.00685 247.896)",
+        "tonalRamp": [
+          "oklch(12.88% 0.0406 264.695)",
+          "oklch(20.768% 0.03982 265.755)",
+          "oklch(27.95% 0.03685 260.031)",
+          "oklch(37.17% 0.03916 257.287)",
+          "oklch(44.553% 0.03745 257.281)",
+          "oklch(55.439% 0.04072 257.417)",
+          "oklch(86.898% 0.01985 252.894)",
+          "oklch(96.826% 0.00685 247.896)"
+        ]
+      },
+      "papel-frio": {
+        "role": "neutral",
+        "displayName": "Papel frio",
+        "canonical": "oklch(98.415% 0.00341 247.858)",
+        "tonalRamp": [
+          "oklch(12.88% 0.0406 264.695)",
+          "oklch(20.768% 0.03982 265.755)",
+          "oklch(27.95% 0.03685 260.031)",
+          "oklch(37.17% 0.03916 257.287)",
+          "oklch(55.439% 0.04072 257.417)",
+          "oklch(71.067% 0.03511 256.788)",
+          "oklch(92.876% 0.01262 255.508)",
+          "oklch(98.415% 0.00341 247.858)"
+        ]
+      },
+      "texto-ardosia": {
+        "role": "neutral",
+        "displayName": "Tinta ardósia",
+        "canonical": "oklch(20.768% 0.03982 265.755)",
+        "tonalRamp": [
+          "oklch(12.88% 0.0406 264.695)",
+          "oklch(20.768% 0.03982 265.755)",
+          "oklch(27.95% 0.03685 260.031)",
+          "oklch(37.17% 0.03916 257.287)",
+          "oklch(44.553% 0.03745 257.281)",
+          "oklch(55.439% 0.04072 257.417)",
+          "oklch(71.067% 0.03511 256.788)",
+          "oklch(98.415% 0.00341 247.858)"
+        ]
+      },
+      "texto-secundario": {
+        "role": "neutral",
+        "displayName": "Texto secundário",
+        "canonical": "oklch(44.553% 0.03745 257.281)",
+        "tonalRamp": [
+          "oklch(12.88% 0.0406 264.695)",
+          "oklch(20.768% 0.03982 265.755)",
+          "oklch(27.95% 0.03685 260.031)",
+          "oklch(37.17% 0.03916 257.287)",
+          "oklch(44.553% 0.03745 257.281)",
+          "oklch(55.439% 0.04072 257.417)",
+          "oklch(71.067% 0.03511 256.788)",
+          "oklch(98.415% 0.00341 247.858)"
+        ]
+      },
+      "texto-sutil": {
+        "role": "neutral",
+        "displayName": "Texto sutil",
+        "canonical": "oklch(55.439% 0.04072 257.417)",
+        "tonalRamp": [
+          "oklch(12.88% 0.0406 264.695)",
+          "oklch(20.768% 0.03982 265.755)",
+          "oklch(27.95% 0.03685 260.031)",
+          "oklch(37.17% 0.03916 257.287)",
+          "oklch(44.553% 0.03745 257.281)",
+          "oklch(55.439% 0.04072 257.417)",
+          "oklch(71.067% 0.03511 256.788)",
+          "oklch(98.415% 0.00341 247.858)"
+        ]
+      },
+      "borda": {
+        "role": "neutral",
+        "displayName": "Borda suave",
+        "canonical": "oklch(92.876% 0.01262 255.508)",
+        "tonalRamp": [
+          "oklch(12.88% 0.0406 264.695)",
+          "oklch(20.768% 0.03982 265.755)",
+          "oklch(27.95% 0.03685 260.031)",
+          "oklch(37.17% 0.03916 257.287)",
+          "oklch(55.439% 0.04072 257.417)",
+          "oklch(71.067% 0.03511 256.788)",
+          "oklch(86.898% 0.01985 252.894)",
+          "oklch(98.415% 0.00341 247.858)"
+        ]
+      },
+      "borda-forte": {
+        "role": "neutral",
+        "displayName": "Borda forte",
+        "canonical": "oklch(86.898% 0.01985 252.894)",
+        "tonalRamp": [
+          "oklch(12.88% 0.0406 264.695)",
+          "oklch(20.768% 0.03982 265.755)",
+          "oklch(27.95% 0.03685 260.031)",
+          "oklch(37.17% 0.03916 257.287)",
+          "oklch(55.439% 0.04072 257.417)",
+          "oklch(71.067% 0.03511 256.788)",
+          "oklch(86.898% 0.01985 252.894)",
+          "oklch(98.415% 0.00341 247.858)"
+        ]
+      },
+      "perigo": {
+        "role": "tertiary",
+        "displayName": "Vermelho de validação",
+        "canonical": "oklch(50.542% 0.19049 27.518)",
+        "tonalRamp": [
+          "oklch(30% 0.16 27.518)",
+          "oklch(40% 0.18 27.518)",
+          "oklch(50.542% 0.19049 27.518)",
+          "oklch(57.71% 0.21516 27.325)",
+          "oklch(70% 0.18 27.518)",
+          "oklch(80% 0.12 27.518)",
+          "oklch(90% 0.06 27.518)",
+          "oklch(97.053% 0.01295 17.38)"
+        ]
+      },
+      "perigo-suave": {
+        "role": "tertiary",
+        "displayName": "Fundo vermelho suave",
+        "canonical": "oklch(97.053% 0.01295 17.38)",
+        "tonalRamp": [
+          "oklch(30% 0.16 27.518)",
+          "oklch(40% 0.18 27.518)",
+          "oklch(50.542% 0.19049 27.518)",
+          "oklch(57.71% 0.21516 27.325)",
+          "oklch(70% 0.18 27.518)",
+          "oklch(80% 0.12 27.518)",
+          "oklch(90% 0.06 27.518)",
+          "oklch(97.053% 0.01295 17.38)"
+        ]
+      },
+      "sucesso": {
+        "role": "secondary",
+        "displayName": "Verde de confirmação",
+        "canonical": "oklch(52.73% 0.1371 150.069)",
+        "tonalRamp": [
+          "oklch(30% 0.10 150.069)",
+          "oklch(42% 0.13 150.069)",
+          "oklch(52.73% 0.1371 150.069)",
+          "oklch(62.705% 0.16991 149.214)",
+          "oklch(72% 0.14 150.069)",
+          "oklch(82% 0.09 150.069)",
+          "oklch(92% 0.05 150.069)",
+          "oklch(98.193% 0.01806 155.826)"
+        ]
+      },
+      "sucesso-suave": {
+        "role": "secondary",
+        "displayName": "Fundo verde suave",
+        "canonical": "oklch(98.193% 0.01806 155.826)",
+        "tonalRamp": [
+          "oklch(30% 0.10 150.069)",
+          "oklch(42% 0.13 150.069)",
+          "oklch(52.73% 0.1371 150.069)",
+          "oklch(62.705% 0.16991 149.214)",
+          "oklch(72% 0.14 150.069)",
+          "oklch(82% 0.09 150.069)",
+          "oklch(92% 0.05 150.069)",
+          "oklch(98.193% 0.01806 155.826)"
+        ]
+      },
+      "aviso": {
+        "role": "tertiary",
+        "displayName": "Âmbar de atenção",
+        "canonical": "oklch(55.528% 0.14551 48.998)",
+        "tonalRamp": [
+          "oklch(30% 0.11 48.998)",
+          "oklch(42% 0.13 48.998)",
+          "oklch(55.528% 0.14551 48.998)",
+          "oklch(66.584% 0.15742 58.318)",
+          "oklch(75% 0.13 48.998)",
+          "oklch(84% 0.09 48.998)",
+          "oklch(92% 0.05 48.998)",
+          "oklch(98.688% 0.0214 95.277)"
+        ]
+      },
+      "aviso-suave": {
+        "role": "tertiary",
+        "displayName": "Fundo âmbar suave",
+        "canonical": "oklch(98.688% 0.0214 95.277)",
+        "tonalRamp": [
+          "oklch(30% 0.11 48.998)",
+          "oklch(42% 0.13 48.998)",
+          "oklch(55.528% 0.14551 48.998)",
+          "oklch(66.584% 0.15742 58.318)",
+          "oklch(75% 0.13 48.998)",
+          "oklch(84% 0.09 48.998)",
+          "oklch(92% 0.05 48.998)",
+          "oklch(98.688% 0.0214 95.277)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Literata editorial",
+        "purpose": "Títulos de página e mensagens de orientação."
+      },
+      "body": {
+        "displayName": "Geist operacional",
+        "purpose": "Leitura, formulários, navegação e dados tabulares."
+      },
+      "mono": {
+        "displayName": "Geist Mono de contexto",
+        "purpose": "Datas, filtros, códigos e metadados compactos."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ambient-low",
+        "value": "0 1px 2px rgb(15 23 42 / 0.04)",
+        "purpose": "Separação quase imperceptível para pequenos controles."
+      },
+      {
+        "name": "card",
+        "value": "0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px rgb(15 23 42 / 0.04)",
+        "purpose": "Elevação baixa para uma superfície que precisa subir um pouco."
+      },
+      {
+        "name": "popover",
+        "value": "0 12px 32px rgb(15 23 42 / 0.12)",
+        "purpose": "Superfícies temporárias acima do conteúdo."
+      },
+      {
+        "name": "dialog",
+        "value": "0 24px 64px rgb(15 23 42 / 0.18)",
+        "purpose": "Proteção do foco visual em diálogos."
+      },
+      {
+        "name": "tree-node",
+        "value": "0 1px 2px rgb(15 23 42 / 0.18)",
+        "purpose": "Presença estrutural de um nó interativo."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-transition",
+        "value": "150ms ease-out",
+        "purpose": "Mudanças discretas de cor, borda e foco."
+      },
+      {
+        "name": "page-transition",
+        "value": "250ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Entrada curta entre telas públicas, respeitando reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile-base",
+        "value": "0px"
+      },
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "content-wide",
+        "value": "768px"
+      },
+      {
+        "name": "compact",
+        "value": "448px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação principal visível, firme e serena.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Continuar</button>",
+      "css": ".ds-btn-primary { min-height: 46px; padding: 0 18px; border: 1px solid transparent; border-radius: 10px; background: var(--color-brand-value); color: var(--color-brand-foreground-value); font: 600 14px/20px var(--font-ui); transition: background-color 150ms ease-out, outline-color 150ms ease-out; } .ds-btn-primary:hover { background: var(--color-brand-hover-value); } .ds-btn-primary:active { background: var(--color-brand-pressed-value); } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-brand-value); outline-offset: 3px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Ação secundária preservada na mesma camada do conteúdo.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\">Cancelar</button>",
+      "css": ".ds-btn-secondary { min-height: 46px; padding: 0 18px; border: 1px solid var(--color-border-value); border-radius: 10px; background: var(--color-surface-value); color: var(--color-foreground-value); font: 600 14px/20px var(--font-ui); transition: background-color 150ms ease-out, border-color 150ms ease-out, outline-color 150ms ease-out; } .ds-btn-secondary:hover { border-color: var(--color-border-strong-value); background: var(--color-surface-muted-value); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--color-brand-value); outline-offset: 3px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "text-field",
+      "description": "Campo de formulário com rótulo claro e foco visível.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Nome do orçamento</span><input class=\"ds-field-input\" placeholder=\"Alimentação\" /></label>",
+      "css": ".ds-field { display: grid; gap: 4px; } .ds-field-label { color: var(--color-foreground-value); font: 600 14px/20px var(--font-ui); } .ds-field-input { width: 100%; height: 48px; padding: 0 14px; border: 1px solid var(--color-border-value); border-radius: 12px; background: var(--color-surface-value); color: var(--color-foreground-value); font: 400 14px/20px var(--font-ui); outline: none; transition: background-color 150ms ease-out, border-color 150ms ease-out, outline-color 150ms ease-out; } .ds-field-input::placeholder { color: var(--color-subtle-value); } .ds-field-input:hover { border-color: var(--color-border-strong-value); } .ds-field-input:focus-visible { border-color: var(--color-brand-value); outline: 2px solid var(--color-brand-value); outline-offset: 0; }"
+    },
+    {
+      "name": "Card Surface",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "Superfície de conteúdo em papel frio, sem elevação por padrão.",
+      "html": "<section class=\"ds-card\"><h3>Visão do mês</h3><p>Saldo disponível</p><strong>R$ 4.280,40</strong></section>",
+      "css": ".ds-card { padding: 22px; border: 1px solid var(--color-border-value); border-radius: 24px; background: var(--color-surface-value); color: var(--color-foreground-value); } .ds-card h3 { margin: 0 0 12px; font: 600 20px/28px var(--font-display); letter-spacing: -0.02em; } .ds-card p { margin: 0 0 4px; color: var(--color-subtle-value); font: 400 12px/16px var(--font-ui); } .ds-card strong { font: 700 30px/30px var(--font-ui); letter-spacing: -0.03em; }"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": "navigation-active",
+      "description": "Navegação compacta com estado ativo em verde-petróleo suave.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Navegação principal\"><a href=\"#\" class=\"ds-nav-link ds-nav-link-active\">Resumo</a><a href=\"#\" class=\"ds-nav-link\">Transações</a><a href=\"#\" class=\"ds-nav-link\">Contas</a></nav>",
+      "css": ".ds-nav { display: flex; gap: 6px; padding: 4px; border: 1px solid var(--color-border-value); border-radius: 999px; background: var(--color-surface-overlay); } .ds-nav-link { padding: 6px 12px; border-radius: 999px; color: var(--color-muted-value); font: 600 14px/20px var(--font-ui); text-decoration: none; transition: background-color 150ms ease-out, color 150ms ease-out, outline-color 150ms ease-out; } .ds-nav-link:hover { color: var(--color-foreground-value); } .ds-nav-link-active { background: var(--color-brand-soft-value); color: var(--color-brand-hover-value); } .ds-nav-link:focus-visible { outline: 2px solid var(--color-brand-value); outline-offset: 3px; }"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "navigation-active",
+      "description": "Filtro compacto que diferencia repouso e seleção sem depender apenas de cor.",
+      "html": "<button class=\"ds-chip ds-chip-selected\" type=\"button\" aria-pressed=\"true\">Alimentação</button>",
+      "css": ".ds-chip { min-height: 32px; padding: 0 10px; border: 1px solid var(--color-border-value); border-radius: 999px; background: var(--color-surface-value); color: var(--color-muted-value); font: 400 12px/16px var(--font-ui); transition: background-color 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out, outline-color 150ms ease-out; } .ds-chip:hover { border-color: var(--color-border-strong-value); background: var(--color-surface-muted-value); } .ds-chip-selected { border-color: var(--color-brand-soft-value); background: var(--color-brand-soft-value); color: var(--color-brand-hover-value); font-weight: 600; } .ds-chip:focus-visible { outline: 2px solid var(--color-brand-value); outline-offset: 3px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Caderno financeiro sereno",
+    "overview": "O Economize deve parecer um lugar calmo para organizar a realidade financeira: papel frio, tinta escura e um verde-petróleo usado como marcação de orientação. A interface não transforma a vida financeira em espetáculo; ela cria uma superfície confiável para ler, registrar e comparar informações sem pressão.\n\nA composição é mobile-first e orientada à tarefa. Tipografia editorial dá peso aos títulos, enquanto uma sans-serif precisa mantém formulários, tabelas e controles fáceis de escanear. A profundidade vem principalmente de camadas tonais e bordas finas; sombras aparecem somente quando uma superfície realmente precisa se destacar, como um modal ou popover.",
+    "keyCharacteristics": [
+      "Papel frio e superfícies tonais, com contraste confortável.",
+      "Verde-petróleo reservado para orientação, seleção e ação primária.",
+      "Literata nos títulos; Geist Sans nos controles e textos de leitura.",
+      "Componentes refinados, contidos e responsivos desde o menor viewport.",
+      "Profundidade em camadas, não em uma coleção de cartões flutuantes."
+    ],
+    "rules": [
+      {
+        "name": "The Verde-Petróleo de Orientação Rule",
+        "body": "Use o acento para orientar uma decisão ou confirmar um estado; não use verde-petróleo como decoração de fundo ou preenchimento indiscriminado.",
+        "section": "colors"
+      },
+      {
+        "name": "The Papel Frio Rule",
+        "body": "Superfícies claras devem parecer papel frio e limpo, nunca branco estourado ou cinza sem vida.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Voices Rule",
+        "body": "Literata conduz a hierarquia; Geist Sans conduz a operação. Não troque suas funções por conveniência.",
+        "section": "typography"
+      },
+      {
+        "name": "The Quiet Measure Rule",
+        "body": "Títulos podem ter personalidade, mas textos operacionais devem preservar leitura direta, altura de linha confortável e alinhamento previsível.",
+        "section": "typography"
+      },
+      {
+        "name": "The Mobile-First Rule",
+        "body": "Toda nova tela deve funcionar primeiro em uma coluna estreita, sem depender de uma versão desktop para revelar a hierarquia ou completar uma tarefa.",
+        "section": "layout"
+      },
+      {
+        "name": "The Layered Surface Rule",
+        "body": "Primeiro resolva hierarquia com papel, fundo, borda e espaço. Só depois considere sombra.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Quiet Elevation Rule",
+        "body": "Uma sombra deve explicar que uma superfície está acima do fluxo; não deve virar o elemento mais chamativo da tela.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do começar cada composição pelo mobile e expandir a hierarquia para telas maiores.",
+      "Do usar verde-petróleo para orientar ação, foco e seleção, preservando sua raridade.",
+      "Do usar Literata em títulos e Geist Sans em operações, formulários e tabelas.",
+      "Do separar camadas com tonalidade, borda fina e espaçamento antes de aplicar sombra.",
+      "Do manter foco visível, estados de erro legíveis e alvos de toque confortáveis.",
+      "Do usar ícones vetoriais consistentes em vez de símbolos de texto ou emojis."
+    ],
+    "donts": [
+      "Don't usar neon, gradientes de texto, gamificação agressiva ou estética promocional de fintech.",
+      "Don't transformar cada grupo em um cartão flutuante com sombra; a tela deve respirar como uma página organizada.",
+      "Don't usar mono como fantasia tecnológica ou como fonte principal de leitura.",
+      "Don't tratar desktop como base e apenas encolher a interface no mobile.",
+      "Don't substituir mensagens claras por cor, ícone ou decoração sem texto.",
+      "Don't inventar valores financeiros, provas, benchmarks ou estados que não venham de dados reais da API."
+    ]
+  }
+}

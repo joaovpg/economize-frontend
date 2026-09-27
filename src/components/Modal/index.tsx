@@ -1,4 +1,11 @@
-import { type ComponentPropsWithRef, type ReactNode, type Ref } from "react";
+import {
+  useLayoutEffect,
+  useRef,
+  type ComponentPropsWithRef,
+  type ReactNode,
+  type Ref,
+  type RefObject,
+} from "react";
 import {
   Dialog as AriaDialog,
   DialogTrigger as AriaDialogTrigger,
@@ -83,6 +90,8 @@ type ModalPropsBase = Omit<
     dialogClassName?: string;
     /** Identificador aplicado ao elemento semântico do diálogo. */
     id?: string;
+    /** Elemento que deve receber o foco inicial quando o diálogo abrir. */
+    initialFocus?: RefObject<HTMLElement | null>;
     /** Classes aplicadas ao overlay, aceitando os estados de renderização do React Aria. */
     overlayClassName?: AriaModalOverlayProps["className"];
     /** Papel semântico do diálogo. Use alertdialog somente para confirmações críticas. */
@@ -151,7 +160,7 @@ export function ModalClose({
   const resolvedClassName = composeRenderProps(
     className,
     (userClassName: string | undefined) =>
-      twMerge("absolute top-0 right-0 shrink-0", userClassName) ?? "",
+      twMerge("absolute top-0 right-0 shrink-0 [--button-height:2.75rem]!", userClassName) ?? "",
   );
 
   return (
@@ -234,6 +243,7 @@ export function Modal({
   defaultOpen,
   dialogClassName,
   id,
+  initialFocus,
   isDismissable = false,
   isKeyboardDismissDisabled = false,
   isOpen,
@@ -250,6 +260,14 @@ export function Modal({
     (userClassName: string | undefined, { isEntering, isExiting }: ModalRenderProps) =>
       overlayStyles({ className: userClassName, isEntering, isExiting }),
   );
+
+  useLayoutEffect(() => {
+    const shouldFocus = isOpen === true || (isOpen === undefined && defaultOpen === true);
+
+    if (shouldFocus) {
+      initialFocus?.current?.focus();
+    }
+  }, [defaultOpen, initialFocus, isOpen]);
 
   return (
     <AriaModalOverlay
@@ -286,5 +304,57 @@ export function Modal({
         </AriaModal>
       </div>
     </AriaModalOverlay>
+  );
+}
+
+export type DiscardChangesModalProps = {
+  isOpen: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+};
+
+/** Confirma o descarte de dados preenchidos antes de fechar um formulário. */
+export function DiscardChangesModal({ isOpen, onCancel, onConfirm }: DiscardChangesModalProps) {
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+
+  return (
+    <Modal
+      initialFocus={cancelButtonRef}
+      isDismissable
+      isKeyboardDismissDisabled={false}
+      isOpen={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          onCancel();
+        }
+      }}
+      role="alertdialog"
+      size="sm"
+    >
+      <ModalHeader>
+        <ModalTitle>Descartar alterações?</ModalTitle>
+        <ModalDescription>Fechar agora apagará os dados preenchidos.</ModalDescription>
+        <ModalClose />
+      </ModalHeader>
+      <ModalBody>
+        <p className="m-0 text-body-small text-muted">
+          Você pode cancelar e continuar editando ou descartar este formulário.
+        </p>
+      </ModalBody>
+      <ModalFooter>
+        <Button
+          ref={cancelButtonRef}
+          onPress={onCancel}
+          size="sm"
+          type="button"
+          variant="secondary"
+        >
+          Continuar editando
+        </Button>
+        <Button onPress={onConfirm} size="sm" type="button" variant="danger">
+          Descartar
+        </Button>
+      </ModalFooter>
+    </Modal>
   );
 }

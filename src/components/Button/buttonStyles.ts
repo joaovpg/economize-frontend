@@ -35,6 +35,8 @@ export const buttonStyles = tv(
       variant: {
         danger:
           "border-danger bg-danger text-brand-foreground data-hovered:border-danger-hover data-hovered:bg-danger-hover data-pressed:border-danger-pressed data-pressed:bg-danger-pressed data-disabled:opacity-[0.42] data-pending:opacity-[0.42] data-focus-visible:outline-danger",
+        filter:
+          "rounded-full border-border bg-surface text-muted aria-pressed:border-brand-soft aria-pressed:bg-brand-soft aria-pressed:text-brand-hover data-hovered:border-border-strong data-hovered:bg-surface-muted data-pressed:border-border-strong data-pressed:bg-surface-strong data-disabled:opacity-[0.42] data-pending:opacity-[0.42] data-focus-visible:outline-brand",
         ghost:
           "border-transparent bg-transparent text-muted data-hovered:bg-surface-muted data-hovered:text-foreground data-pressed:bg-surface-strong data-pressed:text-foreground data-disabled:opacity-[0.42] data-pending:opacity-[0.42] data-focus-visible:outline-brand",
         link: "!rounded !border-0 !bg-transparent !px-0 text-brand data-hovered:text-brand-hover data-hovered:underline data-hovered:underline-offset-3 data-pressed:text-brand-pressed data-pressed:underline data-pressed:underline-offset-3 data-focus-visible:outline-brand data-disabled:text-muted data-disabled:no-underline data-disabled:opacity-100 data-pending:text-muted data-pending:no-underline data-pending:opacity-100",

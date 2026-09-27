@@ -19,16 +19,16 @@ import { IconSlot } from "./IconSlot";
 import { Label } from "./Label";
 
 const control = tv({
-  base: "flex h-12 min-h-12 min-w-0 items-center gap-2.5 rounded-xl border bg-[linear-gradient(180deg,rgb(255_255_255_/_0.7),#fffdf8)] px-3.5 font-ui text-subtle transition-[background-color,border-color,outline-color] motion-reduce:transition-none",
+  base: "flex h-12 min-h-12 min-w-0 items-center gap-2.5 rounded-xl border bg-surface px-3.5 font-ui text-subtle transition-[background-color,border-color,outline-color] motion-reduce:transition-none",
   variants: {
     disabled: {
       false: "",
-      true: "cursor-not-allowed border-border bg-surface-muted text-subtle hover:!border-border focus-within:!border-border focus-within:!outline-none",
+      true: "cursor-not-allowed border-border bg-surface-muted text-subtle hover:border-border! focus-within:border-border! focus-within:outline-none!",
     },
     invalid: {
       false:
-        "border-border hover:border-border-strong focus-within:!border-brand focus-within:outline-brand focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
-      true: "border-danger focus-within:!border-danger focus-within:outline-danger focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
+        "border-border hover:border-border-strong focus-within:border-brand! focus-within:outline-brand focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
+      true: "border-danger focus-within:border-danger! focus-within:outline-danger focus-within:outline-2 focus-within:outline-solid focus-within:outline-offset-0",
     },
   },
 });
@@ -50,7 +50,7 @@ const inputStyles = tv(
 );
 
 const stepperButtonStyles = tv({
-  base: "![--button-height:1.25rem] !size-5 rounded-md text-subtle data-focus-visible:!outline-offset-0 [&>span]:!size-3",
+  base: "[--button-height:1.25rem]! size-5! rounded-md text-subtle data-focus-visible:outline-offset-0! [&>span]:size-3!",
   defaultVariants: {
     invalid: false,
   },

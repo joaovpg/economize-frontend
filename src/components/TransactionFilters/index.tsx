@@ -28,11 +28,19 @@ import { Link } from "../Link";
 import { MonthYearFilter } from "../MonthYearFilter";
 
 const filtersStyles = tv({
-  base: "sticky top-6 w-auto self-start m-[1.5rem_0_1.5rem_1.5rem] max-h-[calc(100svh-3rem)] overflow-auto max-[48rem]:static max-[48rem]:m-[0_1rem_1rem] max-[48rem]:max-h-none max-[48rem]:hidden",
+  base: "sticky top-6 w-auto self-start m-[1.5rem_0_1.5rem_1.5rem] max-h-[calc(100svh-3rem)] overflow-auto",
+  defaultVariants: {
+    presentation: "sidebar",
+  },
   variants: {
     open: {
-      false: "",
-      true: "max-[48rem]:!grid",
+      false: "max-[48rem]:hidden",
+      true: "max-[48rem]:grid",
+    },
+    presentation: {
+      modal:
+        "!static !m-0 !max-h-none !overflow-visible !rounded-none !border-0 !bg-transparent !shadow-none",
+      sidebar: "max-[48rem]:static max-[48rem]:m-[0_1rem_1rem] max-[48rem]:max-h-none",
     },
   },
 });
@@ -111,6 +119,7 @@ export type TransactionFiltersProps = {
   onApply: (values: TransactionFilterFormData) => void;
   onClear: () => void;
   onClose: () => void;
+  presentation?: "modal" | "sidebar";
   showMonth?: boolean;
   value: TransactionFilterState;
 };
@@ -124,6 +133,7 @@ export function TransactionFilters({
   onApply,
   onClear,
   onClose,
+  presentation = "sidebar",
   showMonth = true,
   value,
 }: TransactionFiltersProps) {
@@ -209,7 +219,8 @@ export function TransactionFilters({
     <Card
       as="aside"
       aria-label={ariaLabel}
-      className={filtersStyles({ open: isOpen })}
+      className={filtersStyles({ open: isOpen, presentation })}
+      data-presentation={presentation}
       id={filterId}
     >
       <CardHeader>
@@ -220,7 +231,7 @@ export function TransactionFilters({
           </p>
         </div>
         <Button
-          className="hidden! max-[48rem]:inline-flex!"
+          className={presentation === "modal" ? "inline-flex!" : "hidden! max-[48rem]:inline-flex!"}
           variant="ghost"
           size="sm"
           isIconOnly
@@ -234,10 +245,10 @@ export function TransactionFilters({
       <form className="grid gap-5.5" onSubmit={handleSubmit(onApply)}>
         <CardBody className="gap-5.5">
           <AriaTextField className="grid gap-2.5">
-            <Label className="m-0 !text-caption-strong tracking-[0.04em] !text-muted uppercase">
+            <Label className="m-0 text-caption-strong! tracking-label text-muted! uppercase">
               Buscar transação
             </Label>
-            <div className="flex min-h-10.5 min-w-0 items-center gap-2.5 rounded-xl border border-border bg-[color-mix(in_oklch,var(--color-surface)_70%,transparent)] px-3 text-subtle transition-[background-color,border-color] duration-150 ease-out focus-within:border-brand focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand hover:border-border-strong hover:bg-surface-muted motion-reduce:transition-none [&>svg]:size-4 [&>svg]:shrink-0">
+            <div className="flex min-h-10.5 min-w-0 items-center gap-2.5 rounded-xl border border-border bg-surface px-3 text-subtle transition-[background-color,border-color] duration-150 ease-out focus-within:border-brand focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand hover:border-border-strong hover:bg-surface-muted motion-reduce:transition-none [&>svg]:size-4 [&>svg]:shrink-0">
               <MagnifyingGlassIcon aria-hidden="true" />
               <Input
                 {...searchField}
@@ -250,7 +261,7 @@ export function TransactionFilters({
           </AriaTextField>
 
           <fieldset className="grid min-w-0 gap-2.5 border-0 p-0">
-            <legend className="m-0 flex items-center justify-between gap-2 text-caption-strong tracking-[0.04em] text-muted uppercase">
+            <legend className="m-0 flex items-center justify-between gap-2 text-caption-strong tracking-label text-muted uppercase">
               <span>Categorias</span>
               <Link
                 aria-label="Gerenciar categorias"

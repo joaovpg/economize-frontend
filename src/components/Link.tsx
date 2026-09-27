@@ -16,7 +16,7 @@ const linkStyles = tv(
     variants: {
       active: {
         false: "",
-        true: "!bg-brand-soft !text-brand-hover shadow-nav-active",
+        true: "bg-brand-soft! text-brand-hover!",
       },
       linkVariant: {
         back: "text-caption",
@@ -25,7 +25,7 @@ const linkStyles = tv(
         default: "",
         header: "font-bold [&>span>svg]:size-4",
         navigation:
-          "!h-11 !min-h-11 !rounded-full !px-3 text-button !text-muted no-underline data-hovered:!text-foreground data-hovered:no-underline max-[28rem]:!px-2.5 max-[28rem]:[&>span>svg]:hidden",
+          "h-auto! min-h-0! rounded-full! px-3! py-1.5! text-button text-muted! no-underline data-hovered:text-foreground! data-hovered:no-underline max-[28rem]:px-2.5!",
       },
     },
   },

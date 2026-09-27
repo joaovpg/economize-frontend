@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm, type UseFormSetError } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
+import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
   ModalBody,
   ModalClose,
   ModalDescription,
+  DiscardChangesModal,
   ModalFooter,
   ModalHeader,
   ModalTitle,
@@ -71,7 +73,9 @@ export function CategoryEditorModal({
   onSaved,
 }: CategoryEditorModalProps) {
   const isEditing = category !== null;
+  const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const createCategoryMutation = useMutation({
     mutationFn: (input: Parameters<typeof postCategoria>[0]) => postCategoria(input),
@@ -88,7 +92,7 @@ export function CategoryEditorModal({
   });
   const {
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors, isDirty, isSubmitting },
     handleSubmit,
     register,
     setError,
@@ -101,6 +105,19 @@ export function CategoryEditorModal({
     resolver: zodResolver(categoryFormSchema),
   });
   const nameField = register("nome");
+
+  const requestClose = () => {
+    if (isSubmitting) {
+      return;
+    }
+
+    if (isDirty) {
+      setIsDiscardModalOpen(true);
+      return;
+    }
+
+    onClose();
+  };
 
   const handleFormSubmit = async (data: CategoryFormData) => {
     setSubmitError(null);
@@ -142,75 +159,82 @@ export function CategoryEditorModal({
   };
 
   return (
-    <Modal
-      isDismissable={!isSubmitting}
-      isKeyboardDismissDisabled={isSubmitting}
-      isOpen
-      onOpenChange={(open) => {
-        if (!open && !isSubmitting) {
-          onClose();
-        }
-      }}
-      size="md"
-    >
-      <ModalHeader>
-        <ModalTitle>{isEditing ? "Editar categoria" : "Nova categoria"}</ModalTitle>
-        <ModalDescription>
-          {isEditing
-            ? "Atualize o nome e a organização desta categoria."
-            : "Crie uma categoria para organizar suas transações."}
-        </ModalDescription>
-        {!isSubmitting && <ModalClose />}
-      </ModalHeader>
-      <form
-        className="contents"
-        id="category-editor-form"
-        noValidate
-        onSubmit={handleSubmit(handleFormSubmit)}
+    <>
+      <Modal
+        isDismissable={!isSubmitting && !isDiscardModalOpen}
+        isKeyboardDismissDisabled={isSubmitting || isDiscardModalOpen}
+        isOpen
+        initialFocus={nameInputRef}
+        onOpenChange={(open) => {
+          if (!open) {
+            requestClose();
+          }
+        }}
+        size="md"
       >
-        <ModalBody>
-          {submitError && (
-            <p
-              aria-live="assertive"
-              className="block rounded-xl border border-danger/25 bg-danger-soft px-3.5 py-3 text-body-small text-danger"
-              role="alert"
+        <ModalHeader>
+          <ModalTitle>{isEditing ? "Editar categoria" : "Nova categoria"}</ModalTitle>
+          <ModalDescription>
+            {isEditing
+              ? "Atualize o nome e a organização desta categoria."
+              : "Crie uma categoria para organizar suas transações."}
+          </ModalDescription>
+          {!isSubmitting && !isDiscardModalOpen && <ModalClose />}
+        </ModalHeader>
+        <form
+          className="contents"
+          id="category-editor-form"
+          noValidate
+          onSubmit={handleSubmit(handleFormSubmit)}
+        >
+          <ModalBody>
+            {submitError && <InlineMessage tone="danger">{submitError}</InlineMessage>}
+            <TextField
+              defaultValue={category?.nome ?? ""}
+              errorMessage={errors.nome?.message}
+              inputRef={(input) => {
+                nameInputRef.current = input;
+                nameField.ref(input);
+              }}
+              isDisabled={isSubmitting}
+              label="Nome"
+              name={nameField.name}
+              onBlur={nameField.onBlur}
+              onInput={nameField.onChange}
+              placeholder="Ex.: Moradia"
+            />
+            <CategoryParentField
+              categories={categories}
+              control={control}
+              editingCategory={category}
+              errorMessage={errors.categoriaPaiId?.message}
+              isDisabled={isSubmitting}
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              isDisabled={isSubmitting}
+              onPress={requestClose}
+              size="sm"
+              type="button"
+              variant="secondary"
             >
-              {submitError}
-            </p>
-          )}
-          <TextField
-            defaultValue={category?.nome ?? ""}
-            errorMessage={errors.nome?.message}
-            inputRef={nameField.ref}
-            label="Nome"
-            name={nameField.name}
-            onBlur={nameField.onBlur}
-            onInput={nameField.onChange}
-            placeholder="Ex.: Moradia"
-          />
-          <CategoryParentField
-            categories={categories}
-            control={control}
-            editingCategory={category}
-            errorMessage={errors.categoriaPaiId?.message}
-            isDisabled={isSubmitting}
-          />
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            isDisabled={isSubmitting}
-            onPress={onClose}
-            size="sm"
-            type="button"
-            variant="secondary"
-          >
-            Cancelar
-          </Button>
-          <Button form="category-editor-form" isPending={isSubmitting} size="sm" type="submit">
-            {isEditing ? "Salvar alterações" : "Cadastrar categoria"}
-          </Button>
-        </ModalFooter>
-      </form>
-    </Modal>
+              Cancelar
+            </Button>
+            <Button form="category-editor-form" isPending={isSubmitting} size="sm" type="submit">
+              {isEditing ? "Salvar alterações" : "Cadastrar categoria"}
+            </Button>
+          </ModalFooter>
+        </form>
+      </Modal>
+      <DiscardChangesModal
+        isOpen={isDiscardModalOpen}
+        onCancel={() => setIsDiscardModalOpen(false)}
+        onConfirm={() => {
+          setIsDiscardModalOpen(false);
+          onClose();
+        }}
+      />
+    </>
   );
 }
