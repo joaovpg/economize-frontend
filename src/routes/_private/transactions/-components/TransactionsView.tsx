@@ -57,21 +57,47 @@ type TransactionMetrics = {
   exits: number;
 };
 
+function isIncomeOrExpenseSummaryItem(item: ConsultaTransacaoItem) {
+  switch (item.origem) {
+    case "SALDO_INICIAL_CONTA":
+    case "TRANSFERENCIA":
+      return false;
+    case "TRANSACAO_SIMPLES":
+    case "TRANSACAO_RECORRENTE":
+    case "PARCELA":
+      return true;
+    default: {
+      const exhaustiveCheck: never = item.origem;
+      return exhaustiveCheck;
+    }
+  }
+}
+
 function getTransactionMetrics(
   items: readonly ConsultaTransacaoItem[],
   openingBalance: number,
 ): TransactionMetrics {
-  const entries = items.reduce((total, item) => (item.valor > 0 ? total + item.valor : total), 0);
-  const exits = items.reduce(
-    (total, item) => (item.valor < 0 ? total + Math.abs(item.valor) : total),
-    0,
-  );
+  let entries = 0;
+  let exits = 0;
+  const movement = items.reduce((total, item) => total + item.valor, 0);
+
+  for (const item of items) {
+    if (!isIncomeOrExpenseSummaryItem(item)) {
+      continue;
+    }
+
+    if (item.valor > 0) {
+      entries += item.valor;
+    } else if (item.valor < 0) {
+      exits += Math.abs(item.valor);
+    }
+  }
 
   return {
     entries,
     exits,
     openingBalance,
-    projectedBalance: openingBalance + entries - exits,
+    projectedBalance: openingBalance + movement,
   };
 }
 
