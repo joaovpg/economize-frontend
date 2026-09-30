@@ -1,5 +1,7 @@
 import { useMemo } from "react";
+import { Menu, MenuItem, MenuTrigger, Popover } from "react-aria-components";
 
+import { DotsThreeVerticalIcon } from "@phosphor-icons/react/dist/csr/DotsThreeVertical";
 import { PencilSimpleIcon } from "@phosphor-icons/react/dist/csr/PencilSimple";
 import { RepeatIcon } from "@phosphor-icons/react/dist/csr/Repeat";
 import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
@@ -24,6 +26,8 @@ type TransactionTableProps = {
 type TransactionDayGroup = {
   balance: number;
   date: string;
+  entries: number;
+  exits: number;
   items: ConsultaTransacaoItem[];
 };
 
@@ -34,21 +38,27 @@ function groupTransactionsByDay(
   const groups = new Map<string, TransactionDayGroup>();
   let balance = openingBalance;
 
-  for (const item of items) {
+  for (const item of items.toSorted((left, right) =>
+    left.dataFinanceira.localeCompare(right.dataFinanceira),
+  )) {
     balance += item.valor;
-    const group = groups.get(item.dataFinanceira);
+    let group = groups.get(item.dataFinanceira);
 
-    if (group) {
-      group.balance = balance;
-      group.items.push(item);
-      continue;
+    if (!group) {
+      group = { balance, date: item.dataFinanceira, entries: 0, exits: 0, items: [] };
+      groups.set(item.dataFinanceira, group);
     }
 
-    groups.set(item.dataFinanceira, {
-      balance,
-      date: item.dataFinanceira,
-      items: [item],
-    });
+    group.balance = balance;
+    group.items.push(item);
+
+    if (item.origem !== "SALDO_INICIAL_CONTA" && item.origem !== "TRANSFERENCIA") {
+      if (item.valor > 0) {
+        group.entries += item.valor;
+      } else {
+        group.exits += Math.abs(item.valor);
+      }
+    }
   }
 
   return [...groups.values()];
@@ -62,7 +72,6 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
   day: "2-digit",
   month: "short",
   timeZone: "UTC",
-  year: "numeric",
 });
 
 function formatTransactionDate(date: string) {
@@ -71,6 +80,50 @@ function formatTransactionDate(date: string) {
 
 function getItemKey(item: ConsultaTransacaoItem) {
   return `${item.operacaoId ?? item.segmentoRecorrenciaId ?? item.grupoRecorrenciaId ?? "item"}-${item.contaId}-${item.dataFinanceira}-${item.origem}`;
+}
+
+function TransactionActions({
+  item,
+  onDelete,
+  onEdit,
+}: Pick<TransactionTableProps, "onDelete" | "onEdit"> & { item: ConsultaTransacaoItem }) {
+  return (
+    <MenuTrigger>
+      <Button
+        aria-label={`Ações de ${item.descricao}`}
+        className="size-6! [&_svg]:size-3.5"
+        isIconOnly
+        size="sm"
+        variant="ghost"
+      >
+        <DotsThreeVerticalIcon aria-hidden="true" />
+      </Button>
+      <Popover
+        className="z-50 min-w-40 rounded-xl border border-border bg-surface p-1 shadow-lg outline-none"
+        offset={4}
+        placement="bottom end"
+      >
+        <Menu aria-label={`Ações de ${item.descricao}`} className="outline-none">
+          <MenuItem
+            className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-body-small text-foreground outline-none data-focused:bg-surface-muted"
+            onAction={() => onEdit(item)}
+            textValue="Editar"
+          >
+            <PencilSimpleIcon aria-hidden="true" className="size-4 shrink-0" />
+            Editar
+          </MenuItem>
+          <MenuItem
+            className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-body-small text-danger outline-none data-focused:bg-danger-soft"
+            onAction={() => onDelete(item)}
+            textValue="Excluir"
+          >
+            <TrashIcon aria-hidden="true" className="size-4 shrink-0" />
+            Excluir
+          </MenuItem>
+        </Menu>
+      </Popover>
+    </MenuTrigger>
+  );
 }
 
 export function TransactionTable({
@@ -88,8 +141,8 @@ export function TransactionTable({
   );
 
   return (
-    <div className="min-w-0 overflow-hidden max-[48rem]:px-4 max-[48rem]:pb-4">
-      <table className="block w-full border-collapse text-left md:table">
+    <div className="min-w-0 overflow-hidden">
+      <table className="block w-full border-collapse text-left md:table md:table-fixed">
         <caption className="block border-b border-border p-5.5 text-left md:table-caption">
           <span className="flex items-baseline justify-between gap-4">
             <span className="text-card-title text-foreground" id="transactions-list-title">
@@ -100,164 +153,118 @@ export function TransactionTable({
             </span>
           </span>
         </caption>
+        <colgroup className="hidden md:table-column-group">
+          <col className="w-1/6" />
+          <col />
+          <col className="w-1/4" />
+          <col className="w-8" />
+        </colgroup>
         <thead className="hidden md:table-header-group">
-          <tr className="border-b border-border-strong">
-            <th
-              className="px-5.5 py-3.5 text-caption-strong tracking-label text-muted uppercase"
-              scope="col"
-            >
-              Descrição
+          <tr className="border-b border-border">
+            <th className="px-5 py-3 text-caption text-muted" scope="col">
+              Dia
             </th>
-            <th
-              className="px-5.5 py-3.5 text-caption-strong tracking-label text-muted uppercase"
-              scope="col"
-            >
-              Categoria
+            <th className="px-5 py-3 text-caption text-muted" scope="col">
+              Descrição / Categoria / Conta
             </th>
-            <th
-              className="px-5.5 py-3.5 text-caption-strong tracking-label text-muted uppercase"
-              scope="col"
-            >
-              Conta
-            </th>
-            <th
-              className="px-5.5 py-3.5 text-right text-caption-strong tracking-label text-muted uppercase"
-              scope="col"
-            >
+            <th className="py-3 pr-1 pl-5 text-right text-caption text-muted" scope="col">
               Valor
             </th>
-            <th
-              className="px-5.5 py-3.5 text-right text-caption-strong tracking-label text-muted uppercase"
-              scope="col"
-            >
-              Ações
+            <th className="w-8 px-1 py-3" scope="col">
+              <span className="sr-only">Ações</span>
             </th>
           </tr>
         </thead>
-        {dayGroups.map((group, groupIndex) => {
-          const balanceClassName = group.balance >= 0 ? "text-success" : "text-danger";
-
-          return (
-            <tbody className="grid w-full gap-2.5 md:table-row-group" key={group.date}>
-              <tr className="grid w-full md:table-row">
-                <th
-                  aria-label={`Dia ${formatTransactionDate(group.date)}`}
-                  className={`block p-0 text-left text-caption-strong text-foreground md:table-cell md:px-5.5 md:py-3.5 ${groupIndex > 0 ? "md:pt-7" : ""}`}
-                  colSpan={5}
-                  scope="rowgroup"
-                >
-                  <div
-                    className={`flex flex-wrap items-baseline gap-x-4 gap-y-2 py-2.5 md:p-0 ${groupIndex > 0 ? "pt-7" : ""}`}
-                  >
-                    <time dateTime={group.date}>{formatTransactionDate(group.date)}</time>
-                  </div>
-                </th>
-              </tr>
-              {group.items.map((item, itemIndex) => {
-                const shouldRenderActions = item.origem !== "SALDO_INICIAL_CONTA";
-                const recurring = isRecurringItem(item);
-                const valueClassName = item.valor >= 0 ? "text-success" : "text-danger";
-
-                return (
-                  <tr
-                    className={`grid gap-3 rounded-xl border border-border bg-surface-muted/45 p-3.5 md:table-row md:rounded-none md:border-0 md:border-b md:border-border md:bg-transparent md:p-0 ${itemIndex === group.items.length - 1 ? "md:border-b-0" : ""}`}
-                    key={getItemKey(item)}
-                  >
-                    <td className="flex items-start justify-between gap-4 border-0 p-0 md:table-cell md:max-w-0 md:px-5.5 md:py-4 md:align-top">
-                      <span className="block text-meta text-subtle uppercase md:hidden">
-                        Descrição
-                      </span>
-                      <div className="min-w-0">
-                        <div className="flex min-w-0 items-center gap-1.5">
-                          {recurring && (
-                            <span
-                              className="inline-flex shrink-0 text-brand"
-                              title="Movimento recorrente"
-                            >
-                              <RepeatIcon aria-hidden="true" />
-                              <span className="sr-only">Movimento recorrente</span>
-                            </span>
-                          )}
-                          <span className="truncate text-caption-strong text-foreground">
-                            {item.descricao}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="flex items-start justify-between gap-4 border-0 p-0 text-caption text-muted md:table-cell md:px-5.5 md:py-4 md:align-top">
-                      <span className="block text-meta text-subtle uppercase md:hidden">
-                        Categoria
-                      </span>
-                      <span className="max-w-[60%] text-right md:max-w-none">
-                        {getCategoryLabel(item, categories)}
-                      </span>
-                    </td>
-                    <td className="flex items-start justify-between gap-4 border-0 p-0 text-caption text-muted md:table-cell md:px-5.5 md:py-4 md:align-top">
-                      <span className="block text-meta text-subtle uppercase md:hidden">Conta</span>
-                      <span className="max-w-[60%] text-right md:max-w-none">
-                        {getAccountLabel(item, accounts)}
-                      </span>
-                    </td>
-                    <td className="flex items-start justify-between gap-4 border-0 p-0 text-right tabular-nums md:table-cell md:px-5.5 md:py-4 md:align-top">
-                      <span className="block text-meta text-subtle uppercase md:hidden">Valor</span>
-                      <strong className={`font-semibold whitespace-nowrap ${valueClassName}`}>
-                        {formatSignedCurrency(item.valor)}
-                      </strong>
-                    </td>
-                    <td className="flex items-center justify-between gap-4 border-0 p-0 md:table-cell md:px-5.5 md:py-4 md:align-top">
-                      {shouldRenderActions && (
-                        <>
-                          <span className="block text-meta text-subtle uppercase md:hidden">
-                            Ações
-                          </span>
-                          <div className="flex justify-end gap-1">
-                            {shouldRenderActions && (
-                              <>
-                                <Button
-                                  aria-label="Editar transação"
-                                  isIconOnly
-                                  onPress={() => onEdit(item)}
-                                  size="sm"
-                                  variant="ghost"
-                                >
-                                  <PencilSimpleIcon aria-hidden="true" />
-                                </Button>
-
-                                <Button
-                                  aria-label={`Excluir transação`}
-                                  isIconOnly
-                                  onPress={() => onDelete(item)}
-                                  size="sm"
-                                  variant="danger"
-                                >
-                                  <TrashIcon aria-hidden="true" />
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-              <tr className="block border-t border-dashed border-border-strong md:table-row">
+        {dayGroups.map((group) => (
+          <tbody className="block md:table-row-group" key={group.date}>
+            {group.items.map((item, itemIndex) => (
+              <tr
+                className="grid grid-cols-[minmax(0,1fr)_auto_2rem] items-center border-b border-border py-3 pr-3 pl-4 md:table-row md:p-0"
+                key={getItemKey(item)}
+              >
                 <td
-                  aria-label={`Saldo do dia ${formatCurrency(group.balance)}`}
-                  className="block p-0 text-right md:table-cell md:px-5.5 md:py-3.5"
-                  colSpan={5}
+                  className={`col-span-3 p-0 text-caption text-foreground md:table-cell md:px-5 md:py-3 md:align-top ${itemIndex === 0 ? "pb-2.5" : "hidden"}`}
                 >
-                  <div className="flex items-baseline justify-end gap-2 py-3.5 md:p-0">
-                    <span className="text-meta text-subtle uppercase">Saldo do dia</span>
-                    <strong className={`whitespace-nowrap tabular-nums ${balanceClassName}`}>
-                      {formatCurrency(group.balance)}
-                    </strong>
+                  {itemIndex === 0 && (
+                    <time dateTime={group.date}>{formatTransactionDate(group.date)}</time>
+                  )}
+                </td>
+                <td
+                  aria-label={`${item.descricao}${isRecurringItem(item) ? ", transação recorrente" : ""}${item.situacao === "PLANEJADA" ? ", planejada" : ""}, ${getCategoryLabel(item, categories)}, ${getAccountLabel(item, accounts)}`}
+                  className="min-w-0 p-0 pr-3 md:px-5 md:py-3 md:align-top"
+                >
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-start gap-1.5">
+                      {isRecurringItem(item) && (
+                        <span
+                          className="inline-flex h-4 shrink-0 items-center text-brand"
+                          title="Transação recorrente"
+                        >
+                          <RepeatIcon aria-hidden="true" className="size-3.5" />
+                          <span className="sr-only">Transação recorrente</span>
+                        </span>
+                      )}
+                      <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-1 text-caption-strong wrap-break-word text-foreground">
+                        <span className="min-w-0 wrap-break-word">{item.descricao}</span>
+                        {item.situacao === "PLANEJADA" && (
+                          <span className="inline-block rounded border border-border px-1 text-caption text-muted">
+                            Planejada
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <div className="text-caption wrap-break-word text-muted">
+                      {getCategoryLabel(item, categories)} · {getAccountLabel(item, accounts)}
+                    </div>
                   </div>
                 </td>
+                <td className="p-0 pr-1 text-right md:py-3 md:pl-5 md:align-middle">
+                  <strong
+                    className={`text-caption-strong whitespace-nowrap tabular-nums ${item.valor >= 0 ? "text-success" : "text-danger"}`}
+                  >
+                    {formatSignedCurrency(item.valor)}
+                  </strong>
+                </td>
+                <td className="w-8 px-1 py-0 text-center md:py-3 md:align-middle">
+                  {item.origem !== "SALDO_INICIAL_CONTA" && (
+                    <TransactionActions item={item} onDelete={onDelete} onEdit={onEdit} />
+                  )}
+                </td>
               </tr>
-            </tbody>
-          );
-        })}
+            ))}
+            <tr className="grid grid-cols-[minmax(0,1fr)_auto_2rem] items-start bg-surface-muted py-3 pr-3 pl-4 md:table-row md:p-0">
+              <th
+                aria-label={`Fechamento ${formatTransactionDate(group.date)}, recebido ${formatCurrency(group.entries)}, gasto ${formatCurrency(group.exits)}`}
+                className="min-w-0 p-0 pr-3 text-left md:px-5 md:py-3"
+                colSpan={2}
+                scope="row"
+              >
+                <span className="flex flex-col gap-1">
+                  <span className="text-caption-strong text-foreground">
+                    Fechamento {formatTransactionDate(group.date)}
+                  </span>
+                  <span className="text-caption wrap-break-word text-foreground">
+                    Recebido {formatCurrency(group.entries)} · Gasto {formatCurrency(group.exits)}
+                  </span>
+                </span>
+              </th>
+              <td
+                aria-label={`Saldo do dia ${formatCurrency(group.balance)}`}
+                className="p-0 pr-1 text-right md:py-3 md:pl-5"
+              >
+                <div className="flex flex-col items-end gap-1">
+                  <strong
+                    className={`text-caption-strong whitespace-nowrap tabular-nums ${group.balance >= 0 ? "text-success" : "text-danger"}`}
+                  >
+                    {formatCurrency(group.balance)}
+                  </strong>
+                  <span className="text-caption text-foreground">Saldo do dia</span>
+                </div>
+              </td>
+              <td aria-hidden="true" className="w-8 px-1 py-0" />
+            </tr>
+          </tbody>
+        ))}
       </table>
     </div>
   );
