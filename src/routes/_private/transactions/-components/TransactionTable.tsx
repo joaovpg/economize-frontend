@@ -175,6 +175,36 @@ export function TransactionTable({
             </th>
           </tr>
         </thead>
+        <tbody className="block md:table-row-group">
+          <tr className="grid grid-cols-[minmax(0,1fr)_auto_2rem] items-center border-b border-border bg-surface-muted py-3 pr-3 pl-4 md:table-row md:p-0">
+            <th
+              aria-label="Saldo de abertura, antes da primeira movimentação"
+              className="min-w-0 p-0 pr-3 text-left text-caption-strong text-foreground md:px-5 md:py-3"
+              colSpan={2}
+              scope="row"
+            >
+              <span className="flex flex-col gap-1">
+                <span>Saldo de abertura</span>
+                <span className="text-caption text-muted">Antes da primeira movimentação</span>
+              </span>
+            </th>
+            <td className="p-0 pr-1 text-right md:py-3 md:pl-5">
+              <strong
+                className={`text-caption-strong whitespace-nowrap tabular-nums ${openingBalance >= 0 ? "text-success" : "text-danger"}`}
+              >
+                {formatCurrency(openingBalance)}
+              </strong>
+            </td>
+            <td aria-hidden="true" className="w-8 px-1 py-0" />
+          </tr>
+          {items.length === 0 && (
+            <tr className="block md:table-row">
+              <td className="block p-5.5 text-body-small text-muted md:table-cell" colSpan={4}>
+                Nenhuma movimentação encontrada com esses filtros.
+              </td>
+            </tr>
+          )}
+        </tbody>
         {dayGroups.map((group) => (
           <tbody className="block md:table-row-group" key={group.date}>
             {group.items.map((item, itemIndex) => (

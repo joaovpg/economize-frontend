@@ -6,7 +6,7 @@ import { FunnelIcon } from "@phosphor-icons/react/dist/csr/Funnel";
 import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
 
 import { Button } from "../../../../components/Button";
-import { Card, CardBody, CardHeader } from "../../../../components/Card";
+import { Card } from "../../../../components/Card";
 import { FilterChip } from "../../../../components/FilterChip";
 import { Modal, ModalBody } from "../../../../components/Modal";
 import { PageHeading } from "../../../../components/PageHeading";
@@ -161,35 +161,42 @@ function BalanceHero({
 
   return (
     <section
-      aria-labelledby="transactions-projected-balance-title"
+      aria-labelledby="transactions-opening-balance-title"
       className="overflow-hidden rounded-3xl bg-brand p-5.5 text-brand-foreground min-[60rem]:p-7"
     >
-      <div className="grid grid-cols-2 gap-4 min-[60rem]:grid-cols-[minmax(10rem,1.35fr)_repeat(3,minmax(0,1fr))] min-[60rem]:items-center">
+      <div className="mb-5.5 flex items-start justify-between gap-4 border-b border-brand-foreground/30 pb-5.5 sm:items-center">
+        <div className="min-w-0">
+          <h2
+            className="m-0 text-caption-strong tracking-label text-brand-foreground/80 uppercase"
+            id="transactions-opening-balance-title"
+          >
+            Saldo de abertura
+          </h2>
+          <p className="m-0 mt-1 text-body-small text-brand-foreground/80">
+            Seu ponto de partida no mês
+          </p>
+        </div>
+        <strong className="text-card-title whitespace-nowrap tabular-nums sm:text-section-title">
+          {formatCurrency(metrics.openingBalance)}
+        </strong>
+      </div>
+      <div className="grid grid-cols-2 gap-4 min-[60rem]:grid-cols-[minmax(10rem,1.35fr)_repeat(2,minmax(0,1fr))] min-[60rem]:items-center">
         <div className="col-span-2 min-w-0 min-[60rem]:col-span-1">
           <p className="m-0 text-caption-strong tracking-label text-brand-foreground/80 uppercase">
             Saldo projetado em {getMonthLabel(data.fim)}
           </p>
-          <h2 className="m-0 mt-2 text-metric" id="transactions-projected-balance-title">
-            {formatCurrency(metrics.projectedBalance)}
-          </h2>
+          <p className="m-0 mt-2 text-metric">{formatCurrency(metrics.projectedBalance)}</p>
         </div>
         <Metric label="Entradas" value={metrics.entries} />
         <Metric label="Saídas" value={-metrics.exits} />
-        <Metric
-          className="hidden min-[40rem]:block"
-          label="Saldo anterior"
-          value={metrics.openingBalance}
-        />
       </div>
     </section>
   );
 }
 
-function Metric({ className, label, value }: { className?: string; label: string; value: number }) {
+function Metric({ label, value }: { label: string; value: number }) {
   return (
-    <div
-      className={`min-w-0 border-t border-brand-foreground/30 pt-3.5 min-[60rem]:border-t-0 min-[60rem]:border-l min-[60rem]:pl-5 ${className ?? ""}`}
-    >
+    <div className="min-w-0 border-t border-brand-foreground/30 pt-3.5 min-[60rem]:border-t-0 min-[60rem]:border-l min-[60rem]:pl-5">
       <p className="m-0 text-caption-strong tracking-label text-brand-foreground/75 uppercase">
         {label}
       </p>
@@ -281,31 +288,15 @@ function TransactionList({
 }) {
   return (
     <Card as="section" aria-labelledby="transactions-list-title">
-      {items.length > 0 ? (
-        <TransactionTable
-          accounts={accounts}
-          categories={categories}
-          items={items}
-          onDelete={onDelete}
-          onEdit={onEdit}
-          openingBalance={openingBalance}
-          title={title}
-        />
-      ) : (
-        <>
-          <CardHeader className="items-baseline">
-            <h2 className="m-0 text-card-title text-foreground" id="transactions-list-title">
-              {title}
-            </h2>
-            <span className="text-meta text-subtle">0 itens</span>
-          </CardHeader>
-          <CardBody spacing="none">
-            <p className="m-0 p-5.5 text-body-small text-muted">
-              Nenhuma movimentação encontrada com esses filtros.
-            </p>
-          </CardBody>
-        </>
-      )}
+      <TransactionTable
+        accounts={accounts}
+        categories={categories}
+        items={items}
+        onDelete={onDelete}
+        onEdit={onEdit}
+        openingBalance={openingBalance}
+        title={title}
+      />
     </Card>
   );
 }
@@ -397,7 +388,7 @@ function TransactionsFrame({
 }) {
   return (
     <>
-      <div className="mx-auto grid w-full max-w-320 min-w-0 items-start min-[60rem]:grid-cols-[18.25rem_minmax(0,1fr)]">
+      <div className="mx-auto grid w-full max-w-7xl min-w-0 items-start min-[60rem]:grid-cols-[18.25rem_minmax(0,1fr)]">
         <div className="hidden min-[60rem]:block">
           <FiltersRail {...props} />
         </div>
