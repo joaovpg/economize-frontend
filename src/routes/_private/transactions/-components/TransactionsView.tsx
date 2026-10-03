@@ -36,6 +36,7 @@ type TransactionsViewProps = {
   data: ConsultaTransacoesResponse;
   feedback: string | null;
   filterTriggerRef: RefObject<HTMLButtonElement | null>;
+  hasTransactionScope: boolean;
   isFiltersOpen: boolean;
   items: readonly ConsultaTransacaoItem[];
   onApplyFilters: (values: TransactionFilterFormData) => void;
@@ -46,6 +47,7 @@ type TransactionsViewProps = {
   onMonthChange: (month: TransactionMonth) => void;
   onOpenCreation: () => void;
   onOpenFilters: () => void;
+  onSearchChange: (search: string) => void;
   search: TransactionSearch;
   selectedMonth: TransactionMonth;
 };
@@ -152,40 +154,59 @@ function MonthStepper({
 
 function BalanceHero({
   data,
+  hasTransactionScope,
+  includePreviousBalance,
   items,
 }: {
   data: ConsultaTransacoesResponse;
+  hasTransactionScope: boolean;
+  includePreviousBalance: boolean;
   items: readonly ConsultaTransacaoItem[];
 }) {
-  const metrics = getTransactionMetrics(items, data.saldoAbertura);
+  const showOpeningBalance = includePreviousBalance && !hasTransactionScope;
+  const openingBalance = showOpeningBalance ? data.saldoAbertura : 0;
+  const metrics = getTransactionMetrics(items, openingBalance);
+  const isScenario = hasTransactionScope || !includePreviousBalance;
 
   return (
     <section
-      aria-labelledby="transactions-opening-balance-title"
+      aria-labelledby="transactions-projection-title"
       className="overflow-hidden rounded-3xl bg-brand p-5.5 text-brand-foreground min-[60rem]:p-7"
     >
-      <div className="mb-5.5 flex items-start justify-between gap-4 border-b border-brand-foreground/30 pb-5.5 sm:items-center">
-        <div className="min-w-0">
-          <h2
-            className="m-0 text-caption-strong tracking-label text-brand-foreground/80 uppercase"
-            id="transactions-opening-balance-title"
-          >
-            Saldo de abertura
-          </h2>
-          <p className="m-0 mt-1 text-body-small text-brand-foreground/80">
-            Seu ponto de partida no mês
-          </p>
+      {showOpeningBalance && (
+        <div className="mb-5.5 flex items-start justify-between gap-4 border-b border-brand-foreground/30 pb-5.5 sm:items-center">
+          <div className="min-w-0">
+            <h2
+              className="m-0 text-caption-strong tracking-label text-brand-foreground/80 uppercase"
+              id="transactions-opening-balance-title"
+            >
+              Saldo de abertura
+            </h2>
+            <p className="m-0 mt-1 text-body-small text-brand-foreground/80">
+              Seu ponto de partida no mês
+            </p>
+          </div>
+          <strong className="text-card-title whitespace-nowrap tabular-nums sm:text-section-title">
+            {formatCurrency(metrics.openingBalance)}
+          </strong>
         </div>
-        <strong className="text-card-title whitespace-nowrap tabular-nums sm:text-section-title">
-          {formatCurrency(metrics.openingBalance)}
-        </strong>
-      </div>
+      )}
       <div className="grid grid-cols-2 gap-4 min-[60rem]:grid-cols-[minmax(10rem,1.35fr)_repeat(2,minmax(0,1fr))] min-[60rem]:items-center">
         <div className="col-span-2 min-w-0 min-[60rem]:col-span-1">
-          <p className="m-0 text-caption-strong tracking-label text-brand-foreground/80 uppercase">
-            Saldo projetado em {getMonthLabel(data.fim)}
+          <p
+            className="m-0 text-caption-strong tracking-label text-brand-foreground/80 uppercase"
+            id="transactions-projection-title"
+          >
+            {hasTransactionScope
+              ? `Projeção do recorte em ${getMonthLabel(data.fim)}`
+              : `Saldo projetado em ${getMonthLabel(data.fim)}`}
           </p>
           <p className="m-0 mt-2 text-metric">{formatCurrency(metrics.projectedBalance)}</p>
+          {isScenario && (
+            <p className="m-0 mt-1.5 text-caption text-brand-foreground/80">
+              Cenário calculado a partir de R$ 0,00 com os movimentos exibidos.
+            </p>
+          )}
         </div>
         <Metric label="Entradas" value={metrics.entries} />
         <Metric label="Saídas" value={-metrics.exits} />
@@ -262,13 +283,16 @@ function TransactionsHeader({
           </Button>
         </div>
       </header>
-      {(search.categories.length > 0 || !search.accounts.includes(allAccountsFilterValue)) && (
-        <div className="flex flex-wrap gap-2" aria-label="Filtros ativos">
+      {(search.categories.length > 0 ||
+        search.q.trim().length > 0 ||
+        (search.accounts.length > 0 && !search.accounts.includes(allAccountsFilterValue))) && (
+        <section aria-label="Filtros ativos" className="flex flex-wrap gap-2">
           {search.categories.length > 0 && <FilterChip>Categorias selecionadas</FilterChip>}
-          {!search.accounts.includes(allAccountsFilterValue) && (
+          {search.q.trim().length > 0 && <FilterChip>Busca: {search.q}</FilterChip>}
+          {search.accounts.length > 0 && !search.accounts.includes(allAccountsFilterValue) && (
             <FilterChip>Contas selecionadas</FilterChip>
           )}
-        </div>
+        </section>
       )}
     </>
   );
@@ -281,9 +305,13 @@ function TransactionList({
   onDelete,
   onEdit,
   openingBalance,
+  showOpeningBalance,
+  balanceLabel,
   title,
 }: Pick<TransactionsViewProps, "accounts" | "categories" | "items" | "onDelete" | "onEdit"> & {
+  balanceLabel: string;
   openingBalance: number;
+  showOpeningBalance: boolean;
   title: string;
 }) {
   return (
@@ -295,6 +323,8 @@ function TransactionList({
         onDelete={onDelete}
         onEdit={onEdit}
         openingBalance={openingBalance}
+        showOpeningBalance={showOpeningBalance}
+        balanceLabel={balanceLabel}
         title={title}
       />
     </Card>
@@ -304,31 +334,38 @@ function TransactionList({
 function FiltersRail({
   accounts,
   categories,
+  hasTransactionScope,
   isFiltersOpen,
   onApplyFilters,
   onClearFilters,
   onCloseFilters,
+  onSearchChange,
   search,
 }: Pick<
   TransactionsViewProps,
   | "accounts"
   | "categories"
+  | "hasTransactionScope"
   | "isFiltersOpen"
   | "onApplyFilters"
   | "onClearFilters"
   | "onCloseFilters"
+  | "onSearchChange"
   | "search"
 >) {
   return (
     <TransactionFilters
       ariaLabel="Filtros de transações"
+      applyOnChange
       accounts={accounts}
       categories={categories}
+      disablePreviousBalance={hasTransactionScope}
       filterId="transactions-filters"
       isOpen={isFiltersOpen}
       onApply={onApplyFilters}
       onClear={onClearFilters}
       onClose={onCloseFilters}
+      onSearchChange={onSearchChange}
       presentation="sidebar"
       showMonth={false}
       value={search}
@@ -339,14 +376,23 @@ function FiltersRail({
 function MobileFilterModal({
   accounts,
   categories,
+  hasTransactionScope,
   isFiltersOpen,
   onApplyFilters,
   onClearFilters,
   onClose,
+  onSearchChange,
   search,
 }: Pick<
   TransactionsViewProps,
-  "accounts" | "categories" | "isFiltersOpen" | "onApplyFilters" | "onClearFilters" | "search"
+  | "accounts"
+  | "categories"
+  | "hasTransactionScope"
+  | "isFiltersOpen"
+  | "onApplyFilters"
+  | "onClearFilters"
+  | "onSearchChange"
+  | "search"
 > & { onClose: () => void }) {
   return (
     <Modal
@@ -363,13 +409,16 @@ function MobileFilterModal({
       <ModalBody>
         <TransactionFilters
           ariaLabel="Filtros avançados de transações"
+          applyOnChange
           accounts={accounts}
           categories={categories}
+          disablePreviousBalance={hasTransactionScope}
           filterId="transactions-filters-modal"
           isOpen
           onApply={onApplyFilters}
           onClear={onClearFilters}
           onClose={onClose}
+          onSearchChange={onSearchChange}
           presentation="modal"
           showMonth={false}
           value={search}
@@ -404,10 +453,18 @@ function TransactionsFrame({
 }
 
 export function TransactionsView(props: TransactionsViewProps) {
+  const showOpeningBalance = props.search.includePreviousBalance && !props.hasTransactionScope;
+  const isScenario = props.hasTransactionScope || !props.search.includePreviousBalance;
+
   return (
     <TransactionsFrame props={props}>
       <TransactionsHeader {...props} />
-      <BalanceHero data={props.data} items={props.data.itens} />
+      <BalanceHero
+        data={props.data}
+        hasTransactionScope={props.hasTransactionScope}
+        includePreviousBalance={props.search.includePreviousBalance}
+        items={props.items}
+      />
       {props.feedback && <p className="m-0 text-body-small text-success">{props.feedback}</p>}
       <TransactionList
         accounts={props.accounts}
@@ -415,7 +472,15 @@ export function TransactionsView(props: TransactionsViewProps) {
         items={props.items}
         onDelete={props.onDelete}
         onEdit={props.onEdit}
-        openingBalance={props.data.saldoAbertura}
+        openingBalance={showOpeningBalance ? props.data.saldoAbertura : 0}
+        showOpeningBalance={showOpeningBalance}
+        balanceLabel={
+          props.hasTransactionScope
+            ? "Acumulado do recorte"
+            : isScenario
+              ? "Acumulado do mês"
+              : "Saldo do dia"
+        }
         title="Movimentações"
       />
     </TransactionsFrame>

@@ -94,17 +94,19 @@ function toFormValues(value: TransactionFilterState): TransactionFilterFormData 
 
 type TransactionFilterCheckboxProps = {
   children: ReactNode;
+  isDisabled?: boolean;
   isSelected: boolean;
   onChange: (isSelected: boolean) => void;
 };
 
 function TransactionFilterCheckbox({
   children,
+  isDisabled = false,
   isSelected,
   onChange,
 }: TransactionFilterCheckboxProps) {
   return (
-    <Checkbox isSelected={isSelected} onChange={onChange}>
+    <Checkbox isDisabled={isDisabled} isSelected={isSelected} onChange={onChange}>
       {children}
     </Checkbox>
   );
@@ -112,13 +114,16 @@ function TransactionFilterCheckbox({
 
 export type TransactionFiltersProps = {
   ariaLabel: string;
+  applyOnChange?: boolean;
   accounts: readonly ContaResponse[];
   categories: readonly CategoriaResponse[];
+  disablePreviousBalance?: boolean;
   filterId: string;
   isOpen: boolean;
   onApply: (values: TransactionFilterFormData) => void;
   onClear: () => void;
   onClose: () => void;
+  onSearchChange?: (search: string) => void;
   presentation?: "modal" | "sidebar";
   showMonth?: boolean;
   value: TransactionFilterState;
@@ -126,13 +131,16 @@ export type TransactionFiltersProps = {
 
 export function TransactionFilters({
   ariaLabel,
+  applyOnChange = false,
   accounts,
   categories,
+  disablePreviousBalance = false,
   filterId,
   isOpen,
   onApply,
   onClear,
   onClose,
+  onSearchChange,
   presentation = "sidebar",
   showMonth = true,
   value,
@@ -146,7 +154,7 @@ export function TransactionFilters({
   } = value;
   const categoryFilterItems = buildCategoryFilterItems(categories);
   const accountFilterItems = buildAccountFilterItems(accounts);
-  const { control, handleSubmit, register, reset, setFocus, setValue } =
+  const { control, getValues, handleSubmit, register, reset, setFocus, setValue } =
     useForm<TransactionFilterFormData>({
       defaultValues: toFormValues(value),
       resolver: zodResolver(transactionFilterFormSchema),
@@ -155,6 +163,7 @@ export function TransactionFilters({
   const selectedCategories = useWatch({ control, name: "categories" }) ?? [];
   const selectedIncludePreviousBalance =
     useWatch({ control, name: "includePreviousBalance" }) ?? appliedIncludePreviousBalance;
+  const selectedSearchTerm = useWatch({ control, name: "search" }) ?? appliedSearchTerm;
   const selectedMonth = useWatch({ control, name: "month" }) ?? appliedMonth;
   const allAccountsSelected = appliedAccounts.includes(allAccountsFilterValue);
   const hasAccountFilter = appliedAccounts.length > 0 && !allAccountsSelected;
@@ -164,6 +173,8 @@ export function TransactionFilters({
     Number(appliedCategories.length > 0) +
     Number(hasAccountFilter);
   const searchField = register("search");
+  const isPreviousBalanceDisabled =
+    disablePreviousBalance || (applyOnChange && selectedSearchTerm.trim().length > 0);
 
   useEffect(() => {
     reset({
@@ -171,7 +182,7 @@ export function TransactionFilters({
       categories: [...appliedCategories],
       includePreviousBalance: appliedIncludePreviousBalance,
       month: appliedMonth,
-      search: appliedSearchTerm,
+      search: applyOnChange ? getValues("search") : appliedSearchTerm,
     });
   }, [
     appliedAccounts,
@@ -179,6 +190,8 @@ export function TransactionFilters({
     appliedIncludePreviousBalance,
     appliedMonth,
     appliedSearchTerm,
+    applyOnChange,
+    getValues,
     reset,
   ]);
 
@@ -202,6 +215,34 @@ export function TransactionFilters({
       : individualAccounts;
 
     setValue("accounts", normalizedAccounts, { shouldDirty: true });
+
+    if (applyOnChange) {
+      onApply({ ...getValues(), accounts: normalizedAccounts, search: appliedSearchTerm });
+    }
+  };
+
+  const handleCategoryTreeSelectionChange = (selectedCategoryIds: string[]) => {
+    setValue("categories", selectedCategoryIds, { shouldDirty: true });
+
+    if (applyOnChange) {
+      onApply({
+        ...getValues(),
+        categories: selectedCategoryIds,
+        search: appliedSearchTerm,
+      });
+    }
+  };
+
+  const handlePreviousBalanceChange = (isSelected: boolean) => {
+    setValue("includePreviousBalance", isSelected, { shouldDirty: true });
+
+    if (applyOnChange) {
+      onApply({
+        ...getValues(),
+        includePreviousBalance: isSelected,
+        search: appliedSearchTerm,
+      });
+    }
   };
 
   const handleClearFilters = () => {
@@ -242,7 +283,20 @@ export function TransactionFilters({
         </Button>
       </CardHeader>
 
-      <form className="grid gap-5.5" onSubmit={handleSubmit(onApply)}>
+      <form
+        className="grid gap-5.5"
+        onSubmit={(event) => {
+          if (applyOnChange) {
+            event.preventDefault();
+            if (presentation === "modal") {
+              onClose();
+            }
+            return;
+          }
+
+          void handleSubmit(onApply)(event);
+        }}
+      >
         <CardBody className="gap-5.5">
           <AriaTextField className="grid gap-2.5">
             <Label className="m-0 text-caption-strong! tracking-label text-muted! uppercase">
@@ -254,6 +308,12 @@ export function TransactionFilters({
                 {...searchField}
                 id={`${filterId}-search`}
                 className="min-w-0 flex-1 border-0 bg-transparent text-body-small text-foreground caret-brand outline-none placeholder:text-subtle"
+                onChange={(event) => {
+                  void searchField.onChange(event);
+                  if (applyOnChange) {
+                    onSearchChange?.(event.currentTarget.value);
+                  }
+                }}
                 placeholder="Nome, descrição..."
                 type="search"
               />
@@ -261,7 +321,7 @@ export function TransactionFilters({
           </AriaTextField>
 
           <fieldset className="grid min-w-0 gap-2.5 border-0 p-0">
-            <legend className="m-0 flex items-center justify-between gap-2 text-caption-strong tracking-label text-muted uppercase">
+            <legend className="m-0 flex w-full items-center justify-between gap-2 text-caption-strong tracking-label text-muted uppercase">
               <span>Categorias</span>
               <Link
                 aria-label="Gerenciar categorias"
@@ -278,15 +338,13 @@ export function TransactionFilters({
             <FilterTree
               ariaLabel="Categorias"
               items={categoryFilterItems}
-              onSelectionChange={(selectedCategoryIds) =>
-                setValue("categories", selectedCategoryIds, { shouldDirty: true })
-              }
+              onSelectionChange={handleCategoryTreeSelectionChange}
               selectedKeys={selectedCategories}
             />
           </fieldset>
 
           <fieldset className="grid min-w-0 gap-2.5 border-0 p-0">
-            <legend className="m-0 flex items-center justify-between gap-2 text-caption-strong tracking-label text-muted uppercase">
+            <legend className="m-0 flex w-full items-center justify-between gap-2 text-caption-strong tracking-label text-muted uppercase">
               <span>Contas</span>
               <Link
                 aria-label="Gerenciar contas"
@@ -316,22 +374,37 @@ export function TransactionFilters({
               />
             )}
             <TransactionFilterCheckbox
+              isDisabled={isPreviousBalanceDisabled}
               isSelected={selectedIncludePreviousBalance}
-              onChange={(isSelected) =>
-                setValue("includePreviousBalance", isSelected, { shouldDirty: true })
-              }
+              onChange={handlePreviousBalanceChange}
             >
               Incluir saldo anterior
             </TransactionFilterCheckbox>
+            {isPreviousBalanceDisabled && (
+              <p className="m-0 text-caption text-subtle">
+                Disponível sem recortes de conta, categoria ou busca.
+              </p>
+            )}
           </div>
         </CardBody>
-        <CardFooter className="grid-cols-2 gap-2">
+        <CardFooter
+          className={
+            applyOnChange && presentation === "sidebar" ? "grid-cols-1" : "grid-cols-2 gap-2"
+          }
+        >
           <Button variant="secondary" size="sm" type="button" onPress={handleClearFilters}>
             Limpar
           </Button>
-          <Button variant="primary" size="sm" type="submit">
-            Aplicar
-          </Button>
+          {(!applyOnChange || presentation === "modal") && (
+            <Button
+              variant="primary"
+              size="sm"
+              type={applyOnChange ? "button" : "submit"}
+              onPress={applyOnChange ? onClose : undefined}
+            >
+              {applyOnChange ? "Concluir" : "Aplicar"}
+            </Button>
+          )}
         </CardFooter>
       </form>
     </Card>

@@ -5,8 +5,9 @@ import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 
 import {
   allAccountsFilterValue,
-  transactionSearchSchema,
+  transactionRouteSearchSchema,
   type TransactionFilterFormData,
+  type TransactionFilterState,
 } from "../../../lib/transaction-filters";
 import {
   parseTransactionMonth,
@@ -22,6 +23,10 @@ import {
   type ConsultaTransacoesResponse,
 } from "../../../services/transactions/contracts";
 import { transactionsQueryOptions } from "../../../services/transactions/queries";
+import {
+  scheduleTransactionSearch,
+  useTransactionFilterStore,
+} from "../../../stores/transaction-filters";
 import { getAccountLabel, getCategoryLabel } from "./-components/transaction-labels";
 import { TransactionCreationModal } from "./-components/TransactionCreationModal";
 import { TransactionDeleteModal } from "./-components/TransactionDeleteModal";
@@ -37,12 +42,30 @@ type TransactionsPageProps = {
 };
 
 function getAccountIds(accountFilter: readonly string[]) {
+  if (accountFilter.includes(allAccountsFilterValue)) {
+    return [];
+  }
+
   return accountFilter.filter((accountId) => accountId !== allAccountsFilterValue);
+}
+
+function handleClearFilters() {
+  useTransactionFilterStore.getState().clearFilters();
+}
+
+function handleApplyFilters(formData: TransactionFilterFormData) {
+  useTransactionFilterStore.getState().setFilters({
+    accounts: formData.accounts,
+    categories: formData.categories,
+    includePreviousBalance: formData.includePreviousBalance,
+    q: formData.search.trim(),
+  });
 }
 
 function TransactionsPage({ accounts, categories, data }: TransactionsPageProps) {
   const search = transactionsRoute.useSearch();
   const navigate = transactionsRoute.useNavigate();
+  const filterStore = useTransactionFilterStore();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isCreationOpen, setIsCreationOpen] = useState(false);
   const [editingTarget, setEditingTarget] = useState<ConsultaTransacaoItem | null>(null);
@@ -51,10 +74,33 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
   const filterTriggerRef = useRef<HTMLButtonElement>(null);
   const wasFiltersOpenRef = useRef(false);
   const selectedMonth = parseTransactionMonth(search.month);
+  const filterState: TransactionFilterState = {
+    accounts: filterStore.accounts,
+    categories: filterStore.categories,
+    includePreviousBalance: filterStore.includePreviousBalance,
+    month: search.month,
+    q: filterStore.q,
+  };
+  const selectedAccountIds = getAccountIds(filterState.accounts);
+  const hasTransactionScope =
+    selectedAccountIds.length > 0 ||
+    filterState.categories.length > 0 ||
+    filterState.q.trim().length > 0;
   const visibleItems = useMemo(() => {
-    const normalizedSearchTerm = search.q.trim().toLocaleLowerCase("pt-BR");
+    const normalizedSearchTerm = filterState.q.trim().toLocaleLowerCase("pt-BR");
 
     return data.itens.filter((item) => {
+      if (selectedAccountIds.length > 0 && !selectedAccountIds.includes(item.contaId)) {
+        return false;
+      }
+
+      if (
+        filterState.categories.length > 0 &&
+        (!item.categoriaId || !filterState.categories.includes(item.categoriaId))
+      ) {
+        return false;
+      }
+
       if (normalizedSearchTerm.length === 0) {
         return true;
       }
@@ -65,7 +111,7 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
         getAccountLabel(item, accounts),
       ].some((value) => value.toLocaleLowerCase("pt-BR").includes(normalizedSearchTerm));
     });
-  }, [accounts, categories, data.itens, search.q]);
+  }, [accounts, categories, data.itens, filterState.categories, filterState.q, selectedAccountIds]);
 
   useEffect(() => {
     if (!isFiltersOpen && wasFiltersOpenRef.current) {
@@ -74,17 +120,6 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
     wasFiltersOpenRef.current = isFiltersOpen;
   }, [isFiltersOpen]);
 
-  const handleClearFilters = () => {
-    void navigate({
-      search: (current) => ({
-        ...current,
-        accounts: [allAccountsFilterValue],
-        categories: [],
-        q: "",
-      }),
-    });
-  };
-
   const handleMonthChange = (month: TransactionMonth) => {
     void navigate({
       search: (current) => ({
@@ -92,20 +127,6 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
         month: toYearMonth(month),
       }),
     });
-  };
-
-  const handleApplyFilters = (formData: TransactionFilterFormData) => {
-    void navigate({
-      search: (current) => ({
-        ...current,
-        accounts: formData.accounts,
-        categories: formData.categories,
-        includePreviousBalance: formData.includePreviousBalance,
-        month: formData.month,
-        q: formData.search.trim(),
-      }),
-    });
-    setIsFiltersOpen(false);
   };
 
   const handleOpenCreation = () => {
@@ -145,6 +166,7 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
         data={data}
         feedback={feedback}
         filterTriggerRef={filterTriggerRef}
+        hasTransactionScope={hasTransactionScope}
         isFiltersOpen={isFiltersOpen}
         items={visibleItems}
         onApplyFilters={handleApplyFilters}
@@ -155,7 +177,8 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
         onMonthChange={handleMonthChange}
         onOpenCreation={handleOpenCreation}
         onOpenFilters={() => setIsFiltersOpen(true)}
-        search={search}
+        onSearchChange={scheduleTransactionSearch}
+        search={filterState}
         selectedMonth={selectedMonth}
       />
       {isCreationOpen && (
@@ -189,15 +212,9 @@ function TransactionsPage({ accounts, categories, data }: TransactionsPageProps)
 
 export const Route = createFileRoute("/_private/transactions/")({
   component: TransactionsPageRoute,
-  loaderDeps: ({ search }) => ({
-    accounts: search.accounts,
-    categories: search.categories,
-    month: search.month,
-  }),
+  loaderDeps: ({ search }) => ({ month: search.month }),
   loader: ({ context, deps }) => {
     const transactionQuery = transactionsQueryOptions({
-      categoriaIds: deps.categories,
-      contaIds: getAccountIds(deps.accounts),
       fim: deps.month,
       inicio: deps.month,
     });
@@ -211,15 +228,13 @@ export const Route = createFileRoute("/_private/transactions/")({
     ]);
   },
   preloadStaleTime: 30_000,
-  validateSearch: transactionSearchSchema,
+  validateSearch: transactionRouteSearchSchema,
 });
 
 function TransactionsPageRoute() {
   const search = transactionsRoute.useSearch();
   const { data } = useSuspenseQuery(
     transactionsQueryOptions({
-      categoriaIds: search.categories,
-      contaIds: getAccountIds(search.accounts),
       fim: search.month,
       inicio: search.month,
     }),

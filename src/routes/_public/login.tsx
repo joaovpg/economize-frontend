@@ -12,6 +12,7 @@ import { TextField } from "../../components/TextField";
 import { isApiError } from "../../lib/api-errors";
 import { postLogin } from "../../services/auth/api";
 import { loginRequestSchema, type LoginRequest } from "../../services/auth/contracts";
+import { useTransactionFilterStore } from "../../stores/transaction-filters";
 
 export const Route = createFileRoute("/_public/login")({
   component: LoginPage,
@@ -47,6 +48,7 @@ function LoginPage() {
 
     try {
       await postLogin(data);
+      useTransactionFilterStore.getState().resetFilters();
       await navigate({ replace: true, to: "/transactions" });
     } catch (error) {
       if (!isApiError(error)) {
