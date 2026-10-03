@@ -19,7 +19,9 @@ type TransactionTableProps = {
   items: readonly ConsultaTransacaoItem[];
   onDelete: (target: ConsultaTransacaoItem) => void;
   onEdit: (target: ConsultaTransacaoItem) => void;
+  balanceLabel: string;
   openingBalance: number;
+  showOpeningBalance: boolean;
   title: string;
 };
 
@@ -68,6 +70,21 @@ function isRecurringItem(item: ConsultaTransacaoItem) {
   return item.origem === "TRANSACAO_RECORRENTE" || item.origem === "PARCELA";
 }
 
+function getTransactionDescription(item: ConsultaTransacaoItem) {
+  const { descricao, numeroParcela, totalParcelas } = item;
+
+  if (
+    typeof numeroParcela === "number" &&
+    numeroParcela > 0 &&
+    typeof totalParcelas === "number" &&
+    totalParcelas > 0
+  ) {
+    return `${descricao} (${numeroParcela}/${totalParcelas})`;
+  }
+
+  return descricao;
+}
+
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
   day: "2-digit",
   month: "short",
@@ -90,7 +107,7 @@ function TransactionActions({
   return (
     <MenuTrigger>
       <Button
-        aria-label={`Ações de ${item.descricao}`}
+        aria-label={`Ações de ${getTransactionDescription(item)}`}
         className="size-6! [&_svg]:size-3.5"
         isIconOnly
         size="sm"
@@ -103,7 +120,7 @@ function TransactionActions({
         offset={4}
         placement="bottom end"
       >
-        <Menu aria-label={`Ações de ${item.descricao}`} className="outline-none">
+        <Menu aria-label={`Ações de ${getTransactionDescription(item)}`} className="outline-none">
           <MenuItem
             className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-body-small text-foreground outline-none data-focused:bg-surface-muted"
             onAction={() => onEdit(item)}
@@ -133,6 +150,8 @@ export function TransactionTable({
   onDelete,
   onEdit,
   openingBalance,
+  showOpeningBalance,
+  balanceLabel,
   title,
 }: TransactionTableProps) {
   const dayGroups = useMemo(
@@ -176,27 +195,32 @@ export function TransactionTable({
           </tr>
         </thead>
         <tbody className="block md:table-row-group">
-          <tr className="grid grid-cols-[minmax(0,1fr)_auto_2rem] items-center border-b border-border bg-surface-muted py-3 pr-3 pl-4 md:table-row md:p-0">
-            <th
-              aria-label="Saldo de abertura, antes da primeira movimentação"
-              className="min-w-0 p-0 pr-3 text-left text-caption-strong text-foreground md:px-5 md:py-3"
-              colSpan={2}
-              scope="row"
-            >
-              <span className="flex flex-col gap-1">
-                <span>Saldo de abertura</span>
-                <span className="text-caption text-muted">Antes da primeira movimentação</span>
-              </span>
-            </th>
-            <td className="p-0 pr-1 text-right md:py-3 md:pl-5">
-              <strong
-                className={`text-caption-strong whitespace-nowrap tabular-nums ${openingBalance >= 0 ? "text-success" : "text-danger"}`}
+          {showOpeningBalance && (
+            <tr className="grid grid-cols-[minmax(0,1fr)_auto_2rem] items-center border-b border-border bg-surface-muted py-4 pr-3 pl-4 md:table-row md:p-0">
+              <th
+                aria-label="Saldo de abertura, antes da primeira movimentação"
+                className="min-w-0 p-0 pr-3 text-left text-caption-strong text-foreground md:px-5 md:py-4"
+                colSpan={2}
+                scope="row"
               >
-                {formatCurrency(openingBalance)}
-              </strong>
-            </td>
-            <td aria-hidden="true" className="w-8 px-1 py-0" />
-          </tr>
+                <span className="flex flex-col gap-1">
+                  <span>Saldo de abertura</span>
+                  <span className="text-caption text-muted">Antes da primeira movimentação</span>
+                </span>
+              </th>
+              <td
+                aria-label={`Saldo de abertura ${formatCurrency(openingBalance)}`}
+                className="p-0 pr-1 text-right md:py-4 md:pl-5"
+              >
+                <strong
+                  className={`text-card-title whitespace-nowrap tabular-nums ${openingBalance >= 0 ? "text-success" : "text-danger"}`}
+                >
+                  {formatCurrency(openingBalance)}
+                </strong>
+              </td>
+              <td aria-hidden="true" className="w-8 px-1 py-0" />
+            </tr>
+          )}
           {items.length === 0 && (
             <tr className="block md:table-row">
               <td className="block p-5.5 text-body-small text-muted md:table-cell" colSpan={4}>
@@ -220,7 +244,7 @@ export function TransactionTable({
                   )}
                 </td>
                 <td
-                  aria-label={`${item.descricao}${isRecurringItem(item) ? ", transação recorrente" : ""}${item.situacao === "PLANEJADA" ? ", planejada" : ""}, ${getCategoryLabel(item, categories)}, ${getAccountLabel(item, accounts)}`}
+                  aria-label={`${getTransactionDescription(item)}${isRecurringItem(item) ? ", transação recorrente" : ""}${item.situacao === "PLANEJADA" ? ", planejada" : ""}, ${getCategoryLabel(item, categories)}, ${getAccountLabel(item, accounts)}`}
                   className="min-w-0 p-0 pr-3 md:px-5 md:py-3 md:align-top"
                 >
                   <div className="flex flex-col gap-1">
@@ -235,7 +259,9 @@ export function TransactionTable({
                         </span>
                       )}
                       <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-1 text-caption-strong wrap-break-word text-foreground">
-                        <span className="min-w-0 wrap-break-word">{item.descricao}</span>
+                        <span className="min-w-0 wrap-break-word">
+                          {getTransactionDescription(item)}
+                        </span>
                         {item.situacao === "PLANEJADA" && (
                           <span className="inline-block rounded border border-border px-1 text-caption text-muted">
                             Planejada
@@ -262,10 +288,10 @@ export function TransactionTable({
                 </td>
               </tr>
             ))}
-            <tr className="grid grid-cols-[minmax(0,1fr)_auto_2rem] items-start bg-surface-muted py-3 pr-3 pl-4 md:table-row md:p-0">
+            <tr className="grid grid-cols-[minmax(0,1fr)_auto_2rem] items-center border-b border-border bg-surface-muted py-4 pr-3 pl-4 md:table-row md:p-0">
               <th
                 aria-label={`Fechamento ${formatTransactionDate(group.date)}, recebido ${formatCurrency(group.entries)}, gasto ${formatCurrency(group.exits)}`}
-                className="min-w-0 p-0 pr-3 text-left md:px-5 md:py-3"
+                className="min-w-0 p-0 pr-3 text-left md:px-5 md:py-4"
                 colSpan={2}
                 scope="row"
               >
@@ -273,22 +299,22 @@ export function TransactionTable({
                   <span className="text-caption-strong text-foreground">
                     Fechamento {formatTransactionDate(group.date)}
                   </span>
-                  <span className="text-caption wrap-break-word text-foreground">
+                  <span className="text-caption wrap-break-word text-muted">
                     Recebido {formatCurrency(group.entries)} · Gasto {formatCurrency(group.exits)}
                   </span>
                 </span>
               </th>
               <td
-                aria-label={`Saldo do dia ${formatCurrency(group.balance)}`}
-                className="p-0 pr-1 text-right md:py-3 md:pl-5"
+                aria-label={`${balanceLabel} ${formatCurrency(group.balance)}`}
+                className="p-0 pr-1 text-right md:py-4 md:pl-5"
               >
                 <div className="flex flex-col items-end gap-1">
+                  <span className="text-caption text-muted">{balanceLabel}</span>
                   <strong
-                    className={`text-caption-strong whitespace-nowrap tabular-nums ${group.balance >= 0 ? "text-success" : "text-danger"}`}
+                    className={`text-card-title whitespace-nowrap tabular-nums ${group.balance >= 0 ? "text-success" : "text-danger"}`}
                   >
                     {formatCurrency(group.balance)}
                   </strong>
-                  <span className="text-caption text-foreground">Saldo do dia</span>
                 </div>
               </td>
               <td aria-hidden="true" className="w-8 px-1 py-0" />

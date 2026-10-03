@@ -20,8 +20,18 @@ const transactionSearchShape = {
 };
 
 export const transactionSearchSchema = z.object(transactionSearchShape);
+export const transactionRouteSearchSchema = z.object({
+  month: yearMonthSchema.catch(getCurrentYearMonth).default(getCurrentYearMonth),
+});
 export const summarySearchSchema = transactionSearchSchema.extend({
   ledgerExpanded: z.boolean().catch(true).default(true),
+});
+
+export const transactionFilterValuesSchema = z.object({
+  accounts: z.array(accountFilterValueSchema).default([allAccountsFilterValue]),
+  categories: z.array(categoryFilterValueSchema).default([]),
+  includePreviousBalance: z.boolean().default(true),
+  q: z.string().default(""),
 });
 
 export const transactionFilterFormSchema = z.object({
@@ -34,6 +44,7 @@ export const transactionFilterFormSchema = z.object({
 
 export type AccountFilterValue = z.infer<typeof accountFilterValueSchema>;
 export type TransactionFilterFormData = z.infer<typeof transactionFilterFormSchema>;
+export type TransactionFilterValues = z.infer<typeof transactionFilterValuesSchema>;
 export type TransactionSearch = z.infer<typeof transactionSearchSchema>;
 export type SummarySearch = z.infer<typeof summarySearchSchema>;
 export type TransactionFilterState = Pick<

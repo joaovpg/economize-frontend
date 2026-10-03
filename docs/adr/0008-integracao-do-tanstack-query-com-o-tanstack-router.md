@@ -1,6 +1,6 @@
 # Integração do TanStack Query com o TanStack Router
 
-**Status:** Aceito
+**Status:** Aceito, com a decisão sobre os filtros de transações substituída pela [ADR-0009](0009-filtros-de-transacoes-no-cliente-com-zustand.md)
 
 O frontend adota `@tanstack/react-query` como dono do estado de servidor, trabalhando em conjunto com o TanStack Router. Um `QueryClient` único é fornecido ao React e ao contexto tipado do Router; os loaders usam `ensureQueryData` para garantir consultas antes da renderização, enquanto as telas usam `useSuspenseQuery` para ler o cache. As query options ficam próximas dos serviços de contas, categorias e transações, com query keys que incluem todas as dependências do resultado e `signal` encaminhado ao cliente Ky.
 

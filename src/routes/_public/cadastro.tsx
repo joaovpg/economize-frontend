@@ -13,6 +13,7 @@ import { TextField } from "../../components/TextField";
 import { isApiError } from "../../lib/api-errors";
 import { postCadastro, postLogin } from "../../services/auth/api";
 import { cadastroRequestSchema } from "../../services/auth/contracts";
+import { useTransactionFilterStore } from "../../stores/transaction-filters";
 
 export const Route = createFileRoute("/_public/cadastro")({
   component: RegisterPage,
@@ -72,6 +73,7 @@ function RegisterPage() {
         senha: data.senha,
       });
 
+      useTransactionFilterStore.getState().resetFilters();
       await navigate({ replace: true, to: "/summary" });
     } catch (error) {
       if (!isApiError(error)) {
@@ -91,7 +93,9 @@ function RegisterPage() {
       }
 
       if (!hasFieldError || error.problem?.detail) {
-        setSubmitError(error.problem?.detail ?? "Não foi possível criar sua conta. Tente novamente.");
+        setSubmitError(
+          error.problem?.detail ?? "Não foi possível criar sua conta. Tente novamente.",
+        );
       }
     }
   };

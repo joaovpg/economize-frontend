@@ -386,6 +386,7 @@ export const consultaTransacaoItemSchema = z.looseObject({
   rrule: z.string().nullable().optional(),
   segmentoRecorrenciaId: z.uuid().nullable().optional(),
   situacao: transactionSituationSchema.nullable().optional(),
+  totalParcelas: z.number().int().nullable().optional(),
   valor: z.number(),
 });
 
