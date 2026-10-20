@@ -11,7 +11,7 @@ import { tv } from "tailwind-variants";
 
 const checkboxRootStyles = tv(
   {
-    base: "group flex min-h-[1.625rem] min-w-0 cursor-pointer select-none items-center gap-2 text-label text-muted outline-none transition-colors duration-150 ease-out data-disabled:cursor-not-allowed data-disabled:opacity-50 max-[48rem]:min-h-11 motion-reduce:transition-none",
+    base: "group flex min-h-6.5 min-w-0 cursor-pointer select-none items-center gap-2 text-label text-muted outline-none transition-colors duration-150 ease-out data-disabled:cursor-not-allowed data-disabled:opacity-50 max-[48rem]:min-h-11 motion-reduce:transition-none",
     defaultVariants: {
       invalid: false,
       size: "default",
@@ -70,17 +70,14 @@ function getIndicatorClassName({
   isSelected: boolean;
 }) {
   const selected = isSelected || isIndeterminate;
-  const stateClassName = isDisabled
-    ? ""
-    : isPressed
-      ? selected
-        ? "border-brand-pressed bg-brand-pressed"
-        : "bg-surface-strong"
-      : "";
-  const focusClassName =
-    focusRing === "indicator"
-      ? `group-data-focus-visible:outline-2 group-data-focus-visible:outline-offset-2 group-data-focus-visible:outline-solid ${isInvalid ? "group-data-focus-visible:outline-danger" : "group-data-focus-visible:outline-brand"}`
-      : "";
+  let stateClassName = "";
+  if (!isDisabled && isPressed) {
+    stateClassName = selected ? "border-brand-pressed bg-brand-pressed" : "bg-surface-strong";
+  }
+  let focusClassName = "";
+  if (focusRing === "indicator") {
+    focusClassName = `group-data-focus-visible:outline-2 group-data-focus-visible:outline-offset-2 group-data-focus-visible:outline-solid ${isInvalid ? "group-data-focus-visible:outline-danger" : "group-data-focus-visible:outline-brand"}`;
+  }
 
   return [
     checkboxIndicatorStyles({ selected }),
@@ -117,6 +114,12 @@ export function Checkbox({
       >
         {({ isIndeterminate, isInvalid, isPressed, isSelected, isDisabled }) => {
           const selected = isSelected || isIndeterminate;
+          let indicator = null;
+          if (isIndeterminate) {
+            indicator = <MinusIcon aria-hidden="true" weight="bold" />;
+          } else if (selected) {
+            indicator = <CheckIcon aria-hidden="true" weight="bold" />;
+          }
 
           return (
             <>
@@ -130,11 +133,7 @@ export function Checkbox({
                   isSelected,
                 })}
               >
-                {isIndeterminate ? (
-                  <MinusIcon aria-hidden="true" weight="bold" />
-                ) : selected ? (
-                  <CheckIcon aria-hidden="true" weight="bold" />
-                ) : null}
+                {indicator}
               </span>
               <span className={labelClassName ? `min-w-0 ${labelClassName}` : "min-w-0"}>
                 {children}

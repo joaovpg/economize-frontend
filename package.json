@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "build": "tsc -b && vite build",
+    "check": "pnpm fmt:check && pnpm lint && pnpm build",
     "dev": "vite",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
-    "lint": "oxlint",
+    "lint": "oxlint --deny-warnings --report-unused-disable-directives-severity error",
     "lint:fix": "oxlint --fix",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc -b"
   },
   "dependencies": {
     "@hookform/lenses": "^0.10.0",
@@ -27,6 +29,7 @@
     "react-aria-components": "^1.20.0",
     "react-dom": "^19.2.8",
     "react-hook-form": "^7.85.0",
+    "react-number-format": "^5.4.5",
     "tailwind-merge": "^3.7.0",
     "tailwind-variants": "^3.3.1",
     "tailwindcss": "^4.3.3",
@@ -41,6 +44,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.1.0",
+    "eslint-plugin-sonarjs": "^4.2.2",
     "oxc-transform-react": "^0.145.0",
     "oxfmt": "^0.64.0",
     "oxlint": "^1.80.0",
@@ -48,5 +52,6 @@
     "oxlint-tsgolint": "^7.0.2001",
     "typescript": "~7.0.2",
     "vite": "^8.2.2"
-  }
+  },
+  "packageManager": "pnpm@12.11.2"
 }

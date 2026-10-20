@@ -70,7 +70,7 @@ const modalStyles = tv({
 
 export type ModalSize = "sm" | "md" | "lg" | "fullScreen";
 
-type ModalPropsBase = Omit<
+export type ModalProps = Omit<
   AriaModalOverlayProps,
   | "aria-describedby"
   | "aria-label"
@@ -100,8 +100,6 @@ type ModalPropsBase = Omit<
     size?: ModalSize;
     ref?: Ref<HTMLDivElement>;
   };
-
-export type ModalProps = ModalPropsBase;
 
 export type ModalHeaderProps = ComponentPropsWithRef<"div">;
 export type ModalTitleProps = Omit<AriaHeadingProps, "children" | "slot"> & {
@@ -254,7 +252,7 @@ export function Modal({
   shouldCloseOnInteractOutside,
   size = "md",
   ...overlayProps
-}: ModalProps) {
+}: Readonly<ModalProps>) {
   const resolvedOverlayClassName = composeRenderProps(
     overlayClassName,
     (userClassName: string | undefined, { isEntering, isExiting }: ModalRenderProps) =>

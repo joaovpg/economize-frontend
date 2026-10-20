@@ -154,189 +154,210 @@ function validateOperationBase(
   }
 }
 
-export const formularioOperacaoFinanceiraSchema = z
-  .object({
-    ate: optionalDateInputSchema,
-    diasMes: z.array(z.number().int().min(1).max(31)),
-    diasSemana: z.array(dayOfWeekSchema),
-    frequencia: recurrenceFrequencySchema.nullable(),
-    intervalo: optionalPositiveIntegerInputSchema,
-    numeroPrimeiraParcela: optionalPositiveIntegerInputSchema,
-    quantidadeOcorrencias: optionalPositiveIntegerInputSchema,
-    quantidadeTotalOriginal: optionalPositiveIntegerInputSchema,
-    semTermino: z.boolean(),
-    ...formularioOperacaoFinanceiraBaseShape,
-  })
-  .superRefine((formulario, contexto) => {
+const formularioCriacaoBaseSchema = z.object({
+  ate: optionalDateInputSchema,
+  diasMes: z.array(z.number().int().min(1).max(31)),
+  diasSemana: z.array(dayOfWeekSchema),
+  frequencia: recurrenceFrequencySchema.nullable(),
+  intervalo: optionalPositiveIntegerInputSchema,
+  numeroPrimeiraParcela: optionalPositiveIntegerInputSchema,
+  quantidadeOcorrencias: optionalPositiveIntegerInputSchema,
+  quantidadeTotalOriginal: optionalPositiveIntegerInputSchema,
+  semTermino: z.boolean(),
+  ...formularioOperacaoFinanceiraBaseShape,
+});
+
+type FormularioCriacaoBase = z.infer<typeof formularioCriacaoBaseSchema>;
+
+function validateDailyOrYearlyDays(formulario: FormularioCriacaoBase, contexto: z.RefinementCtx) {
+  if (formulario.diasSemana.length > 0) {
+    contexto.addIssue({
+      code: "custom",
+      message: "Não selecione dias da semana para esta frequência.",
+      path: ["diasSemana"],
+    });
+  }
+  if (formulario.diasMes.length > 0) {
+    contexto.addIssue({
+      code: "custom",
+      message: "Não selecione dias do mês para esta frequência.",
+      path: ["diasMes"],
+    });
+  }
+}
+
+function validateWeeklyDays(formulario: FormularioCriacaoBase, contexto: z.RefinementCtx) {
+  const initialWeekday = new Date(`${formulario.data}T00:00:00Z`).getUTCDay();
+
+  if (formulario.diasSemana.length === 0) {
+    contexto.addIssue({
+      code: "custom",
+      message: "Selecione ao menos um dia da semana.",
+      path: ["diasSemana"],
+    });
+  }
+
+  const initialDayOfWeek = initialWeekday === 0 ? 7 : initialWeekday;
+  const selectedWeekdayNumbers = formulario.diasSemana.map((day) =>
+    day === "SUNDAY"
+      ? 7
+      : ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"].indexOf(day) + 1,
+  );
+
+  if (!selectedWeekdayNumbers.includes(initialDayOfWeek)) {
+    contexto.addIssue({
+      code: "custom",
+      message: "Inclua o dia da data inicial na recorrência.",
+      path: ["diasSemana"],
+    });
+  }
+  if (selectedWeekdayNumbers.some((day) => day < initialDayOfWeek)) {
+    contexto.addIssue({
+      code: "custom",
+      message: "O dia inicial deve ser a primeira ocorrência da semana.",
+      path: ["diasSemana"],
+    });
+  }
+}
+
+function validateMonthlyDays(formulario: FormularioCriacaoBase, contexto: z.RefinementCtx) {
+  const initialMonthDay = new Date(`${formulario.data}T00:00:00Z`).getUTCDate();
+
+  if (formulario.diasMes.length === 0) {
+    contexto.addIssue({
+      code: "custom",
+      message: "Selecione ao menos um dia do mês.",
+      path: ["diasMes"],
+    });
+  }
+  if (!formulario.diasMes.includes(initialMonthDay)) {
+    contexto.addIssue({
+      code: "custom",
+      message: "Inclua o dia da data inicial na recorrência.",
+      path: ["diasMes"],
+    });
+  }
+  if (formulario.diasMes.some((day) => day < initialMonthDay)) {
+    contexto.addIssue({
+      code: "custom",
+      message: "O dia inicial deve ser a primeira ocorrência do mês.",
+      path: ["diasMes"],
+    });
+  }
+}
+
+function validateRecurrenceEnd(formulario: FormularioCriacaoBase, contexto: z.RefinementCtx) {
+  if (formulario.semTermino) {
+    if (formulario.ate !== "" || formulario.quantidadeOcorrencias !== "") {
+      contexto.addIssue({
+        code: "custom",
+        message: "Remova o término antes de escolher uma recorrência sem fim.",
+        path: ["ate"],
+      });
+    }
+  } else {
+    const hasEndDate = formulario.ate !== "";
+    const hasOccurrenceCount = formulario.quantidadeOcorrencias !== "";
+
+    if (!hasEndDate && !hasOccurrenceCount) {
+      contexto.addIssue({
+        code: "custom",
+        message: "Informe a quantidade de ocorrências ou a data final.",
+        path: ["ate"],
+      });
+    }
+    if (hasEndDate && hasOccurrenceCount) {
+      contexto.addIssue({
+        code: "custom",
+        message: "Escolha apenas uma forma de término.",
+        path: ["ate"],
+      });
+    }
+    if (
+      formulario.ate !== "" &&
+      z.iso.date().safeParse(formulario.ate).success &&
+      formulario.ate < formulario.data
+    ) {
+      contexto.addIssue({
+        code: "custom",
+        message: "A data final não pode ser anterior à data inicial.",
+        path: ["ate"],
+      });
+    }
+  }
+}
+
+function validateInstallment(formulario: FormularioCriacaoBase, contexto: z.RefinementCtx) {
+  addRequiredOperationFieldIssue(
+    contexto,
+    "intervalo",
+    formulario.intervalo,
+    "Informe o intervalo.",
+  );
+  addRequiredOperationFieldIssue(
+    contexto,
+    "numeroPrimeiraParcela",
+    formulario.numeroPrimeiraParcela,
+    "Informe o número inicial.",
+  );
+  addRequiredOperationFieldIssue(
+    contexto,
+    "quantidadeTotalOriginal",
+    formulario.quantidadeTotalOriginal,
+    "Informe o total de parcelas.",
+  );
+
+  if (
+    formulario.numeroPrimeiraParcela !== "" &&
+    formulario.quantidadeTotalOriginal !== "" &&
+    Number(formulario.quantidadeTotalOriginal) < Number(formulario.numeroPrimeiraParcela)
+  ) {
+    contexto.addIssue({
+      code: "custom",
+      message: "O total de parcelas deve ser maior ou igual ao número inicial.",
+      path: ["quantidadeTotalOriginal"],
+    });
+  }
+}
+
+function validateRecurrence(formulario: FormularioCriacaoBase, contexto: z.RefinementCtx) {
+  addRequiredOperationFieldIssue(
+    contexto,
+    "frequencia",
+    formulario.frequencia,
+    "Selecione uma frequência.",
+  );
+  addRequiredOperationFieldIssue(
+    contexto,
+    "intervalo",
+    formulario.intervalo,
+    "Informe o intervalo.",
+  );
+
+  if (formulario.frequencia && z.iso.date().safeParse(formulario.data).success) {
+    switch (formulario.frequencia) {
+      case "DAILY":
+      case "YEARLY":
+        validateDailyOrYearlyDays(formulario, contexto);
+        break;
+      case "WEEKLY":
+        validateWeeklyDays(formulario, contexto);
+        break;
+      case "MONTHLY":
+        validateMonthlyDays(formulario, contexto);
+        break;
+    }
+  }
+  validateRecurrenceEnd(formulario, contexto);
+}
+
+export const formularioOperacaoFinanceiraSchema = formularioCriacaoBaseSchema.superRefine(
+  (formulario, contexto) => {
     validateOperationBase(formulario, contexto);
-
-    if (formulario.tipoOperacao === "RECORRENCIA") {
-      addRequiredOperationFieldIssue(
-        contexto,
-        "frequencia",
-        formulario.frequencia,
-        "Selecione uma frequência.",
-      );
-      addRequiredOperationFieldIssue(
-        contexto,
-        "intervalo",
-        formulario.intervalo,
-        "Informe o intervalo.",
-      );
-
-      if (formulario.frequencia && z.iso.date().safeParse(formulario.data).success) {
-        const initialDate = new Date(`${formulario.data}T00:00:00Z`);
-        const initialWeekday = initialDate.getUTCDay();
-        const initialMonthDay = initialDate.getUTCDate();
-
-        if (formulario.frequencia === "DAILY" || formulario.frequencia === "YEARLY") {
-          if (formulario.diasSemana.length > 0) {
-            contexto.addIssue({
-              code: "custom",
-              message: "Não selecione dias da semana para esta frequência.",
-              path: ["diasSemana"],
-            });
-          }
-          if (formulario.diasMes.length > 0) {
-            contexto.addIssue({
-              code: "custom",
-              message: "Não selecione dias do mês para esta frequência.",
-              path: ["diasMes"],
-            });
-          }
-        }
-
-        if (formulario.frequencia === "WEEKLY") {
-          if (formulario.diasSemana.length === 0) {
-            contexto.addIssue({
-              code: "custom",
-              message: "Selecione ao menos um dia da semana.",
-              path: ["diasSemana"],
-            });
-          }
-
-          const initialDayOfWeek = initialWeekday === 0 ? 7 : initialWeekday;
-          const selectedWeekdayNumbers = formulario.diasSemana.map((day) =>
-            day === "SUNDAY"
-              ? 7
-              : ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"].indexOf(day) +
-                1,
-          );
-
-          if (!selectedWeekdayNumbers.includes(initialDayOfWeek)) {
-            contexto.addIssue({
-              code: "custom",
-              message: "Inclua o dia da data inicial na recorrência.",
-              path: ["diasSemana"],
-            });
-          }
-          if (selectedWeekdayNumbers.some((day) => day < initialDayOfWeek)) {
-            contexto.addIssue({
-              code: "custom",
-              message: "O dia inicial deve ser a primeira ocorrência da semana.",
-              path: ["diasSemana"],
-            });
-          }
-        }
-
-        if (formulario.frequencia === "MONTHLY") {
-          if (formulario.diasMes.length === 0) {
-            contexto.addIssue({
-              code: "custom",
-              message: "Selecione ao menos um dia do mês.",
-              path: ["diasMes"],
-            });
-          }
-          if (!formulario.diasMes.includes(initialMonthDay)) {
-            contexto.addIssue({
-              code: "custom",
-              message: "Inclua o dia da data inicial na recorrência.",
-              path: ["diasMes"],
-            });
-          }
-          if (formulario.diasMes.some((day) => day < initialMonthDay)) {
-            contexto.addIssue({
-              code: "custom",
-              message: "O dia inicial deve ser a primeira ocorrência do mês.",
-              path: ["diasMes"],
-            });
-          }
-        }
-      }
-
-      if (formulario.semTermino) {
-        if (formulario.ate !== "" || formulario.quantidadeOcorrencias !== "") {
-          contexto.addIssue({
-            code: "custom",
-            message: "Remova o término antes de escolher uma recorrência sem fim.",
-            path: ["ate"],
-          });
-        }
-      } else {
-        const hasEndDate = formulario.ate !== "";
-        const hasOccurrenceCount = formulario.quantidadeOcorrencias !== "";
-
-        if (!hasEndDate && !hasOccurrenceCount) {
-          contexto.addIssue({
-            code: "custom",
-            message: "Informe a quantidade de ocorrências ou a data final.",
-            path: ["ate"],
-          });
-        }
-        if (hasEndDate && hasOccurrenceCount) {
-          contexto.addIssue({
-            code: "custom",
-            message: "Escolha apenas uma forma de término.",
-            path: ["ate"],
-          });
-        }
-        if (
-          formulario.ate !== "" &&
-          z.iso.date().safeParse(formulario.ate).success &&
-          formulario.ate < formulario.data
-        ) {
-          contexto.addIssue({
-            code: "custom",
-            message: "A data final não pode ser anterior à data inicial.",
-            path: ["ate"],
-          });
-        }
-      }
-    }
-
-    if (formulario.tipoOperacao === "PARCELAMENTO") {
-      addRequiredOperationFieldIssue(
-        contexto,
-        "intervalo",
-        formulario.intervalo,
-        "Informe o intervalo.",
-      );
-      addRequiredOperationFieldIssue(
-        contexto,
-        "numeroPrimeiraParcela",
-        formulario.numeroPrimeiraParcela,
-        "Informe o número inicial.",
-      );
-      addRequiredOperationFieldIssue(
-        contexto,
-        "quantidadeTotalOriginal",
-        formulario.quantidadeTotalOriginal,
-        "Informe o total de parcelas.",
-      );
-
-      if (
-        formulario.numeroPrimeiraParcela !== "" &&
-        formulario.quantidadeTotalOriginal !== "" &&
-        Number(formulario.quantidadeTotalOriginal) < Number(formulario.numeroPrimeiraParcela)
-      ) {
-        contexto.addIssue({
-          code: "custom",
-          message: "O total de parcelas deve ser maior ou igual ao número inicial.",
-          path: ["quantidadeTotalOriginal"],
-        });
-      }
-    }
-  });
+    if (formulario.tipoOperacao === "RECORRENCIA") validateRecurrence(formulario, contexto);
+    if (formulario.tipoOperacao === "PARCELAMENTO") validateInstallment(formulario, contexto);
+  },
+);
 
 export type FormularioOperacaoFinanceira = z.infer<typeof formularioOperacaoFinanceiraSchema>;
 

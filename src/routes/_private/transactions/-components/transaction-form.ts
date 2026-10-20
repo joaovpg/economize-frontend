@@ -190,8 +190,8 @@ function requireFormValue<T>(value: T | null | undefined, fieldName: string): T 
   return value;
 }
 
-export function toCreateTransactionRequest(
-  data: FormularioOperacaoFinanceira,
+function buildTransactionRequest(
+  data: FormularioOperacaoFinanceira | FormularioEdicaoOperacaoFinanceira,
 ): CriarTransacaoRequest {
   if (data.tipoOperacao !== "TRANSACAO") {
     throw new Error("O formulário não representa uma transação.");
@@ -209,8 +209,8 @@ export function toCreateTransactionRequest(
   };
 }
 
-export function toCreateTransferRequest(
-  data: FormularioOperacaoFinanceira,
+function buildTransferRequest(
+  data: FormularioOperacaoFinanceira | FormularioEdicaoOperacaoFinanceira,
 ): CriarTransferenciaRequest {
   if (data.tipoOperacao !== "TRANSFERENCIA") {
     throw new Error("O formulário não representa uma transferência.");
@@ -227,42 +227,21 @@ export function toCreateTransferRequest(
   };
 }
 
-export function toEditTransactionRequest(
+export const toCreateTransactionRequest: (
+  data: FormularioOperacaoFinanceira,
+) => CriarTransacaoRequest = buildTransactionRequest;
+
+export const toEditTransactionRequest: (
   data: FormularioEdicaoOperacaoFinanceira,
-): AlterarTransacaoRequest {
-  if (data.tipoOperacao !== "TRANSACAO") {
-    throw new Error("O formulário não representa uma transação.");
-  }
+) => AlterarTransacaoRequest = buildTransactionRequest;
 
-  return {
-    categoriaId: data.categoriaId ?? undefined,
-    contaId: requireFormValue(data.contaId, "contaId"),
-    dataFinanceira: data.data,
-    descricao: data.descricao.trim(),
-    observacoes: normalizeOptionalText(data.observacoes),
-    situacao: data.situacao,
-    tipo: data.tipo,
-    valor: parseValidatedMoney(data.valor),
-  };
-}
+export const toCreateTransferRequest: (
+  data: FormularioOperacaoFinanceira,
+) => CriarTransferenciaRequest = buildTransferRequest;
 
-export function toEditTransferRequest(
+export const toEditTransferRequest: (
   data: FormularioEdicaoOperacaoFinanceira,
-): AlterarTransferenciaRequest {
-  if (data.tipoOperacao !== "TRANSFERENCIA") {
-    throw new Error("O formulário não representa uma transferência.");
-  }
-
-  return {
-    contaDestinoId: requireFormValue(data.contaDestinoId, "contaDestinoId"),
-    contaOrigemId: requireFormValue(data.contaOrigemId, "contaOrigemId"),
-    dataFinanceira: data.data,
-    descricao: data.descricao.trim(),
-    observacoes: normalizeOptionalText(data.observacoes),
-    situacao: data.situacao,
-    valor: parseValidatedMoney(data.valor),
-  };
-}
+) => AlterarTransferenciaRequest = buildTransferRequest;
 
 export function toEditRecurrenceOccurrenceRequest(
   data: FormularioEdicaoOperacaoFinanceira,

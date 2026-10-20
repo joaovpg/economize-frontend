@@ -1,14 +1,16 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   Button as AriaButton,
+  ComboBox as AriaComboBox,
+  Group,
+  Input,
   ListBox,
   ListBoxItem as AriaListBoxItem,
   Popover,
-  Select as AriaSelect,
-  SelectValue,
   composeRenderProps,
+  type ComboBoxProps as AriaComboBoxProps,
   type ListBoxItemProps as AriaListBoxItemProps,
-  type SelectProps as AriaSelectProps,
+  type Key,
 } from "react-aria-components";
 
 import { CaretDownIcon } from "@phosphor-icons/react/dist/csr/CaretDown";
@@ -22,7 +24,7 @@ import { IconSlot } from "./IconSlot";
 import { Label } from "./Label";
 
 const control = tv({
-  base: "flex w-full min-w-0 cursor-pointer items-center gap-3 border font-ui text-subtle transition-[background-color,border-color,outline-color] motion-reduce:transition-none",
+  base: "flex w-full min-w-0 cursor-text items-center gap-3 border font-ui text-subtle transition-[background-color,border-color,outline-color] motion-reduce:transition-none",
   variants: {
     appearance: {
       compact:
@@ -41,9 +43,9 @@ const control = tv({
   },
 });
 
-const selectValueStyles = tv(
+const inputStyles = tv(
   {
-    base: "min-w-0 flex-1 truncate text-left text-body-small data-placeholder:text-subtle",
+    base: "min-w-0 flex-1 border-0 bg-transparent text-body-small caret-brand outline-none placeholder:text-subtle",
     defaultVariants: {
       disabled: false,
     },
@@ -66,6 +68,20 @@ const itemIndicatorStyles = tv({
 });
 
 type SelectionMode = "single" | "multiple";
+
+type SelectionInputState = {
+  inputValue: string;
+  selectedKey: Key | null;
+  selectedText: string;
+};
+
+function getSelectedKey(value: unknown): Key | null {
+  if (typeof value === "string" || typeof value === "number") {
+    return value;
+  }
+
+  return null;
+}
 
 /**
  * Props da opção estilizada do Select do Economize.
@@ -105,14 +121,16 @@ export function SelectItem<T = object>({ children, className, ...itemProps }: Se
  * React Aria.
  */
 export type SelectProps<T = object, M extends SelectionMode = "single"> = Omit<
-  AriaSelectProps<T, M>,
+  AriaComboBoxProps<T, M>,
+  | "allowsCustomValue"
   | "children"
-  | "defaultSelectedKey"
+  | "defaultFilter"
+  | "defaultInputValue"
   | "description"
   | "errorMessage"
+  | "inputValue"
   | "label"
-  | "onSelectionChange"
-  | "selectedKey"
+  | "onInputChange"
 > & {
   /** Opções renderizadas dentro da lista. */
   children: ReactNode;
@@ -122,6 +140,8 @@ export type SelectProps<T = object, M extends SelectionMode = "single"> = Omit<
   appearance?: "default" | "compact";
   /** Classes adicionais aplicadas à label do campo. */
   labelClassName?: string;
+  /** Texto exibido no input quando não há seleção nem busca ativa. */
+  placeholder?: string;
   /** Texto auxiliar opcional exibido logo abaixo da label. */
   description?: string;
   /** Mensagem de validação exibida na área reservada abaixo do controle. */
@@ -134,13 +154,17 @@ export type SelectProps<T = object, M extends SelectionMode = "single"> = Omit<
   popoverClassName?: string;
   /** Classes adicionais aplicadas à lista de opções. */
   listBoxClassName?: string;
+  /** Texto curto exibido depois da seleção, sem alterar o texto usado para filtrar opções. */
+  selectedText?: (key: Key | null) => string;
+  /** Chamado quando o texto de busca é apagado em um Select com `selectedText`. */
+  onSearchClear?: () => void;
 };
 
 /**
  * Select acessível e estilizado para os formulários do Economize.
  *
- * O componente usa a composição Select + Label + Button + SelectValue + Popover + ListBox do React
- * Aria, compartilhando a altura, tipografia, superfície e estados visuais do TextField.
+ * O componente usa a composição ComboBox + Label + Group + Input + Button + Popover + ListBox do
+ * React Aria. O texto digitado filtra as opções localmente sem aceitar valores fora da lista.
  */
 export function Select<T = object, M extends SelectionMode = "single">({
   children,
@@ -157,36 +181,87 @@ export function Select<T = object, M extends SelectionMode = "single">({
   popoverClassName,
   reserveErrorSpace = true,
   className,
+  onSearchClear,
+  selectedText,
   ...selectProps
 }: SelectProps<T, M>) {
   const hasError = Boolean(errorMessage) || isInvalid;
   const hasVisualError = hasError && !isDisabled;
+  const [selectionInputState, setSelectionInputState] = useState<SelectionInputState | null>(null);
+  const selectedKey = getSelectedKey(selectProps.value);
+  const currentSelectedText = selectedText?.(selectedKey) ?? "";
+  const matchesCurrentSelection =
+    selectionInputState?.selectedKey === selectedKey &&
+    selectionInputState.selectedText === currentSelectedText;
+  const selectionInputValue = matchesCurrentSelection
+    ? selectionInputState.inputValue
+    : currentSelectedText;
+  const inputValue = selectedText ? selectionInputValue : undefined;
+
+  function handleInputChange(nextInputValue: string) {
+    if (!selectedText) {
+      return;
+    }
+
+    setSelectionInputState({
+      inputValue: nextInputValue,
+      selectedKey,
+      selectedText: currentSelectedText,
+    });
+
+    if (nextInputValue === "") {
+      onSearchClear?.();
+    }
+  }
+
+  const handleChange: NonNullable<SelectProps<T, M>["onChange"]> = (nextValue) => {
+    selectProps.onChange?.(nextValue);
+
+    if (selectedText) {
+      const nextSelectedKey = getSelectedKey(nextValue);
+      const nextSelectedText = selectedText(nextSelectedKey);
+
+      setSelectionInputState({
+        inputValue: nextSelectedText,
+        selectedKey: nextSelectedKey,
+        selectedText: nextSelectedText,
+      });
+    }
+  };
 
   return (
-    <AriaSelect
+    <AriaComboBox
       {...selectProps}
+      allowsCustomValue={false}
       className={composeTailwindRenderProps(className, "flex flex-col min-w-0 gap-1")}
       isDisabled={isDisabled}
       isInvalid={hasError}
-      placeholder={placeholder}
+      inputValue={inputValue}
+      onChange={handleChange}
+      onInputChange={selectedText ? handleInputChange : undefined}
     >
       <Label className={labelClassName} isDisabled={isDisabled}>
         {label}
       </Label>
       {description && <Description isDisabled={isDisabled}>{description}</Description>}
-      <AriaButton
+      <Group
         className={control({
           appearance,
           disabled: isDisabled,
           invalid: hasVisualError,
         })}
+        isDisabled={isDisabled}
+        isInvalid={hasVisualError}
       >
         {leadingIcon && <IconSlot>{leadingIcon}</IconSlot>}
-        <SelectValue className={selectValueStyles({ disabled: isDisabled })}>
-          {({ selectedText, defaultChildren }) => selectedText || defaultChildren}
-        </SelectValue>
-        <CaretDownIcon aria-hidden="true" className="size-4 shrink-0 text-subtle" />
-      </AriaButton>
+        <Input className={inputStyles({ disabled: isDisabled })} placeholder={placeholder} />
+        <AriaButton
+          aria-label={`Mostrar opções para ${label}`}
+          className="grid size-8 shrink-0 place-items-center rounded-lg text-subtle transition-colors outline-none data-focus-visible:outline-2 data-focus-visible:outline-offset-0 data-focus-visible:outline-brand data-focus-visible:outline-solid data-hovered:bg-surface-muted data-pressed:bg-surface-strong motion-reduce:transition-none"
+        >
+          <CaretDownIcon aria-hidden="true" className="size-4" />
+        </AriaButton>
+      </Group>
       <div className={reserveErrorSpace ? "min-h-4 min-w-0" : "min-w-0"}>
         <FieldError>{errorMessage}</FieldError>
       </div>
@@ -202,10 +277,13 @@ export function Select<T = object, M extends SelectionMode = "single">({
             "flex max-h-[inherit] flex-col gap-0.5 overflow-auto outline-none",
             listBoxClassName,
           )}
+          renderEmptyState={() => (
+            <span className="px-3 py-2 text-body-small text-subtle">Nenhuma opção encontrada</span>
+          )}
         >
           {children}
         </ListBox>
       </Popover>
-    </AriaSelect>
+    </AriaComboBox>
   );
 }

@@ -5,6 +5,7 @@ import { DotsThreeVerticalIcon } from "@phosphor-icons/react/dist/csr/DotsThreeV
 import { PencilSimpleIcon } from "@phosphor-icons/react/dist/csr/PencilSimple";
 import { RepeatIcon } from "@phosphor-icons/react/dist/csr/Repeat";
 import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
+import { tv } from "tailwind-variants";
 
 import { Button } from "../../../../components/Button";
 import { formatCurrency, formatSignedCurrency } from "../../../../lib/formatters";
@@ -12,6 +13,14 @@ import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../../../services/categories/contracts";
 import { type ConsultaTransacaoItem } from "../../../../services/transactions/contracts";
 import { getAccountLabel, getCategoryLabel } from "./transaction-labels";
+
+const moneyStyles = tv({
+  base: "whitespace-nowrap tabular-nums",
+  variants: {
+    positive: { true: "text-success", false: "text-danger" },
+    size: { total: "text-card-title", entry: "text-caption-strong" },
+  },
+});
 
 type TransactionTableProps = {
   accounts: readonly ContaResponse[];
@@ -212,9 +221,7 @@ export function TransactionTable({
                 aria-label={`Saldo de abertura ${formatCurrency(openingBalance)}`}
                 className="p-0 pr-1 text-right md:py-4 md:pl-5"
               >
-                <strong
-                  className={`text-card-title whitespace-nowrap tabular-nums ${openingBalance >= 0 ? "text-success" : "text-danger"}`}
-                >
+                <strong className={moneyStyles({ positive: openingBalance >= 0, size: "total" })}>
                   {formatCurrency(openingBalance)}
                 </strong>
               </td>
@@ -275,9 +282,7 @@ export function TransactionTable({
                   </div>
                 </td>
                 <td className="p-0 pr-1 text-right md:py-3 md:pl-5 md:align-middle">
-                  <strong
-                    className={`text-caption-strong whitespace-nowrap tabular-nums ${item.valor >= 0 ? "text-success" : "text-danger"}`}
-                  >
+                  <strong className={moneyStyles({ positive: item.valor >= 0, size: "entry" })}>
                     {formatSignedCurrency(item.valor)}
                   </strong>
                 </td>
@@ -310,9 +315,7 @@ export function TransactionTable({
               >
                 <div className="flex flex-col items-end gap-1">
                   <span className="text-caption text-muted">{balanceLabel}</span>
-                  <strong
-                    className={`text-card-title whitespace-nowrap tabular-nums ${group.balance >= 0 ? "text-success" : "text-danger"}`}
-                  >
+                  <strong className={moneyStyles({ positive: group.balance >= 0, size: "total" })}>
                     {formatCurrency(group.balance)}
                   </strong>
                 </div>

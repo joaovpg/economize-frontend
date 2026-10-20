@@ -122,10 +122,10 @@ function getRadioButtonClassName({
   isInvalid: boolean;
 }) {
   const hasVisualError = isInvalid && !isDisabled;
-  const focusClassName =
-    appearance !== "default" && isFocusVisible
-      ? `outline-2 outline-offset-2 outline-solid ${hasVisualError ? "outline-danger" : "outline-brand"}`
-      : "";
+  let focusClassName = "";
+  if (appearance !== "default" && isFocusVisible) {
+    focusClassName = `outline-2 outline-offset-2 outline-solid ${hasVisualError ? "outline-danger" : "outline-brand"}`;
+  }
 
   return [radioButtonStyles({ appearance, className, invalid: hasVisualError }), focusClassName]
     .filter(Boolean)
@@ -148,16 +148,14 @@ function getRadioIndicatorClassName({
   isSelected: boolean;
 }) {
   const hasVisualError = isInvalid && !isDisabled;
-  const pressedClassName =
-    !isDisabled && !hasVisualError && isPressed
-      ? isSelected
-        ? "border-brand-pressed bg-brand-soft"
-        : "bg-surface-strong"
-      : "";
-  const focusClassName =
-    appearance === "default" && isFocusVisible
-      ? `outline-2 outline-offset-2 outline-solid ${hasVisualError ? "outline-danger" : "outline-brand"}`
-      : "";
+  let pressedClassName = "";
+  if (!isDisabled && !hasVisualError && isPressed) {
+    pressedClassName = isSelected ? "border-brand-pressed bg-brand-soft" : "bg-surface-strong";
+  }
+  let focusClassName = "";
+  if (appearance === "default" && isFocusVisible) {
+    focusClassName = `outline-2 outline-offset-2 outline-solid ${hasVisualError ? "outline-danger" : "outline-brand"}`;
+  }
 
   return [
     radioIndicatorStyles({ invalid: hasVisualError, selected: isSelected }),

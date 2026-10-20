@@ -1,5 +1,6 @@
 import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
 import { Select, SelectItem } from "../../../../components/Select";
+import { buildCategoryTree, type CategoryTreeNode } from "../../../../lib/category-tree";
 import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../../../services/categories/contracts";
 import {
@@ -97,6 +98,34 @@ type CategorySelectProps = {
   value?: string | null;
 };
 
+type CategorySelectOption = {
+  category: CategoriaResponse;
+  depth: number;
+  path: string;
+};
+
+const categoryNameCollator = new Intl.Collator("pt-BR", { sensitivity: "base" });
+
+function flattenCategoryOptions(
+  nodes: readonly CategoryTreeNode<CategoriaResponse>[],
+  ancestorNames: readonly string[] = [],
+): CategorySelectOption[] {
+  const sortedNodes = nodes.toSorted((left, right) =>
+    categoryNameCollator.compare(left.nome, right.nome),
+  );
+
+  return sortedNodes.flatMap((node) => {
+    const pathParts = [...ancestorNames, node.nome];
+    const option: CategorySelectOption = {
+      category: node,
+      depth: ancestorNames.length,
+      path: pathParts.join(" › "),
+    };
+
+    return [option].concat(flattenCategoryOptions(node.children, pathParts));
+  });
+}
+
 export function CategorySelect({
   categories,
   errorMessage,
@@ -111,6 +140,7 @@ export function CategorySelect({
   const activeCategories = categories.filter(
     (category) => category.ativo || (includeSelectedInactive && category.id === value),
   );
+  const categoryOptions = flattenCategoryOptions(buildCategoryTree(activeCategories));
 
   return (
     <Select
@@ -120,26 +150,48 @@ export function CategorySelect({
       label={label}
       name={name}
       onBlur={onBlur}
+      onSearchClear={() => onChange(null)}
       onChange={(nextValue) =>
         onChange(
           nextValue === null || String(nextValue) === NO_CATEGORY_OPTION ? null : String(nextValue),
         )
       }
       value={value ?? NO_CATEGORY_OPTION}
+      placeholder="Sem categoria"
+      selectedText={(key) => {
+        if (key === null || key === NO_CATEGORY_OPTION) {
+          return "";
+        }
+
+        const selectedCategory = activeCategories.find((category) => category.id === key);
+
+        if (!selectedCategory) {
+          return "";
+        }
+
+        return `${selectedCategory.nome}${selectedCategory.ativo ? "" : " · inativa"}`;
+      }}
     >
       <SelectItem id={NO_CATEGORY_OPTION} textValue="Sem categoria">
         Sem categoria
       </SelectItem>
-      {activeCategories.map((category) => (
-        <SelectItem
-          id={category.id}
-          key={category.id}
-          textValue={`${category.nome}${category.ativo ? "" : " (inativa)"}`}
-        >
-          {category.nome}
-          {!category.ativo && " · inativa"}
-        </SelectItem>
-      ))}
+      {categoryOptions.map(({ category, depth, path }) => {
+        const textValue = `${path}${category.ativo ? "" : " (inativa)"}`;
+
+        return (
+          <SelectItem
+            aria-label={textValue}
+            id={category.id}
+            key={category.id}
+            textValue={textValue}
+          >
+            <span className="block min-w-0 truncate" title={textValue}>
+              {`${"— ".repeat(depth)}${category.nome}`}
+              {!category.ativo && " · inativa"}
+            </span>
+          </SelectItem>
+        );
+      })}
     </Select>
   );
 }

@@ -105,6 +105,13 @@ function getSelectionState<TSelectionKey extends string>(
   };
 }
 
+function getChangedKeys(previous: ReadonlySet<string>, next: ReadonlySet<string>) {
+  return new Set([
+    ...Array.from(previous).filter((key) => !next.has(key)),
+    ...Array.from(next).filter((key) => !previous.has(key)),
+  ]);
+}
+
 export function FilterTree<TSelectionKey extends string>({
   ariaLabel,
   items,
@@ -126,19 +133,7 @@ export function FilterTree<TSelectionKey extends string>({
     }
 
     const nextTreeSelection = new Set(Array.from(selection, (key) => String(key)));
-    const changedKeys = new Set<string>();
-
-    for (const key of currentTreeSelection) {
-      if (!nextTreeSelection.has(key)) {
-        changedKeys.add(key);
-      }
-    }
-
-    for (const key of nextTreeSelection) {
-      if (!currentTreeSelection.has(key)) {
-        changedKeys.add(key);
-      }
-    }
+    const changedKeys = getChangedKeys(currentTreeSelection, nextTreeSelection);
 
     const nextSelectedLeafKeys = new Set(selectedKeys);
 

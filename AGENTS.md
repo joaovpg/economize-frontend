@@ -5,9 +5,11 @@ Frontend React do Economize, uma aplicação web para registrar, entender e cont
 ## Essencial
 
 - Use `pnpm` como gerenciador de pacotes.
-- Antes de concluir uma alteração, execute, nesta ordem: `pnpm fmt:check`, `pnpm lint` e
-  `pnpm build`.
-- `pnpm build` é também a verificação de tipos: ele executa `tsc -b` antes do build do Vite.
+- Antes de concluir uma alteração, execute `pnpm check` e informe o resultado. A sequência
+  de verificações está definida no `package.json` e também é executada no CI.
+- Corrija a causa dos diagnósticos; preserve as verificações e a segurança dos tipos.
+  Para exceções de lint ou TypeScript, siga a política de
+  [Desenvolvimento e validação](docs/agent-guidelines/development.md#exceções).
 - O projeto ainda não possui script ou framework de testes; não declare testes como executados.
 
 ## Instruções por contexto
