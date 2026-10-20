@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
+import { CurrencyField } from "../../../../components/CurrencyField";
 import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
@@ -15,7 +16,6 @@ import {
   ModalHeader,
   ModalTitle,
 } from "../../../../components/Modal";
-import { NumberField } from "../../../../components/NumberField";
 import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
 import { TextArea } from "../../../../components/TextArea";
 import { TextField } from "../../../../components/TextField";
@@ -29,7 +29,6 @@ import {
   type ConsultaTransacaoItem,
   type FormularioEdicaoOperacaoFinanceira,
   type FormularioTipoOperacao,
-  parseMoneyInput,
 } from "../../../../services/transactions/contracts";
 import { transactionsQueryKey } from "../../../../services/transactions/queries";
 import { putTransferencia } from "../../../../services/transfers/api";
@@ -149,12 +148,14 @@ function getInitialValues(
   const isTransfer = operation === "TRANSFERENCIA";
   const isTransferOrigin = isTransfer && target.valor < 0;
   const counterpartyAccountId = target.contaContraparteId ?? "";
+  const destinationAccountId = isTransferOrigin ? counterpartyAccountId : target.contaId;
+  const originAccountId = isTransferOrigin ? target.contaId : counterpartyAccountId;
 
   return {
     categoriaId: isTransfer ? null : (target.categoriaId ?? null),
-    contaDestinoId: isTransfer ? (isTransferOrigin ? counterpartyAccountId : target.contaId) : "",
+    contaDestinoId: isTransfer ? destinationAccountId : "",
     contaId: isTransfer ? "" : target.contaId,
-    contaOrigemId: isTransfer ? (isTransferOrigin ? target.contaId : counterpartyAccountId) : "",
+    contaOrigemId: isTransfer ? originAccountId : "",
     data: target.dataFinanceira,
     descricao: target.descricao,
     observacoes: target.observacoes ?? "",
@@ -463,25 +464,37 @@ export function TransactionEditModal({
               <Controller
                 control={control}
                 name="valor"
-                render={({ field }) => (
-                  <NumberField
-                    autoComplete="off"
-                    className="min-w-0"
-                    errorMessage={errors.valor?.message}
-                    formatOptions={{ currency: "BRL", maximumFractionDigits: 4, style: "currency" }}
-                    inputMode="decimal"
-                    isDisabled={isSubmitting}
-                    label={operation === "PARCELAMENTO" ? "Valor da parcela" : "Valor"}
-                    maxLength={24}
-                    name={field.name}
-                    onBlur={field.onBlur}
-                    onChange={(value) => field.onChange(Number.isNaN(value) ? "" : String(value))}
-                    inputRef={field.ref}
-                    placeholder="R$ 0,00"
-                    showStepperButton
-                    value={parseMoneyInput(field.value) ?? undefined}
-                  />
-                )}
+                render={({ field }) => {
+                  const displayValue =
+                    field.value === ""
+                      ? ""
+                      : new Intl.NumberFormat("en-US", {
+                          maximumFractionDigits: 2,
+                          useGrouping: false,
+                        }).format(Number(field.value));
+                  const hasExtraPrecision = Number(field.value) !== Number(displayValue);
+
+                  return (
+                    <CurrencyField
+                      autoComplete="off"
+                      className="min-w-0"
+                      errorMessage={errors.valor?.message}
+                      description={
+                        hasExtraPrecision
+                          ? `Valor original: R$ ${formatMoneyForSummary(field.value)}. Será mantido até você alterar este campo.`
+                          : undefined
+                      }
+                      isDisabled={isSubmitting}
+                      label={operation === "PARCELAMENTO" ? "Valor da parcela" : "Valor"}
+                      name={field.name}
+                      onBlur={field.onBlur}
+                      onValueChange={field.onChange}
+                      inputRef={field.ref}
+                      placeholder="R$ 0,00"
+                      value={displayValue}
+                    />
+                  );
+                }}
               />
             </div>
 

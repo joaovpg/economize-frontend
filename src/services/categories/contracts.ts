@@ -15,7 +15,7 @@ export const categoriasResponseSchema = z.array(categoriaResponseSchema);
 const categoriaNomeSchema = z.string().regex(/\S/);
 const categoriaCorSchema = z
   .string()
-  .regex(/^\s*(#[0-9A-Fa-f]{6})?\s*$/)
+  .refine((value) => /^(#[0-9A-Fa-f]{6})?$/.test(value.trim()))
   .nullable()
   .optional();
 const categoriaPaiIdSchema = z.uuid().nullable().optional();

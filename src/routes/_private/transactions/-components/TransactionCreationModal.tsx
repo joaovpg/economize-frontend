@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
+import { CurrencyField } from "../../../../components/CurrencyField";
 import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
@@ -15,7 +16,6 @@ import {
   ModalHeader,
   ModalTitle,
 } from "../../../../components/Modal";
-import { NumberField } from "../../../../components/NumberField";
 import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
 import { TextArea } from "../../../../components/TextArea";
 import { TextField } from "../../../../components/TextField";
@@ -25,7 +25,6 @@ import { postRecorrencia } from "../../../../services/recurrences/api";
 import { postTransacao } from "../../../../services/transactions/api";
 import {
   formularioOperacaoFinanceiraSchema,
-  parseMoneyInput,
   type FormularioOperacaoFinanceira,
 } from "../../../../services/transactions/contracts";
 import { transactionsQueryKey } from "../../../../services/transactions/queries";
@@ -214,6 +213,12 @@ export function TransactionCreationModal({
     resolver: zodResolver(formularioOperacaoFinanceiraSchema),
   });
   const tipoOperacao = useWatch({ control, name: "tipoOperacao" });
+  let financialDateLabel = "Data financeira";
+  if (tipoOperacao === "RECORRENCIA") {
+    financialDateLabel = "Data inicial";
+  } else if (tipoOperacao === "PARCELAMENTO") {
+    financialDateLabel = "Data da primeira parcela";
+  }
   const startDate = useWatch({ control, name: "data" });
   const accountId = useWatch({ control, name: "contaId" });
   const categoryId = useWatch({ control, name: "categoriaId" });
@@ -455,21 +460,18 @@ export function TransactionCreationModal({
                 control={control}
                 name="valor"
                 render={({ field }) => (
-                  <NumberField
+                  <CurrencyField
                     autoComplete="off"
                     className="min-w-0"
                     errorMessage={errors.valor?.message}
-                    formatOptions={{ currency: "BRL", maximumFractionDigits: 4, style: "currency" }}
-                    inputMode="decimal"
                     isDisabled={isSubmitting}
                     label={tipoOperacao === "PARCELAMENTO" ? "Valor da parcela" : "Valor"}
-                    maxLength={24}
                     name={field.name}
                     onBlur={field.onBlur}
-                    onChange={(value) => field.onChange(Number.isNaN(value) ? "" : String(value))}
+                    onValueChange={field.onChange}
                     inputRef={field.ref}
                     placeholder="R$ 0,00"
-                    value={parseMoneyInput(field.value) ?? undefined}
+                    value={field.value}
                   />
                 )}
               />
@@ -483,13 +485,7 @@ export function TransactionCreationModal({
                   <TextField
                     errorMessage={errors.data?.message}
                     isDisabled={isSubmitting}
-                    label={
-                      tipoOperacao === "RECORRENCIA"
-                        ? "Data inicial"
-                        : tipoOperacao === "PARCELAMENTO"
-                          ? "Data da primeira parcela"
-                          : "Data financeira"
-                    }
+                    label={financialDateLabel}
                     name={field.name}
                     onBlur={field.onBlur}
                     onInput={field.onChange}

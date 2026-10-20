@@ -21,6 +21,7 @@ function PublicLayout() {
   const isLogin = pathname === "/login";
   const alternatePath = isLogin ? "/cadastro" : "/login";
   const linkTitle = isLogin ? "Criar conta" : "Entrar";
+  const entranceOffset = isLogin ? -16 : 16;
 
   return (
     <div className="app-background relative isolate grid min-h-svh bg-canvas px-5 py-6 text-foreground sm:py-8 md:px-8 lg:py-13">
@@ -43,7 +44,7 @@ function PublicLayout() {
             <AnimatePresence initial={false}>
               <motion.div
                 key={pathname}
-                initial={{ opacity: 0, x: reducedMotion ? 0 : isLogin ? -16 : 16 }}
+                initial={{ opacity: 0, x: reducedMotion ? 0 : entranceOffset }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{
                   duration: reducedMotion ? 0.12 : 0.25,

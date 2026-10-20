@@ -206,12 +206,10 @@ export function TransactionFilters({
     const hadAllAccountsSelected = selectedAccounts.includes(allAccountsFilterValue);
     const hasAllAccountsSelected = nextAccounts.includes(allAccountsFilterValue);
 
-    const normalizedAccounts = hasAllAccountsSelected
-      ? hadAllAccountsSelected
-        ? individualAccounts.length > 0
-          ? individualAccounts
-          : [allAccountsFilterValue]
-        : [allAccountsFilterValue]
+    const keepAllAccountsSelected =
+      hasAllAccountsSelected && (!hadAllAccountsSelected || individualAccounts.length === 0);
+    const normalizedAccounts = keepAllAccountsSelected
+      ? [allAccountsFilterValue]
       : individualAccounts;
 
     setValue("accounts", normalizedAccounts, { shouldDirty: true });

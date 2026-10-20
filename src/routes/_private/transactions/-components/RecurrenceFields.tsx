@@ -41,9 +41,10 @@ export function RecurrenceFields({ control, setValue }: RecurrenceFieldsProps) {
   const monthDays = useWatch({ control, name: "diasMes" });
   const semTermino = useWatch({ control, name: "semTermino" });
   const occurrenceCount = useWatch({ control, name: "quantidadeOcorrencias" });
-  const [terminationType, setTerminationType] = useState<RecurrenceEndType>(
-    semTermino ? "none" : occurrenceCount !== "" ? "count" : "until",
-  );
+  const [terminationType, setTerminationType] = useState<RecurrenceEndType>(() => {
+    if (semTermino) return "none";
+    return occurrenceCount !== "" ? "count" : "until";
+  });
 
   useEffect(() => {
     if (!isValidFormDate(startDate)) {
@@ -293,7 +294,8 @@ export function RecurrenceFields({ control, setValue }: RecurrenceFieldsProps) {
               />
             )}
           />
-        ) : terminationType === "until" ? (
+        ) : null}
+        {terminationType === "until" && (
           <Controller
             control={control}
             name="ate"
@@ -311,7 +313,8 @@ export function RecurrenceFields({ control, setValue }: RecurrenceFieldsProps) {
               />
             )}
           />
-        ) : (
+        )}
+        {terminationType === "none" && (
           <p className="m-0 self-end pb-4 text-caption text-muted">
             A recorrência continuará ativa até ser encerrada.
           </p>

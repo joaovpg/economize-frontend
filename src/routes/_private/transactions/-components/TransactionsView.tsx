@@ -455,6 +455,8 @@ function TransactionsFrame({
 export function TransactionsView(props: TransactionsViewProps) {
   const showOpeningBalance = props.search.includePreviousBalance && !props.hasTransactionScope;
   const isScenario = props.hasTransactionScope || !props.search.includePreviousBalance;
+  const unfilteredBalanceLabel = isScenario ? "Acumulado do mês" : "Saldo do dia";
+  const balanceLabel = props.hasTransactionScope ? "Acumulado do recorte" : unfilteredBalanceLabel;
 
   return (
     <TransactionsFrame props={props}>
@@ -474,13 +476,7 @@ export function TransactionsView(props: TransactionsViewProps) {
         onEdit={props.onEdit}
         openingBalance={showOpeningBalance ? props.data.saldoAbertura : 0}
         showOpeningBalance={showOpeningBalance}
-        balanceLabel={
-          props.hasTransactionScope
-            ? "Acumulado do recorte"
-            : isScenario
-              ? "Acumulado do mês"
-              : "Saldo do dia"
-        }
+        balanceLabel={balanceLabel}
         title="Movimentações"
       />
     </TransactionsFrame>

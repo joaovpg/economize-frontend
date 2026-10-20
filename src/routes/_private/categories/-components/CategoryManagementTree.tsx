@@ -57,9 +57,10 @@ export function CategoryManagementTree({
   const tree = filterCategoryTree(buildCategoryTree(categories), searchQuery);
   const filteredCategoryCount = countCategoryTreeNodes(tree);
   const hasSearch = normalizeCategorySearch(searchQuery).length > 0;
-  const resultMessage = hasSearch
-    ? `${filteredCategoryCount} ${filteredCategoryCount === 1 ? "categoria encontrada" : "categorias encontradas"}.`
-    : `${filteredCategoryCount} ${filteredCategoryCount === 1 ? "categoria exibida" : "categorias exibidas"}.`;
+  const categoryLabel = filteredCategoryCount === 1 ? "categoria" : "categorias";
+  const searchResultLabel = filteredCategoryCount === 1 ? "encontrada" : "encontradas";
+  const displayedResultLabel = filteredCategoryCount === 1 ? "exibida" : "exibidas";
+  const resultMessage = `${filteredCategoryCount} ${categoryLabel} ${hasSearch ? searchResultLabel : displayedResultLabel}.`;
 
   return (
     <>

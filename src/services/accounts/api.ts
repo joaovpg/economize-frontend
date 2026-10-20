@@ -10,10 +10,7 @@ export async function getContas({ signal }: ApiRequestOptions = {}) {
   return parseApiResponse(api.get("contas", { signal }), contasResponseSchema);
 }
 
-export async function postConta(
-  input: CadastrarContaRequest,
-  options: ApiRequestOptions = {},
-) {
+export async function postConta(input: CadastrarContaRequest, options: ApiRequestOptions = {}) {
   const request = cadastrarContaRequestSchema.parse(input);
 
   return parseApiResponse(
