@@ -12,15 +12,19 @@ import { formatCurrency, formatSignedCurrency } from "../../../../lib/formatters
 import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../../../services/categories/contracts";
 import { type ConsultaTransacaoItem } from "../../../../services/transactions/contracts";
+import { tailwindMergeConfig } from "../../../../utils/tailwindMergeConfig";
 import { getAccountLabel, getCategoryLabel } from "./transaction-labels";
 
-const moneyStyles = tv({
-  base: "whitespace-nowrap tabular-nums",
-  variants: {
-    positive: { true: "text-success", false: "text-danger" },
-    size: { total: "text-card-title", entry: "text-caption-strong" },
+const moneyStyles = tv(
+  {
+    base: "whitespace-nowrap tabular-nums",
+    variants: {
+      positive: { true: "text-success", false: "text-danger" },
+      size: { total: "text-card-title", entry: "text-caption-strong" },
+    },
   },
-});
+  { twMergeConfig: tailwindMergeConfig },
+);
 
 type TransactionTableProps = {
   accounts: readonly ContaResponse[];
