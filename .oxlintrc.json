@@ -181,15 +181,5 @@
     "tailwindcss/no-conflicting-classes": "error",
     "tailwindcss/no-deprecated-classes": "error"
   },
-  "overrides": [
-    {
-      "files": ["src/components/**"],
-      "rules": {
-        "shadcn/no-restyle": "off",
-        "shadcn/no-arbitrary-values": "off",
-        "shadcn/require-static-classes": "off"
-      }
-    }
-  ],
   "ignorePatterns": ["src/routeTree.gen.ts"]
 }

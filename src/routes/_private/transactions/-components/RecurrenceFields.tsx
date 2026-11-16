@@ -7,10 +7,14 @@ import {
   type UseFormSetValue,
 } from "react-hook-form";
 
+import { today } from "@internationalized/date";
+
 import { Button } from "../../../../components/Button";
 import { Checkbox } from "../../../../components/Checkbox";
+import { DatePicker } from "../../../../components/DatePicker";
 import { Select, SelectItem } from "../../../../components/Select";
 import { TextField } from "../../../../components/TextField";
+import { parseFormDate } from "../../../../lib/date";
 import { type FormularioOperacaoFinanceira } from "../../../../services/transactions/contracts";
 import {
   dayOfWeekOptions,
@@ -300,16 +304,21 @@ export function RecurrenceFields({ control, setValue }: RecurrenceFieldsProps) {
             control={control}
             name="ate"
             render={({ field }) => (
-              <TextField
+              <DatePicker
+                todayValue={today("America/Sao_Paulo")}
                 errorMessage={errors.ate?.message}
                 isDisabled={isSubmitting}
                 label="Data final"
+                minValue={parseFormDate(startDate)}
+                isTodayDisabled={
+                  isValidFormDate(startDate) && startDate > today("America/Sao_Paulo").toString()
+                }
+                todayDisabledReason="A data de hoje é anterior ao início da recorrência."
                 name={field.name}
                 onBlur={field.onBlur}
-                onInput={field.onChange}
+                onChange={(date) => field.onChange(date?.toString() ?? "")}
                 inputRef={field.ref}
-                type="date"
-                value={field.value}
+                value={parseFormDate(field.value)}
               />
             )}
           />

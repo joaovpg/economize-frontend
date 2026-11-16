@@ -300,7 +300,7 @@ export function TransactionFilters({
             <Label className="m-0 text-caption-strong! tracking-label text-muted! uppercase">
               Buscar transação
             </Label>
-            <div className="flex min-h-10.5 min-w-0 items-center gap-2.5 rounded-xl border border-border bg-surface px-3 text-subtle transition-[background-color,border-color] duration-150 ease-out focus-within:border-brand focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand hover:border-border-strong hover:bg-surface-muted motion-reduce:transition-none [&>svg]:size-4 [&>svg]:shrink-0">
+            <div className="flex min-h-10.5 min-w-0 items-center gap-2.5 rounded-xl border border-border bg-surface px-3 text-subtle transition-colors duration-150 ease-out focus-within:border-brand focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand hover:border-border-strong hover:bg-surface-muted motion-reduce:transition-none [&>svg]:size-4 [&>svg]:shrink-0">
               <MagnifyingGlassIcon aria-hidden="true" />
               <Input
                 {...searchField}

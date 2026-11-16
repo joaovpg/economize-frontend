@@ -163,14 +163,8 @@ export const Route = createFileRoute("/_private/summary")({
   component: SummaryPageRoute,
   loader: ({ context }) =>
     Promise.all([
-      context.queryClient.query({
-        ...categoriesQueryOptions({ ativo: true }),
-        staleTime: "static",
-      }),
-      context.queryClient.query({
-        ...accountsQueryOptions(),
-        staleTime: "static",
-      }),
+      context.queryClient.query(categoriesQueryOptions({ ativo: true })),
+      context.queryClient.query(accountsQueryOptions()),
     ]),
   preloadStaleTime: 30_000,
   validateSearch: summarySearchSchema,

@@ -141,7 +141,7 @@ export function CategoryEditorModal({
         });
         successMessage = "Categoria criada com sucesso.";
       }
-      await queryClient.invalidateQueries({ queryKey: [categoriesQueryKey] });
+      await queryClient.invalidateQueries({ queryKey: categoriesQueryKey });
     } catch (error) {
       applyCategoryFormError(
         error,

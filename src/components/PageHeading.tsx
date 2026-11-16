@@ -30,7 +30,7 @@ export function PageHeading({
     <div className={twMerge("flex min-w-0 flex-col gap-2.5", className)}>
       {eyebrow && <span className="text-meta text-brand uppercase">{eyebrow}</span>}
       <h1
-        className={`m-0 ${size === "compact" ? "font-display text-4xl leading-[0.98] font-semibold tracking-display max-[48rem]:text-3xl" : "text-page-title"}`}
+        className={`m-0 ${size === "compact" ? "font-display text-4xl leading-display font-semibold tracking-display max-[48rem]:text-3xl" : "text-page-title"}`}
         id={id}
       >
         {title}

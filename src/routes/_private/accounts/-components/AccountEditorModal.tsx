@@ -2,9 +2,11 @@ import { useRef, useState } from "react";
 import { Controller, useForm, type UseFormSetError } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { today } from "@internationalized/date";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
+import { DatePicker } from "../../../../components/DatePicker";
 import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
@@ -19,6 +21,7 @@ import {
 import { NumberField } from "../../../../components/NumberField";
 import { TextField } from "../../../../components/TextField";
 import { isApiError } from "../../../../lib/api-errors";
+import { parseFormDate } from "../../../../lib/date";
 import { postConta } from "../../../../services/accounts/api";
 import { accountsQueryKey } from "../../../../services/accounts/queries";
 import { accountFormSchema, type AccountFormData } from "./account-form";
@@ -87,7 +90,7 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
     setError,
   } = useForm<AccountFormData>({
     defaultValues: {
-      dataSaldoInicial: new Date().toISOString().slice(0, 10),
+      dataSaldoInicial: today("America/Sao_Paulo").toString(),
       moeda: "BRL",
       nome: "",
       saldoInicial: 0,
@@ -97,7 +100,6 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
   });
   const nameField = register("nome");
   const currencyField = register("moeda");
-  const dateField = register("dataSaldoInicial");
 
   const requestClose = () => {
     if (isSubmitting) {
@@ -206,15 +208,22 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
               )}
             />
 
-            <TextField
-              errorMessage={errors.dataSaldoInicial?.message}
-              inputRef={dateField.ref}
-              isDisabled={isSubmitting}
-              label="Data do saldo inicial"
-              name={dateField.name}
-              onBlur={dateField.onBlur}
-              onInput={dateField.onChange}
-              type="date"
+            <Controller
+              control={control}
+              name="dataSaldoInicial"
+              render={({ field }) => (
+                <DatePicker
+                  todayValue={today("America/Sao_Paulo")}
+                  errorMessage={errors.dataSaldoInicial?.message}
+                  inputRef={field.ref}
+                  isDisabled={isSubmitting}
+                  label="Data do saldo inicial"
+                  name={field.name}
+                  onBlur={field.onBlur}
+                  onChange={(date) => field.onChange(date?.toString() ?? "")}
+                  value={parseFormDate(field.value)}
+                />
+              )}
             />
           </ModalBody>
 

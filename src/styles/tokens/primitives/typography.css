@@ -21,6 +21,7 @@
   --leading-snug: 1.25;
   --leading-normal: 1.5;
   --leading-relaxed: 1.7;
+  --leading-display: 0.98;
 
   /* Letter spacing */
   --tracking-display: -0.035em;

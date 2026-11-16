@@ -1,0 +1,3 @@
+@utility transition-dialog {
+  transition-property: opacity, transform;
+}

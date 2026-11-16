@@ -30,6 +30,18 @@
 - Preserve as exceções do gerador de rotas; a correção deve ocorrer na fonte ou configuração
   do gerador, sem editar o arquivo gerado.
 
+## Política de lint
+
+- O lint bloqueia problemas de correção, segurança básica, acessibilidade essencial, Promises não
+  tratadas e classes Tailwind inválidas, conflitantes, duplicadas ou depreciadas.
+- Avisos também bloqueiam: `pnpm lint` usa `--deny-warnings`. Um aviso mantido na configuração
+  exige correção antes da conclusão.
+- As categorias `correctness`, `suspicious` e `perf` estão ativas; `pedantic`, `style`,
+  `restriction` e `nursery` estão desligadas. Novas regras entram uma a uma, com justificativa,
+  e não por categoria inteira.
+- Formatação e ordenação de imports ficam com o Oxfmt, não com o lint.
+- O lint é type-aware (`typeAware` e `typeCheck`) e usa o TypeScript do projeto.
+
 ## Ferramentas
 
 - Oxfmt define a formatação e a ordenação de imports em `.oxfmtrc.json`.

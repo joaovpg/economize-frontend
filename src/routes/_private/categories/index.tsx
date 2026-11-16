@@ -224,9 +224,5 @@ function CategoriesPage() {
 
 export const Route = createFileRoute("/_private/categories/")({
   component: CategoriesPage,
-  loader: ({ context }) =>
-    context.queryClient.query({
-      ...categoriesQueryOptions(),
-      staleTime: "static",
-    }),
+  loader: ({ context }) => context.queryClient.query(categoriesQueryOptions()),
 });

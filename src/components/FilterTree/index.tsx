@@ -194,7 +194,7 @@ export function FilterTree<TSelectionKey extends string>({
               {hasChildItems && (
                 <Button
                   aria-label={isExpanded ? `Recolher ${item.label}` : `Expandir ${item.label}`}
-                  className="ml-auto size-4.5! shrink-0 rounded-[0.3125rem]!"
+                  className="ml-auto size-4.5! shrink-0 rounded-check!"
                   isIconOnly
                   size="sm"
                   variant="ghost"

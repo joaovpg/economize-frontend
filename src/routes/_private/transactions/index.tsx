@@ -222,9 +222,9 @@ export const Route = createFileRoute("/_private/transactions/")({
     const accountQuery = accountsQueryOptions();
 
     return Promise.all([
-      context.queryClient.query({ ...transactionQuery, staleTime: "static" }),
-      context.queryClient.query({ ...categoryQuery, staleTime: "static" }),
-      context.queryClient.query({ ...accountQuery, staleTime: "static" }),
+      context.queryClient.query(transactionQuery),
+      context.queryClient.query(categoryQuery),
+      context.queryClient.query(accountQuery),
     ]);
   },
   preloadStaleTime: 30_000,

@@ -24,6 +24,7 @@
   --color-page-glow: var(--color-page-glow-value);
 
   --color-surface-strong: var(--color-surface-strong-value);
+  --color-surface-control: color-mix(in oklch, var(--color-surface-value) 70%, transparent);
 
   --color-danger: var(--color-danger-value);
   --color-danger-hover: var(--color-danger-hover-value);

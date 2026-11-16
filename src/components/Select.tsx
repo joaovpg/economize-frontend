@@ -24,7 +24,7 @@ import { IconSlot } from "./IconSlot";
 import { Label } from "./Label";
 
 const control = tv({
-  base: "flex w-full min-w-0 cursor-text items-center gap-3 border font-ui text-subtle transition-[background-color,border-color,outline-color] motion-reduce:transition-none",
+  base: "flex w-full min-w-0 cursor-text items-center gap-3 border font-ui text-subtle transition-colors motion-reduce:transition-none",
   variants: {
     appearance: {
       compact:

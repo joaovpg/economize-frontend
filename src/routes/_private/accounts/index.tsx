@@ -261,9 +261,5 @@ function AccountsPage() {
 
 export const Route = createFileRoute("/_private/accounts/")({
   component: AccountsPage,
-  loader: ({ context }) =>
-    context.queryClient.query({
-      ...accountsQueryOptions(),
-      staleTime: "static",
-    }),
+  loader: ({ context }) => context.queryClient.query(accountsQueryOptions()),
 });

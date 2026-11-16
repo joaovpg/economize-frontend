@@ -60,7 +60,7 @@ const radioFieldStyles = tv({
 
 const radioButtonStyles = tv(
   {
-    base: "group flex min-w-0 cursor-pointer select-none items-center outline-none transition-[background-color,border-color,color,outline-color] duration-150 ease-out data-disabled:cursor-not-allowed data-disabled:opacity-50 data-readonly:cursor-default motion-reduce:transition-none",
+    base: "group flex min-w-0 cursor-pointer select-none items-center outline-none transition-colors duration-150 ease-out data-disabled:cursor-not-allowed data-disabled:opacity-50 data-readonly:cursor-default motion-reduce:transition-none",
     variants: {
       appearance: {
         default:
@@ -79,7 +79,7 @@ const radioButtonStyles = tv(
 );
 
 const radioIndicatorStyles = tv({
-  base: "grid size-4.5 shrink-0 place-items-center rounded-full border bg-surface transition-[background-color,border-color] duration-150 ease-out motion-reduce:transition-none",
+  base: "grid size-4.5 shrink-0 place-items-center rounded-full border bg-surface transition-colors duration-150 ease-out motion-reduce:transition-none",
   variants: {
     invalid: {
       false: "",

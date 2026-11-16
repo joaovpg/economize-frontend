@@ -20,4 +20,4 @@ Frontend React do Economize, uma aplicação web para registrar, entender e cont
   [Arquitetura frontend](docs/agent-guidelines/frontend-architecture.md).
 - Ao criar componentes, formulários ou estilos, consulte
   [Interface e estilos](docs/agent-guidelines/ui-and-styling.md).
-- Antes de mudar uma decisão arquitetural, consulte os [ADRs aceitos](docs/adr/).
+- Antes de mudar uma decisão arquitetural, consulte a [Arquitetura frontend](docs/agent-guidelines/frontend-architecture.md) e atualize as diretrizes de `docs/agent-guidelines/` na mesma alteração.

@@ -31,11 +31,10 @@ const checkboxRootStyles = tv(
 );
 
 const checkboxIndicatorStyles = tv({
-  base: "grid size-[1.125rem] shrink-0 place-items-center rounded-[0.3125rem] border text-brand-foreground transition-[background-color,border-color,color] duration-150 ease-out [&>svg]:size-2.75 [&>svg]:shrink-0 motion-reduce:transition-none",
+  base: "grid size-[1.125rem] shrink-0 place-items-center rounded-check border text-brand-foreground transition-colors duration-150 ease-out [&>svg]:size-2.75 [&>svg]:shrink-0 motion-reduce:transition-none",
   variants: {
     selected: {
-      false:
-        "border-border-strong bg-[color-mix(in_oklch,var(--color-surface)_70%,transparent)] text-transparent",
+      false: "border-border-strong bg-surface-control text-transparent",
       true: "border-brand bg-brand text-brand-foreground",
     },
   },

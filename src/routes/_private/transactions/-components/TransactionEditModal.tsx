@@ -2,10 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { today } from "@internationalized/date";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
 import { CurrencyField } from "../../../../components/CurrencyField";
+import { DatePicker } from "../../../../components/DatePicker";
 import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
@@ -19,6 +21,7 @@ import {
 import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
 import { TextArea } from "../../../../components/TextArea";
 import { TextField } from "../../../../components/TextField";
+import { parseFormDate } from "../../../../lib/date";
 import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../../../services/categories/contracts";
 import { putOcorrenciaRecorrente } from "../../../../services/recurrences/api";
@@ -258,6 +261,7 @@ export function TransactionEditModal({
     mode: "onSubmit",
     resolver: zodResolver(formularioEdicaoOperacaoFinanceiraSchema),
   });
+  const situation = useWatch({ control, name: "situacao" });
   const accountId = useWatch({ control, name: "contaId" });
   const destinationAccountId = useWatch({ control, name: "contaDestinoId" });
   const originAccountId = useWatch({ control, name: "contaOrigemId" });
@@ -503,16 +507,21 @@ export function TransactionEditModal({
                 control={control}
                 name="data"
                 render={({ field }) => (
-                  <TextField
+                  <DatePicker
+                    todayValue={today("America/Sao_Paulo")}
                     errorMessage={errors.data?.message}
                     isDisabled={isSubmitting}
                     label="Data financeira"
+                    maxValue={
+                      (operation === "TRANSACAO" || isTransfer) && situation === "EFETIVADA"
+                        ? today("America/Sao_Paulo")
+                        : undefined
+                    }
                     name={field.name}
                     onBlur={field.onBlur}
-                    onInput={field.onChange}
+                    onChange={(date) => field.onChange(date?.toString() ?? "")}
                     inputRef={field.ref}
-                    type="date"
-                    value={field.value}
+                    value={parseFormDate(field.value)}
                   />
                 )}
               />
