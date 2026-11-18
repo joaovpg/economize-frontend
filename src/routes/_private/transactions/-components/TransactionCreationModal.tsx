@@ -348,7 +348,7 @@ export function TransactionCreationModal({
               />
             )}
 
-            <div className="grid min-w-0 gap-3.5 sm:grid-cols-[minmax(0,1fr)_12rem]">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-[minmax(0,1fr)_var(--spacing-form-aside)]">
               <Controller
                 control={control}
                 name="descricao"
@@ -390,7 +390,7 @@ export function TransactionCreationModal({
               />
             </div>
 
-            <div className="grid min-w-0 gap-3.5 sm:grid-cols-2">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
               <Controller
                 control={control}
                 name="data"
@@ -445,7 +445,7 @@ export function TransactionCreationModal({
             </div>
 
             {tipoOperacao === "TRANSFERENCIA" ? (
-              <div className="grid min-w-0 gap-3.5 sm:grid-cols-2">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2">
                 <Controller
                   control={control}
                   name="contaOrigemId"
@@ -487,7 +487,7 @@ export function TransactionCreationModal({
                 />
               </div>
             ) : (
-              <div className="grid min-w-0 gap-3.5 sm:grid-cols-2">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2">
                 <Controller
                   control={control}
                   name="contaId"

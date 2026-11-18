@@ -85,9 +85,9 @@ function filterAccounts(accounts: readonly ContaResponse[], status: AccountStatu
 function AccountStatus({ isActive }: { isActive: boolean }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-caption ${isActive ? "border-success/25 bg-success-soft text-success" : "border-warning/25 bg-warning-soft text-warning"}`}
+      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-caption ${isActive ? "border-success bg-success-soft text-success" : "border-warning bg-warning-soft text-warning"}`}
     >
-      <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
+      <span aria-hidden="true" className="size-2 rounded-full bg-current" />
       {isActive ? "Ativa" : "Inativa"}
     </span>
   );
@@ -103,8 +103,8 @@ function AccountsEmptyState({
   const isFiltered = status !== "all";
 
   return (
-    <div className="grid justify-items-center gap-3.5 px-4 py-10 text-center">
-      <div className="grid size-12 place-items-center rounded-2xl bg-brand-soft text-xl text-brand-hover">
+    <div className="grid justify-items-center gap-4 px-4 py-10 text-center">
+      <div className="grid size-12 place-items-center rounded-control bg-surface-muted text-xl text-muted">
         <IconSlot>
           {isFiltered ? (
             <MagnifyingGlassIcon aria-hidden="true" />
@@ -113,11 +113,11 @@ function AccountsEmptyState({
           )}
         </IconSlot>
       </div>
-      <div className="grid gap-1.5">
+      <div className="grid gap-2">
         <h3 className="text-title text-foreground">
           {hasAccounts && isFiltered ? "Nenhuma conta nesse filtro" : "Nenhuma conta cadastrada"}
         </h3>
-        <p className="m-0 max-w-[36ch] text-body text-muted">
+        <p className="m-0 max-w-measure-lead text-body text-muted">
           {hasAccounts && isFiltered
             ? "Altere o filtro para visualizar outras contas."
             : "Crie uma conta para começar a registrar suas movimentações."}
@@ -216,9 +216,9 @@ function AccountsPage() {
   return (
     <section
       aria-labelledby="accounts-title"
-      className="flex min-w-0 flex-col px-0 pt-7 pb-10 max-[64rem]:px-4 max-[48rem]:pt-5.5 max-[48rem]:pb-8"
+      className="flex min-w-0 flex-col px-0 pt-8 pb-10 max-lg:px-4 max-md:pt-6 max-md:pb-8"
     >
-      <div className="flex w-full max-w-320 flex-col gap-7 self-center">
+      <div className="flex w-full max-w-7xl flex-col gap-8 self-center">
         <Link
           className="justify-start! self-start"
           leadingIcon={<ArrowLeftIcon aria-hidden="true" />}
@@ -230,7 +230,7 @@ function AccountsPage() {
           Voltar para transações
         </Link>
 
-        <header className="flex items-end justify-between gap-5 max-[40rem]:flex-col max-[40rem]:items-start max-[40rem]:gap-4">
+        <header className="flex items-end justify-between gap-5 max-sm:flex-col max-sm:items-start max-sm:gap-4">
           <PageHeading
             description="Tenha suas contas em um só lugar para registrar movimentações com mais contexto."
             eyebrow="Organização financeira"
@@ -259,7 +259,7 @@ function AccountsPage() {
               <h2 className="m-0 text-title text-foreground" id="accounts-list-title">
                 Todas as contas
               </h2>
-              <p className="m-0 mt-1.5 text-caption text-muted">
+              <p className="m-0 mt-1 text-caption text-muted">
                 {filteredAccounts.length}{" "}
                 {filteredAccounts.length === 1 ? "registro encontrado" : "registros encontrados"}
               </p>
@@ -289,31 +289,31 @@ function AccountsPage() {
                   <thead>
                     <tr className="border-b border-border">
                       <th
-                        className="px-5.5 py-3.5 text-left text-caption text-subtle max-[40rem]:px-4"
+                        className="px-5 py-3 text-left text-caption text-muted max-sm:px-4"
                         scope="col"
                       >
                         Conta
                       </th>
                       <th
-                        className="px-5.5 py-3.5 text-left text-caption text-subtle max-[40rem]:px-4"
+                        className="px-5 py-3 text-left text-caption text-muted max-sm:px-4"
                         scope="col"
                       >
                         Status
                       </th>
                       <th
-                        className="px-5.5 py-3.5 text-left text-caption text-subtle max-[40rem]:hidden"
+                        className="px-5 py-3 text-left text-caption text-muted max-sm:hidden"
                         scope="col"
                       >
                         Data inicial
                       </th>
                       <th
-                        className="px-5.5 py-3.5 text-right text-caption text-subtle max-[40rem]:px-4"
+                        className="px-5 py-3 text-right text-caption text-muted max-sm:px-4"
                         scope="col"
                       >
                         Saldo inicial
                       </th>
                       <th
-                        className="px-5.5 py-3.5 text-right text-caption text-subtle max-[40rem]:px-4"
+                        className="px-5 py-3 text-right text-caption text-muted max-sm:px-4"
                         scope="col"
                       >
                         <span className="sr-only">Ações</span>
@@ -323,24 +323,24 @@ function AccountsPage() {
                   <tbody>
                     {filteredAccounts.map((account) => (
                       <tr className="border-b border-border last:border-b-0" key={account.id}>
-                        <td className="min-w-0 px-5.5 py-4 align-middle max-[40rem]:px-4">
+                        <td className="min-w-0 px-5 py-4 align-middle max-sm:px-4">
                           <span className="block truncate text-body-strong text-foreground">
                             {account.nome}
                           </span>
-                          <span className="mt-1 block text-caption text-subtle">
+                          <span className="mt-1 block text-caption text-muted">
                             {account.moeda}
                           </span>
                         </td>
-                        <td className="px-5.5 py-4 align-middle max-[40rem]:px-4">
+                        <td className="px-5 py-4 align-middle max-sm:px-4">
                           <AccountStatus isActive={account.ativo} />
                         </td>
-                        <td className="px-5.5 py-4 align-middle text-body text-muted max-[40rem]:hidden">
+                        <td className="px-5 py-4 align-middle text-body text-muted max-sm:hidden">
                           {formatInitialBalanceDate(account.dataSaldoInicial)}
                         </td>
-                        <td className="px-5.5 py-4 text-right align-middle text-body-strong text-foreground tabular-nums max-[40rem]:px-4">
+                        <td className="px-5 py-4 text-right align-middle text-body-strong text-foreground tabular-nums max-sm:px-4">
                           {formatAccountBalance(account.saldoInicial, account.moeda)}
                         </td>
-                        <td className="px-5.5 py-4 align-middle max-[40rem]:px-4">
+                        <td className="px-5 py-4 align-middle max-sm:px-4">
                           <div className="flex items-center justify-end gap-1">
                             <Button
                               aria-label={`Editar conta ${account.nome}`}

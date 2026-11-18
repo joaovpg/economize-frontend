@@ -18,12 +18,12 @@ export type PageHeadingProps = {
 /** Hierarquia editorial compartilhada pelas telas principais do Economize. */
 export function PageHeading({ className, description, eyebrow, id, title }: PageHeadingProps) {
   return (
-    <div className={twMerge("flex min-w-0 flex-col gap-2.5", className)}>
+    <div className={twMerge("flex min-w-0 flex-col gap-2", className)}>
       {eyebrow && <span className="text-caption text-muted">{eyebrow}</span>}
       <h1 className="m-0 text-title-page" id={id}>
         {title}
       </h1>
-      <p className="m-0 max-w-[48ch] text-body text-muted">{description}</p>
+      <p className="m-0 max-w-md text-body text-muted">{description}</p>
     </div>
   );
 }

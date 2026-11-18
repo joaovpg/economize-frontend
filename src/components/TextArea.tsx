@@ -12,11 +12,11 @@ import { FieldError } from "./FieldError";
 import { Label } from "./Label";
 
 const control = tv({
-  base: "min-h-28 min-w-0 resize-y rounded-xl border bg-surface px-3.5 py-3 text-body max-md:text-md text-foreground caret-brand outline-none transition-colors placeholder:text-subtle motion-reduce:transition-none",
+  base: "min-h-textarea min-w-0 resize-y rounded-control border bg-surface px-3 py-3 text-body max-md:text-md text-foreground caret-brand outline-none transition-colors placeholder:text-muted motion-reduce:transition-none",
   variants: {
     disabled: {
       false: "",
-      true: "cursor-not-allowed border-border bg-surface-muted text-subtle hover:border-border focus:border-border focus:outline-none",
+      true: "cursor-not-allowed border-border bg-surface-muted text-muted hover:border-border focus:border-border focus:outline-none",
     },
     invalid: {
       false:

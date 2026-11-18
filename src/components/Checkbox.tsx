@@ -12,7 +12,7 @@ import { tv } from "../utils/tailwind";
 
 const checkboxRootStyles = tv(
   {
-    base: "group flex min-h-6.5 min-w-0 cursor-pointer select-none items-center gap-2 text-body-strong text-muted outline-none transition-colors duration-150 ease-out data-disabled:cursor-not-allowed data-disabled:opacity-50 max-[48rem]:min-h-11 motion-reduce:transition-none",
+    base: "group flex min-h-6 min-w-0 cursor-pointer select-none items-center gap-2 text-body-strong text-muted outline-none transition-colors duration-150 ease-out data-disabled:cursor-not-allowed data-disabled:opacity-50 max-md:min-h-touch motion-reduce:transition-none",
     defaultVariants: {
       invalid: false,
       size: "default",
@@ -23,7 +23,7 @@ const checkboxRootStyles = tv(
         true: "text-danger",
       },
       size: {
-        compact: "mb-1 min-h-8 gap-2.25",
+        compact: "mb-1 min-h-8 gap-2",
         default: "",
       },
     },
@@ -32,10 +32,10 @@ const checkboxRootStyles = tv(
 );
 
 const checkboxIndicatorStyles = tv({
-  base: "grid size-[1.125rem] shrink-0 place-items-center rounded-check border text-brand-foreground transition-colors duration-150 ease-out [&>svg]:size-2.75 [&>svg]:shrink-0 motion-reduce:transition-none",
+  base: "grid size-4 shrink-0 place-items-center rounded-sm border text-brand-foreground transition-colors duration-150 ease-out [&>svg]:size-3 [&>svg]:shrink-0 motion-reduce:transition-none",
   variants: {
     selected: {
-      false: "border-border-strong bg-surface-control text-transparent",
+      false: "border-border-strong bg-surface text-transparent",
       true: "border-brand bg-brand text-brand-foreground",
     },
   },

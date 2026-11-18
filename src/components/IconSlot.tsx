@@ -10,10 +10,7 @@ export function IconSlot({ children }: IconSlotProps) {
   }
 
   return (
-    <span
-      aria-hidden="true"
-      className="grid size-4.5 shrink-0 place-items-center [&>svg]:size-full"
-    >
+    <span aria-hidden="true" className="grid size-4 shrink-0 place-items-center [&>svg]:size-full">
       {children}
     </span>
   );

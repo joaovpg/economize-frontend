@@ -58,8 +58,8 @@ export function TransactionRepetitionFields({
   };
 
   return (
-    <section className="grid min-w-0 gap-3.5 rounded-xl border border-border bg-surface-muted px-3.5 py-3">
-      <div className="flex min-h-9 items-center justify-between gap-3">
+    <section className="grid min-w-0 gap-3 rounded-control border border-border bg-surface-muted px-3 py-3">
+      <div className="flex min-h-8 items-center justify-between gap-3">
         <span className="text-body-strong text-foreground">Repetir</span>
         <Switch
           aria-label="Repetir"
@@ -75,7 +75,7 @@ export function TransactionRepetitionFields({
 
       {repeticao.ativa && (
         <>
-          <div className="grid min-w-0 gap-3.5 sm:grid-cols-2">
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
             <TextField
               errorMessage={repeticaoErrors?.intervalo?.message}
               inputMode="numeric"
@@ -136,7 +136,7 @@ export function TransactionRepetitionFields({
             </RadioGroup>
           )}
 
-          <div className="grid min-w-0 gap-3.5 sm:grid-cols-2">
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
             <Select
               errorMessage={repeticaoErrors?.termino?.tipo?.message}
               isDisabled={isDisabled}
@@ -168,7 +168,7 @@ export function TransactionRepetitionFields({
           </div>
 
           {repeticao.termino.tipo === "PARCELAS" && (
-            <div className="grid min-w-0 gap-3.5 sm:grid-cols-2">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
               <TextField
                 errorMessage={repeticaoErrors?.termino?.numeroPrimeiraParcela?.message}
                 inputMode="numeric"

@@ -56,9 +56,9 @@ const modalStyles = tv({
   },
   variants: {
     presentation: {
-      card: "max-h-[calc(var(--visual-viewport-height,100dvh)-2rem)] rounded-modal border border-border shadow-dialog",
+      card: "max-h-[calc(var(--visual-viewport-height,100dvh)-2rem)] rounded-surface border border-border shadow-dialog",
       fullScreen:
-        "h-dvh max-w-none md:h-auto md:max-h-[calc(var(--visual-viewport-height,100dvh)-2rem)] md:rounded-modal md:border md:border-border md:shadow-dialog",
+        "h-dvh max-w-none md:h-auto md:max-h-[calc(var(--visual-viewport-height,100dvh)-2rem)] md:rounded-surface md:border md:border-border md:shadow-dialog",
     },
     size: {
       sm: "md:max-w-sm",
@@ -163,7 +163,7 @@ function ModalClose({
     className,
     (userClassName: string | undefined) =>
       twMerge(
-        "absolute top-modal-mobile-inset-top right-modal-mobile-inset-right -translate-y-0.5 shrink-0 [--button-height:2rem]! md:top-modal md:right-modal",
+        "absolute top-modal-mobile-inset-top right-modal-mobile-inset-right shrink-0 [--button-height:var(--spacing-8)]! md:top-modal md:right-modal",
         userClassName,
       ) ?? "",
   );
@@ -200,7 +200,7 @@ export function ModalHeader({
       {...props}
       data-slot="modal-header"
       className={twMerge(
-        "group/modal-header relative flex min-w-0 shrink-0 flex-col gap-1.5 pt-modal-mobile-inset-top pr-modal-mobile-inset-right pl-modal-mobile-inset-left text-left md:pt-modal md:pr-modal md:pl-modal group-has-[[data-slot=modal-body]]/modal:border-b group-has-[[data-slot=modal-body]]/modal:border-border pb-4 group-has-[[data-slot=modal-close]]/modal-header:pr-14",
+        "group/modal-header relative flex min-w-0 shrink-0 flex-col gap-1 pt-modal-mobile-inset-top pr-modal-mobile-inset-right pl-modal-mobile-inset-left text-left md:pt-modal md:pr-modal md:pl-modal group-has-[[data-slot=modal-body]]/modal:border-b group-has-[[data-slot=modal-body]]/modal:border-border pb-4 group-has-[[data-slot=modal-close]]/modal-header:pr-16",
         className,
       )}
     >

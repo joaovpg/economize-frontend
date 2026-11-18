@@ -6,15 +6,15 @@ import type { VariantProps } from "tailwind-variants";
 
 const inlineMessageStyles = tv(
   {
-    base: "m-0 block rounded-xl border px-3.5 py-3 text-body",
+    base: "m-0 block rounded-control border px-3 py-3 text-body",
     defaultVariants: {
       tone: "success",
     },
     variants: {
       tone: {
-        danger: "border-danger/25 bg-danger-soft text-danger",
-        success: "border-success/25 bg-success-soft text-success",
-        warning: "border-warning/25 bg-warning-soft text-warning",
+        danger: "border-danger bg-danger-soft text-danger",
+        success: "border-success bg-success-soft text-success",
+        warning: "border-warning bg-warning-soft text-warning",
       },
     },
   },

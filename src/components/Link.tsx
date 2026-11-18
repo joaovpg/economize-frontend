@@ -19,11 +19,11 @@ const linkStyles = tv(
       linkVariant: {
         back: "text-caption",
         brand: "gap-3",
-        compactBrand: "gap-2.5 text-title no-underline",
+        compactBrand: "gap-2 text-title no-underline",
         default: "",
         header: "[&>span>svg]:size-4",
         navigation:
-          "h-auto! min-h-0! rounded-full! px-3! py-1.5! text-body-strong no-underline data-hovered:no-underline max-[28rem]:px-2.5!",
+          "h-auto! min-h-0! rounded-full! px-3! py-1! text-body-strong no-underline data-hovered:no-underline max-sm:px-2!",
       },
       active: {
         false: "",

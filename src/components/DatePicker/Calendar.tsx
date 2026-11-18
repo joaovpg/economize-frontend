@@ -31,7 +31,7 @@ type CalendarContentProps = Pick<
 export function Calendar(props: CalendarContentProps) {
   return (
     <AriaCalendar
-      className="w-70 max-w-full font-ui"
+      className="w-calendar max-w-full font-ui"
       firstDayOfWeek="sun"
       minValue={props.minValue}
       maxValue={props.maxValue}
@@ -154,7 +154,7 @@ function CalendarContent({
               <CalendarCell
                 date={date}
                 data-current-day={date.compare(todayValue) === 0 || undefined}
-                className="flex size-10 items-center justify-center rounded-lg text-body text-foreground tabular-nums outline-none data-current-day:font-semibold data-current-day:not-data-selected:text-brand data-disabled:text-subtle data-disabled:opacity-40 data-focus-visible:outline-2 data-focus-visible:outline-brand data-hovered:bg-surface-muted data-outside-month:text-subtle data-outside-month:opacity-40 data-selected:bg-brand data-selected:text-brand-foreground data-unavailable:text-subtle data-unavailable:opacity-40"
+                className="flex size-10 items-center justify-center rounded-control text-body text-foreground tabular-nums outline-none data-current-day:font-semibold data-disabled:text-muted data-disabled:opacity-40 data-focus-visible:outline-2 data-focus-visible:outline-brand data-hovered:bg-surface-muted data-outside-month:text-muted data-outside-month:opacity-40 data-selected:bg-brand data-selected:text-brand-foreground data-unavailable:text-muted data-unavailable:opacity-40"
               />
             )}
           </CalendarGridBody>
@@ -254,7 +254,7 @@ function CalendarContent({
               calendar.setFocusedDate(todayValue);
               showDays();
             }}
-            className="h-10 cursor-pointer rounded-lg px-2 text-body-strong text-brand outline-none data-disabled:cursor-not-allowed data-disabled:text-subtle data-focus-visible:outline-2 data-focus-visible:outline-brand data-hovered:bg-brand-soft"
+            className="h-10 cursor-pointer rounded-control px-2 text-body-strong text-brand outline-none data-disabled:cursor-not-allowed data-disabled:text-muted data-focus-visible:outline-2 data-focus-visible:outline-brand data-hovered:bg-brand-soft"
           >
             Ir para hoje
           </Button>
@@ -271,7 +271,7 @@ function CalendarContent({
           </FieldButton>
         </div>
         {isTodayDisabled && todayDisabledReason && (
-          <p id={todayDescriptionId} className="m-0 max-w-64 text-caption text-muted">
+          <p id={todayDescriptionId} className="m-0 max-w-xs text-caption text-muted">
             {todayDisabledReason}
           </p>
         )}

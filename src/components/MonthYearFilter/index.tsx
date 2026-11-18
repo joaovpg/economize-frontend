@@ -38,7 +38,7 @@ export function MonthYearFilter({ className, onChange, value }: MonthYearFilterP
   return (
     <fieldset
       className={[
-        "flex min-w-0 items-center gap-0.5 rounded-2xl border border-border card-background p-1",
+        "flex min-w-0 items-center gap-0 rounded-control border border-border bg-surface p-1",
         className,
       ]
         .filter(Boolean)
@@ -47,7 +47,8 @@ export function MonthYearFilter({ className, onChange, value }: MonthYearFilterP
       <legend className="sr-only">Selecionar mês e ano</legend>
       <Button
         aria-label="Mês anterior"
-        className="rounded-full! text-subtle!"
+        shape="segment"
+        className="text-muted!"
         isDisabled={!canGoToPreviousMonth}
         isIconOnly
         onPress={() => onChange(previousMonth)}
@@ -109,7 +110,8 @@ export function MonthYearFilter({ className, onChange, value }: MonthYearFilterP
       </Select>
       <Button
         aria-label="Próximo mês"
-        className="rounded-full! text-subtle!"
+        shape="segment"
+        className="text-muted!"
         isDisabled={!canGoToNextMonth}
         isIconOnly
         onPress={() => onChange(nextMonth)}

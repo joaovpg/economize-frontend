@@ -102,18 +102,14 @@ function RegisterPage() {
 
   return (
     <section
-      className="grid min-h-107.5 grid-cols-[minmax(0,1fr)_22.5rem] items-start gap-26 max-[56.25rem]:min-h-0 max-[56.25rem]:grid-cols-1 max-[56.25rem]:gap-8.5"
+      className="grid min-h-auth grid-cols-[minmax(0,1fr)_var(--spacing-auth-card)] items-start gap-24 max-lg:min-h-0 max-lg:grid-cols-1 max-lg:gap-8"
       aria-labelledby="auth-title"
     >
-      <div className="flex flex-col gap-5 pt-5.5 pb-5.5 max-[56.25rem]:pt-0 max-[56.25rem]:pb-0">
-        <span
-          className="block h-1 w-10 rounded-full bg-linear-to-r from-brand to-teal-200"
-          aria-hidden="true"
-        />
-        <h1 className="m-0 max-w-[11ch] text-title-page text-balance" id="auth-title">
+      <div className="flex flex-col gap-5 pt-6 pb-6 max-lg:pt-0 max-lg:pb-0">
+        <h1 className="m-0 max-w-measure-heading text-title-page text-balance" id="auth-title">
           Crie sua conta.
         </h1>
-        <p className="m-0 max-w-[35ch] text-body text-pretty text-muted">
+        <p className="m-0 max-w-measure-lead text-body text-pretty text-muted">
           Cadastro direto, com campos fáceis de ler e sem elementos competindo com a tarefa
           principal.
         </p>
@@ -123,7 +119,7 @@ function RegisterPage() {
         <CardBody spacing="compact">
           {submitError && (
             <p
-              className="m-0 rounded-md bg-danger-soft px-3 py-2 text-caption text-danger"
+              className="m-0 rounded-control bg-danger-soft px-3 py-2 text-caption text-danger"
               role="alert"
               aria-live="assertive"
             >
@@ -178,7 +174,7 @@ function RegisterPage() {
             placeholder="Repita sua senha"
             errorMessage={errors.confirmacao?.message}
           />
-          <p className="m-0 flex items-center gap-2.25 text-caption text-pretty text-muted before:size-1.75 before:flex-none before:shrink-0 before:rounded-full before:bg-brand before:content-['']">
+          <p className="m-0 flex items-center gap-2 text-caption text-pretty text-muted before:size-2 before:flex-none before:shrink-0 before:rounded-full before:bg-muted before:content-['']">
             Fuso horário detectado: <strong>{timezone}</strong>
           </p>
           <Button

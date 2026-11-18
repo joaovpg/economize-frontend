@@ -19,6 +19,6 @@
   }
 
   :focus-visible {
-    @apply rounded-md outline-2 outline-offset-4 outline-brand/50;
+    @apply rounded-control outline-2 outline-offset-4 outline-brand/50;
   }
 }

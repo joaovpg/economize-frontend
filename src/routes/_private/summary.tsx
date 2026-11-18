@@ -78,7 +78,7 @@ function SummaryPage({ accounts, categories }: SummaryPageProps) {
 
   return (
     <section className="min-w-0" aria-labelledby="summary-title">
-      <div className="grid min-w-0 grid-cols-[18.25rem_minmax(0,1fr)] items-start max-[48rem]:block">
+      <div className="grid min-w-0 grid-cols-[var(--spacing-sidebar)_minmax(0,1fr)] items-start max-md:block">
         <TransactionFilters
           ariaLabel="Filtros do resumo"
           accounts={accounts}
@@ -97,15 +97,15 @@ function SummaryPage({ accounts, categories }: SummaryPageProps) {
           }}
         />
 
-        <div className="min-w-0 pt-8 pr-7 pb-10 pl-7 max-[48rem]:pt-6 max-[48rem]:pr-4 max-[48rem]:pb-8 max-[48rem]:pl-4">
-          <header className="mb-5.5 flex items-end justify-between gap-4 max-[48rem]:mb-4 max-[48rem]:grid max-[48rem]:items-start max-[48rem]:gap-4">
+        <div className="min-w-0 px-6 pt-8 pb-10 max-md:px-4 max-md:pt-6 max-md:pb-8">
+          <header className="mb-6 flex items-end justify-between gap-4 max-md:mb-4 max-md:grid max-md:items-start max-md:gap-4">
             <PageHeading
               description="Resumo financeiro do mês selecionado."
               id="summary-title"
               title="Resumo"
             />
             <Button
-              className="hidden! max-[48rem]:inline-flex!"
+              className="hidden! max-md:inline-flex!"
               variant="secondary"
               size="md"
               ref={filterTriggerRef}
@@ -119,11 +119,11 @@ function SummaryPage({ accounts, categories }: SummaryPageProps) {
           </header>
 
           <section
-            className="mb-3.5 hidden gap-2.5 max-[48rem]:grid"
+            className="mb-4 hidden gap-3 max-md:grid"
             aria-label="Filtros ativos"
             aria-live="polite"
           >
-            <span className="text-caption text-subtle">Filtros ativos</span>
+            <span className="text-caption text-muted">Filtros ativos</span>
             <div className="flex flex-wrap gap-2">
               <FilterChip>Mês: {getMonthLabel(search.month)}</FilterChip>
               {search.categories.length > 0 && (
@@ -139,11 +139,11 @@ function SummaryPage({ accounts, categories }: SummaryPageProps) {
                 <h2 className="m-0 text-title text-foreground" id="summary-empty-title">
                   Resumo indisponível
                 </h2>
-                <p className="m-0 mt-1.5 text-body text-muted">
+                <p className="m-0 mt-1 text-body text-muted">
                   O resumo será disponibilizado quando existir uma rota própria para seus dados.
                 </p>
               </div>
-              <span className="text-caption text-subtle">
+              <span className="text-caption text-muted">
                 {activeFilterCount} {activeFilterCount === 1 ? "filtro" : "filtros"}
               </span>
             </CardHeader>

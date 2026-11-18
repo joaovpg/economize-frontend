@@ -22,11 +22,11 @@ import { Calendar } from "./Calendar";
 import { SyncDateSegments, useDateSegments } from "./date-segments";
 
 const control = tv({
-  base: "flex h-12 min-h-12 min-w-0 items-center gap-2.5 rounded-xl border bg-surface px-3.5 font-ui transition-colors motion-reduce:transition-none",
+  base: "flex h-10 min-h-10 max-md:h-touch max-md:min-h-touch min-w-0 items-center gap-2 rounded-control border bg-surface px-3 font-ui transition-colors motion-reduce:transition-none",
   variants: {
     disabled: {
       false: "",
-      true: "cursor-not-allowed border-border bg-surface-muted text-subtle hover:border-border! focus-within:border-border! focus-within:outline-none!",
+      true: "cursor-not-allowed border-border bg-surface-muted text-muted hover:border-border! focus-within:border-border! focus-within:outline-none!",
     },
     invalid: {
       false:
@@ -95,7 +95,7 @@ export function DatePicker({
             <Group className={control({ disabled: isDisabled, invalid: hasError && !isDisabled })}>
               <DateInput
                 key={clearVersion}
-                className="flex min-w-0 flex-1 overflow-x-auto text-body text-foreground outline-none data-disabled:text-subtle max-md:text-md"
+                className="flex min-w-0 flex-1 overflow-x-auto text-body text-foreground outline-none data-disabled:text-muted max-md:text-md"
               >
                 {(segment) =>
                   segment.type === "day" ? (
@@ -107,20 +107,20 @@ export function DatePicker({
                           else if (inputRef) inputRef.current = element;
                         }}
                         segment={segment}
-                        className="rounded-sm px-0.5 tabular-nums caret-brand outline-none data-disabled:text-subtle data-focused:bg-brand data-focused:text-brand-foreground data-placeholder:not-data-focused:text-subtle"
+                        className="rounded-sm px-px tabular-nums caret-brand outline-none data-disabled:text-muted data-focused:bg-brand data-focused:text-brand-foreground data-placeholder:not-data-focused:text-muted"
                       />
                     </SyncDateSegments>
                   ) : (
                     <DateSegment
                       segment={segment}
-                      className="rounded-sm px-0.5 tabular-nums caret-brand outline-none data-disabled:text-subtle data-focused:bg-brand data-focused:text-brand-foreground data-placeholder:not-data-focused:text-subtle"
+                      className="rounded-sm px-px tabular-nums caret-brand outline-none data-disabled:text-muted data-focused:bg-brand data-focused:text-brand-foreground data-placeholder:not-data-focused:text-muted"
                     />
                   )
                 }
               </DateInput>
               <Button
                 aria-label={`Abrir calendário para ${label}`}
-                className="grid size-8 shrink-0 place-items-center rounded-lg text-subtle outline-none data-disabled:cursor-not-allowed data-focus-visible:outline-2 data-focus-visible:outline-brand data-hovered:bg-surface-muted"
+                className="grid size-8 shrink-0 place-items-center rounded-control text-muted outline-none data-disabled:cursor-not-allowed data-focus-visible:outline-2 data-focus-visible:outline-brand data-hovered:bg-surface-muted"
               >
                 <CalendarBlankIcon aria-hidden="true" className="size-5" />
               </Button>
@@ -130,7 +130,7 @@ export function DatePicker({
             </div>
             <Popover
               placement="bottom start"
-              className="z-10 max-w-[calc(100vw-1rem)] overflow-auto rounded-xl border border-border bg-surface p-3 text-foreground shadow-popover"
+              className="z-10 max-w-[calc(100vw-1rem)] overflow-auto rounded-surface border border-border bg-surface p-3 text-foreground shadow-popover"
             >
               <Dialog aria-label={`Calendário para ${label}`} className="outline-none">
                 <Calendar

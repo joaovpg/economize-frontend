@@ -24,16 +24,16 @@ import { IconSlot } from "./IconSlot";
 import { Label } from "./Label";
 
 const control = tv({
-  base: "flex w-full min-w-0 cursor-text items-center gap-3 border font-ui text-subtle transition-colors motion-reduce:transition-none",
+  base: "flex w-full min-w-0 cursor-text items-center gap-3 border font-ui text-muted transition-colors motion-reduce:transition-none",
   variants: {
     appearance: {
       compact:
-        "h-9 min-h-9 rounded-lg border-transparent! bg-transparent px-2.5 data-hovered:bg-surface-muted data-pressed:bg-surface-strong",
-      default: "h-12 min-h-12 rounded-xl bg-surface px-3.5",
+        "h-8 min-h-8 rounded-sm border-transparent! bg-transparent px-3 data-hovered:bg-surface-muted data-pressed:bg-surface-strong",
+      default: "h-10 min-h-10 max-md:h-touch max-md:min-h-touch rounded-control bg-surface px-3",
     },
     disabled: {
       false: "",
-      true: "cursor-not-allowed border-border bg-surface-muted text-subtle hover:border-border! focus-within:border-border! focus-within:outline-none!",
+      true: "cursor-not-allowed border-border bg-surface-muted text-muted hover:border-border! focus-within:border-border! focus-within:outline-none!",
     },
     invalid: {
       false:
@@ -45,14 +45,14 @@ const control = tv({
 
 const inputStyles = tv(
   {
-    base: "min-w-0 flex-1 border-0 bg-transparent text-body max-md:text-md caret-brand outline-none placeholder:text-subtle",
+    base: "min-w-0 flex-1 border-0 bg-transparent text-body max-md:text-md caret-brand outline-none placeholder:text-muted",
     defaultVariants: {
       disabled: false,
     },
     variants: {
       disabled: {
         false: "text-foreground",
-        true: "text-subtle",
+        true: "text-muted",
       },
     },
   },
@@ -60,11 +60,11 @@ const inputStyles = tv(
 );
 
 const itemStyles = tv({
-  base: "group flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-body text-foreground outline-none transition-colors duration-150 ease-out data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focused:bg-surface-muted data-selected:bg-brand-soft data-selected:text-brand-hover motion-reduce:transition-none",
+  base: "group flex min-h-10 max-md:min-h-touch cursor-pointer items-center gap-3 rounded-control px-3 py-2 text-body text-foreground outline-none transition-colors duration-150 ease-out data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focused:bg-surface-muted data-selected:bg-brand-soft data-selected:text-brand-hover motion-reduce:transition-none",
 });
 
 const itemIndicatorStyles = tv({
-  base: "size-4 shrink-0 text-brand opacity-0 transition-opacity duration-150 ease-out group-data-disabled:text-subtle group-data-selected:opacity-100 motion-reduce:transition-none",
+  base: "size-4 shrink-0 text-brand opacity-0 transition-opacity duration-150 ease-out group-data-disabled:text-muted group-data-selected:opacity-100 motion-reduce:transition-none",
 });
 
 type SelectionMode = "single" | "multiple";
@@ -257,7 +257,7 @@ export function Select<T = object, M extends SelectionMode = "single">({
         <Input className={inputStyles({ disabled: isDisabled })} placeholder={placeholder} />
         <AriaButton
           aria-label={`Mostrar opções para ${label}`}
-          className="grid size-8 shrink-0 place-items-center rounded-lg text-subtle transition-colors outline-none data-focus-visible:outline-2 data-focus-visible:outline-offset-0 data-focus-visible:outline-brand data-focus-visible:outline-solid data-hovered:bg-surface-muted data-pressed:bg-surface-strong motion-reduce:transition-none"
+          className="grid size-8 shrink-0 place-items-center rounded-control text-muted transition-colors outline-none data-focus-visible:outline-2 data-focus-visible:outline-offset-0 data-focus-visible:outline-brand data-focus-visible:outline-solid data-hovered:bg-surface-muted data-pressed:bg-surface-strong motion-reduce:transition-none"
         >
           <CaretDownIcon aria-hidden="true" className="size-4" />
         </AriaButton>
@@ -267,18 +267,18 @@ export function Select<T = object, M extends SelectionMode = "single">({
       </div>
       <Popover
         className={cn(
-          "z-10 min-w-(--trigger-width) overflow-hidden rounded-xl border border-border bg-surface p-1 shadow-popover",
+          "z-10 flex min-w-(--trigger-width) flex-col overflow-hidden rounded-surface border border-border bg-surface p-1 shadow-popover",
           popoverClassName,
         )}
       >
         <ListBox
           aria-label={`${label} disponíveis`}
           className={cn(
-            "flex max-h-[inherit] flex-col gap-0.5 overflow-auto outline-none",
+            "flex min-h-0 flex-1 flex-col gap-1 overflow-auto outline-none",
             listBoxClassName,
           )}
           renderEmptyState={() => (
-            <span className="px-3 py-2 text-body text-subtle">Nenhuma opção encontrada</span>
+            <span className="px-3 py-2 text-body text-muted">Nenhuma opção encontrada</span>
           )}
         >
           {children}

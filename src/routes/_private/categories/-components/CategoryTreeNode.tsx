@@ -26,26 +26,26 @@ export function CategoryTreeNode({
     <li className="flex min-w-0 flex-col gap-2">
       <div
         className={cn(
-          "flex min-w-0 items-center justify-between gap-3 rounded-xl border border-border bg-surface-overlay px-3 py-2.5",
-          !node.ativo && "bg-surface-muted/55",
+          "flex min-w-0 items-center justify-between gap-3 rounded-control border border-border bg-surface px-3 py-2",
+          !node.ativo && "bg-surface-muted",
         )}
       >
-        <div className="flex min-w-0 items-center gap-2.5">
+        <div className="flex min-w-0 items-center gap-2">
           <span
             aria-hidden="true"
             className={cn(
-              "size-2.5 shrink-0 rounded-full bg-brand",
+              "size-2 shrink-0 rounded-full bg-success",
               !node.ativo && "bg-border-strong",
             )}
           />
           <div className="flex min-w-0 flex-col gap-1">
             <span className="truncate text-body-strong text-foreground">{node.nome}</span>
-            <span className="flex flex-wrap items-center gap-2 text-caption text-subtle">
+            <span className="flex flex-wrap items-center gap-2 text-caption text-muted">
               <span
                 className={cn(
-                  "rounded-full border px-2 py-0.5 text-caption",
+                  "rounded-full border px-2 py-px text-caption",
                   node.ativo
-                    ? "border-success/25 bg-success-soft text-success"
+                    ? "border-success bg-success-soft text-success"
                     : "border-border bg-surface text-muted",
                 )}
               >

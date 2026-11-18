@@ -12,7 +12,7 @@ const descriptionStyles = tv(
     variants: {
       disabled: {
         false: "text-muted",
-        true: "text-subtle",
+        true: "text-muted",
       },
     },
   },

@@ -30,11 +30,11 @@ import { MonthYearFilter } from "../MonthYearFilter";
 
 // Estilo da barra lateral. No modo modal o componente não usa Card: corpo e rodapé vêm do Modal.
 const filtersStyles = tv({
-  base: "sticky top-6 w-auto self-start m-[1.5rem_0_1.5rem_1.5rem] max-h-[calc(100svh-3rem)] overflow-auto max-[48rem]:static max-[48rem]:m-[0_1rem_1rem] max-[48rem]:max-h-none",
+  base: "sticky top-6 w-auto self-start my-6 ml-6 max-h-[calc(100svh-3rem)] overflow-auto max-md:static max-md:mx-4 max-md:mt-0 max-md:mb-4 max-md:max-h-none",
   variants: {
     open: {
-      false: "max-[48rem]:hidden",
-      true: "max-[48rem]:grid",
+      false: "max-md:hidden",
+      true: "max-md:grid",
     },
   },
 });
@@ -254,18 +254,18 @@ export function TransactionFilters({
     : { Body: CardBody, Footer: CardFooter };
   const formProps = isModal
     ? { "aria-label": ariaLabel, className: "flex min-h-0 min-w-0 flex-1 flex-col", id: filterId }
-    : { className: "grid gap-5.5" };
+    : { className: "grid gap-6" };
   const sidebarFooterColumns = applyOnChange ? "grid-cols-1" : "grid-cols-2 gap-2";
   const sidebarHeader = isModal ? null : (
     <CardHeader>
       <div>
         <h2 className="m-0 text-title">Filtros</h2>
-        <p className="m-0 text-caption text-subtle">
+        <p className="m-0 text-caption text-muted">
           {activeFilterCount} {activeFilterCount === 1 ? "ativo" : "ativos"}
         </p>
       </div>
       <Button
-        className="hidden! max-[48rem]:inline-flex!"
+        className="hidden! max-md:inline-flex!"
         variant="ghost"
         size="sm"
         isIconOnly
@@ -292,15 +292,15 @@ export function TransactionFilters({
         void handleSubmit(onApply)(event);
       }}
     >
-      <Body className="gap-5.5">
-        <AriaTextField className="grid gap-2.5">
+      <Body className="gap-6">
+        <AriaTextField className="grid gap-2">
           <Label className="m-0 text-body-strong text-muted">Buscar transação</Label>
-          <div className="flex min-h-10.5 min-w-0 items-center gap-2.5 rounded-xl border border-border bg-surface px-3 text-subtle transition-colors duration-150 ease-out focus-within:border-brand focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand hover:border-border-strong hover:bg-surface-muted motion-reduce:transition-none [&>svg]:size-4 [&>svg]:shrink-0">
+          <div className="flex h-10 min-h-10 min-w-0 items-center gap-2 rounded-control border border-border bg-surface px-3 text-muted transition-colors duration-150 ease-out focus-within:border-brand focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand hover:border-border-strong hover:bg-surface-muted motion-reduce:transition-none max-md:h-touch max-md:min-h-touch [&>svg]:size-4 [&>svg]:shrink-0">
             <MagnifyingGlassIcon aria-hidden="true" />
             <Input
               {...searchField}
               id={`${filterId}-search`}
-              className="min-w-0 flex-1 border-0 bg-transparent text-body text-foreground caret-brand outline-none placeholder:text-subtle max-md:text-md"
+              className="min-w-0 flex-1 border-0 bg-transparent text-body text-foreground caret-brand outline-none placeholder:text-muted max-md:text-md"
               onChange={(event) => {
                 void searchField.onChange(event);
                 if (applyOnChange) {
@@ -313,12 +313,12 @@ export function TransactionFilters({
           </div>
         </AriaTextField>
 
-        <fieldset className="grid min-w-0 gap-2.5 border-0 p-0">
+        <fieldset className="grid min-w-0 gap-2 border-0 p-0">
           <legend className="m-0 flex w-full items-center justify-between gap-2 text-caption text-muted">
             <span>Categorias</span>
             <Link
               aria-label="Gerenciar categorias"
-              className="size-8! min-h-8! rounded-lg!"
+              className="size-8! min-h-8! rounded-control!"
               isIconOnly
               preload="intent"
               size="sm"
@@ -336,12 +336,12 @@ export function TransactionFilters({
           />
         </fieldset>
 
-        <fieldset className="grid min-w-0 gap-2.5 border-0 p-0">
+        <fieldset className="grid min-w-0 gap-2 border-0 p-0">
           <legend className="m-0 flex w-full items-center justify-between gap-2 text-caption text-muted">
             <span>Contas</span>
             <Link
               aria-label="Gerenciar contas"
-              className="size-8! min-h-8! rounded-lg!"
+              className="size-8! min-h-8! rounded-control!"
               isIconOnly
               preload="intent"
               size="sm"
@@ -359,7 +359,7 @@ export function TransactionFilters({
           />
         </fieldset>
 
-        <div className="grid gap-2.5">
+        <div className="grid gap-2">
           {showMonth && (
             <MonthYearFilter
               onChange={(month) => setValue("month", toYearMonth(month), { shouldDirty: true })}
@@ -374,7 +374,7 @@ export function TransactionFilters({
             Incluir saldo anterior
           </TransactionFilterCheckbox>
           {isPreviousBalanceDisabled && (
-            <p className="m-0 text-caption text-subtle">
+            <p className="m-0 text-caption text-muted">
               Disponível sem recortes de conta, categoria ou busca.
             </p>
           )}

@@ -13,11 +13,11 @@ import { IconSlot } from "./IconSlot";
 import { Label } from "./Label";
 
 const control = tv({
-  base: "flex h-12 min-h-12 min-w-0 items-center gap-2.5 rounded-xl border bg-surface px-3.5 font-ui text-subtle transition-colors motion-reduce:transition-none",
+  base: "flex h-10 min-h-10 max-md:h-touch max-md:min-h-touch min-w-0 items-center gap-2 rounded-control border bg-surface px-3 font-ui text-muted transition-colors motion-reduce:transition-none",
   variants: {
     disabled: {
       false: "",
-      true: "cursor-not-allowed border-border bg-surface-muted text-subtle hover:border-border! focus-within:border-border! focus-within:outline-none!",
+      true: "cursor-not-allowed border-border bg-surface-muted text-muted hover:border-border! focus-within:border-border! focus-within:outline-none!",
     },
     invalid: {
       false:
@@ -29,11 +29,11 @@ const control = tv({
 
 const inputStyles = tv(
   {
-    base: "min-w-0 flex-1 border-0 bg-transparent text-body max-md:text-md tabular-nums caret-brand outline-none placeholder:text-subtle",
+    base: "min-w-0 flex-1 border-0 bg-transparent text-body max-md:text-md tabular-nums caret-brand outline-none placeholder:text-muted",
     variants: {
       disabled: {
         false: "text-foreground",
-        true: "text-subtle",
+        true: "text-muted",
       },
     },
   },

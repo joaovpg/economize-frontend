@@ -11,7 +11,7 @@ const labelStyles = tv({
   variants: {
     disabled: {
       false: "text-foreground",
-      true: "text-subtle",
+      true: "text-muted",
     },
   },
 });

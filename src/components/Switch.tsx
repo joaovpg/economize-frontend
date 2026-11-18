@@ -6,11 +6,11 @@ const switchStyles = tv(
   {
     slots: {
       button:
-        "group inline-flex min-h-9 cursor-pointer items-center rounded-lg p-1 transition-colors outline-none data-disabled:cursor-not-allowed data-disabled:opacity-disabled data-focus-visible:bg-surface-muted",
+        "group inline-flex min-h-8 max-md:min-h-touch cursor-pointer items-center rounded-control p-1 transition-colors outline-none data-disabled:cursor-not-allowed data-disabled:opacity-disabled data-focus-visible:bg-surface-muted",
       thumb:
-        "absolute top-0.5 left-0.5 block size-4 rounded-full bg-surface shadow-tree-node transition-transform duration-150 ease-out group-data-selected:translate-x-4 motion-reduce:transition-none",
+        "block size-4 rounded-full border border-border bg-surface transition-transform duration-150 ease-out group-data-selected:translate-x-3 motion-reduce:transition-none",
       track:
-        "relative block h-5 w-9 rounded-full bg-border-strong transition-colors duration-150 ease-out group-data-selected:bg-brand motion-reduce:transition-none",
+        "relative block h-5 w-8 rounded-full border-2 border-transparent bg-border-strong transition-colors duration-150 ease-out group-data-selected:bg-brand motion-reduce:transition-none",
     },
   },
   { twMerge: false },

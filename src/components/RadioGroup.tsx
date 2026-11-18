@@ -29,7 +29,7 @@ const radioOptionsStyles = tv({
       default: "",
       pill: "",
       segmented:
-        "flex w-full max-w-full gap-1 overflow-hidden rounded-xl border border-border bg-surface-muted p-1",
+        "flex w-full max-w-full gap-1 overflow-hidden rounded-control border border-border bg-surface-muted p-1",
     },
     invalid: {
       false: "",
@@ -37,7 +37,7 @@ const radioOptionsStyles = tv({
     },
     orientation: {
       horizontal: "flex flex-wrap gap-2",
-      vertical: "grid gap-1.5",
+      vertical: "grid gap-2",
     },
   },
 });
@@ -52,7 +52,7 @@ const radioFieldStyles = tv({
     },
     hasDescription: {
       false: "",
-      true: "grid gap-0.5",
+      true: "grid gap-1",
     },
   },
 });
@@ -63,10 +63,10 @@ const radioButtonStyles = tv(
     variants: {
       appearance: {
         default:
-          "min-h-11 gap-2 rounded-lg text-body-strong text-muted data-hovered:bg-surface-muted data-hovered:text-foreground data-pressed:bg-surface-strong data-pressed:text-foreground data-selected:text-foreground",
-        pill: "min-h-11 max-w-full gap-2 rounded-full border border-border bg-surface px-3.5 py-2 text-body-strong text-foreground data-hovered:border-border-strong data-hovered:bg-surface-muted data-pressed:border-border-strong data-pressed:bg-surface-strong data-selected:border-brand data-selected:bg-brand-soft data-selected:text-brand-hover",
+          "min-h-10 max-md:min-h-touch gap-2 rounded-control text-body-strong text-muted data-hovered:bg-surface-muted data-hovered:text-foreground data-pressed:bg-surface-strong data-pressed:text-foreground data-selected:text-foreground",
+        pill: "min-h-10 max-md:min-h-touch max-w-full gap-2 rounded-full border border-border bg-surface px-3 py-2 text-body-strong text-foreground data-hovered:border-border-strong data-hovered:bg-surface-muted data-pressed:border-border-strong data-pressed:bg-surface-strong data-selected:border-brand data-selected:bg-brand-soft data-selected:text-brand-hover",
         segmented:
-          "min-h-11 w-full justify-center gap-2 rounded-lg px-3 py-2 text-center text-body-strong text-muted data-hovered:bg-surface data-hovered:text-foreground data-pressed:bg-surface-strong data-pressed:text-foreground data-selected:bg-surface data-selected:text-foreground data-selected:shadow-sm",
+          "min-h-10 max-md:min-h-touch w-full justify-center gap-2 rounded-sm px-3 py-2 text-center text-body-strong text-muted data-hovered:bg-surface data-hovered:text-foreground data-pressed:bg-surface-strong data-pressed:text-foreground data-selected:bg-surface data-selected:text-foreground",
       },
       invalid: {
         false: "",
@@ -78,7 +78,7 @@ const radioButtonStyles = tv(
 );
 
 const radioIndicatorStyles = tv({
-  base: "grid size-4.5 shrink-0 place-items-center rounded-full border bg-surface transition-colors duration-150 ease-out motion-reduce:transition-none",
+  base: "grid size-4 shrink-0 place-items-center rounded-full border bg-surface transition-colors duration-150 ease-out motion-reduce:transition-none",
   variants: {
     invalid: {
       false: "",
@@ -344,7 +344,7 @@ export function RadioItem({
         )}
       </AriaRadioButton>
       {hasDescription && (
-        <Description isDisabled={isOptionDisabled} className="ml-7">
+        <Description isDisabled={isOptionDisabled} className="ml-6">
           {description}
         </Description>
       )}

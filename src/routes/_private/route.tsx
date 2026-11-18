@@ -47,9 +47,9 @@ function LogoutButton() {
 
 function PrivateLayout() {
   return (
-    <div className="app-background relative isolate min-h-svh overflow-hidden text-foreground selection:bg-brand-soft selection:text-brand-hover">
-      <div className="relative z-1 min-h-svh w-full">
-        <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border bg-canvas-panel px-5 py-4.5 backdrop-blur-header max-[48rem]:grid max-[48rem]:grid-cols-[minmax(0,1fr)_auto] max-[48rem]:gap-3.5 max-[48rem]:p-4">
+    <div className="min-h-svh overflow-x-clip bg-canvas text-foreground selection:bg-brand-soft selection:text-brand-hover">
+      <div className="min-h-svh w-full">
+        <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border bg-surface px-5 py-4 max-md:grid max-md:grid-cols-[minmax(0,1fr)_auto] max-md:gap-3 max-md:p-4">
           <Link
             className="justify-start! whitespace-nowrap"
             linkVariant="compactBrand"

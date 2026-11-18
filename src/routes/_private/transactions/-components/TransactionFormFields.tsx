@@ -70,7 +70,7 @@ export function AccountSelect({
           >
             <span className="flex min-w-0 items-center justify-between gap-3">
               <span className="truncate">{account.nome}</span>
-              <span className="shrink-0 text-caption text-subtle">
+              <span className="shrink-0 text-caption text-muted">
                 {account.moeda}
                 {!account.ativo && " · inativa"}
               </span>

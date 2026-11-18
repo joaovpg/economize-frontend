@@ -206,7 +206,7 @@ function RepetitionSummary({ target }: RepetitionSummaryProps) {
   const summary = getRepeticaoResumo(target);
 
   return (
-    <section className="grid min-w-0 gap-2 rounded-xl border border-border bg-surface-muted px-3.5 py-3">
+    <section className="grid min-w-0 gap-2 rounded-control border border-border bg-surface-muted px-3 py-3">
       <p className="m-0 text-body-strong text-foreground">Repetir</p>
       {summary && <p className="m-0 text-body text-muted">{summary}</p>}
     </section>
@@ -489,7 +489,7 @@ export function TransactionEditModal({
               />
             )}
 
-            <div className="grid min-w-0 gap-3.5 sm:grid-cols-[minmax(0,1fr)_12rem]">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-[minmax(0,1fr)_var(--spacing-form-aside)]">
               <Controller
                 control={control}
                 name="descricao"
@@ -550,7 +550,7 @@ export function TransactionEditModal({
               />
             </div>
 
-            <div className="grid min-w-0 gap-3.5 sm:grid-cols-2">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
               <Controller
                 control={control}
                 name="data"
@@ -596,7 +596,7 @@ export function TransactionEditModal({
             </div>
 
             {isTransfer ? (
-              <div className="grid min-w-0 gap-3.5 sm:grid-cols-2">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2">
                 <Controller
                   control={control}
                   name="contaOrigemId"
@@ -640,7 +640,7 @@ export function TransactionEditModal({
                 />
               </div>
             ) : (
-              <div className="grid min-w-0 gap-3.5 sm:grid-cols-2">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2">
                 <Controller
                   control={control}
                   name="contaId"
@@ -723,7 +723,7 @@ export function TransactionEditModal({
 
             <output
               aria-live="polite"
-              className="rounded-xl border border-border bg-surface-muted px-3.5 py-3 text-body text-muted"
+              className="rounded-control border border-border bg-surface-muted px-3 py-3 text-body text-muted"
             >
               {summary}
             </output>

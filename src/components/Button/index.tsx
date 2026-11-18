@@ -57,6 +57,7 @@ export function Button({
   isIconOnly = false,
   isPending = false,
   leadingIcon,
+  shape = "control",
   size = "md",
   trailingIcon,
   variant = "primary",
@@ -69,6 +70,7 @@ export function Button({
       buttonStyles({
         className: userClassName,
         isIconOnly,
+        shape,
         size,
         variant,
       }),
