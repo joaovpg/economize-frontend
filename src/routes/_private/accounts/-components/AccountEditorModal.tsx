@@ -11,7 +11,6 @@ import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
   ModalBody,
-  ModalClose,
   ModalDescription,
   DiscardChangesModal,
   ModalFooter,
@@ -21,9 +20,11 @@ import {
 import { NumberField } from "../../../../components/NumberField";
 import { TextField } from "../../../../components/TextField";
 import { isApiError } from "../../../../lib/api-errors";
-import { parseFormDate } from "../../../../lib/date";
-import { postConta } from "../../../../services/accounts/api";
+import { parseFormDate, transactionTimeZone } from "../../../../lib/date";
+import { postConta, putConta } from "../../../../services/accounts/api";
+import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { accountsQueryKey } from "../../../../services/accounts/queries";
+import { transactionsQueryKey } from "../../../../services/transactions/queries";
 import { accountFormSchema, type AccountFormData } from "./account-form";
 
 function getAccountFormField(field: string | undefined): keyof AccountFormData | null {
@@ -41,9 +42,8 @@ function applyAccountFormError(
   error: unknown,
   setError: UseFormSetError<AccountFormData>,
   setSubmitError: (message: string) => void,
+  fallback: string,
 ) {
-  const fallback = "Não foi possível cadastrar a conta. Tente novamente.";
-
   if (!isApiError(error)) {
     setSubmitError(fallback);
     return;
@@ -67,11 +67,13 @@ function applyAccountFormError(
 }
 
 type AccountEditorModalProps = {
+  account: ContaResponse | null;
   onClose: () => void;
   onSaved: (message: string) => Promise<void>;
 };
 
-export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps) {
+export function AccountEditorModal({ account, onClose, onSaved }: AccountEditorModalProps) {
+  const isEditing = account !== null;
   const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -82,6 +84,14 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
       void queryClient.invalidateQueries({ queryKey: accountsQueryKey }).catch(() => undefined);
     },
   });
+  const editAccountMutation = useMutation({
+    mutationFn: ({ id, input }: { id: string; input: Parameters<typeof putConta>[1] }) =>
+      putConta(id, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: accountsQueryKey }).catch(() => undefined);
+      void queryClient.invalidateQueries({ queryKey: transactionsQueryKey }).catch(() => undefined);
+    },
+  });
   const {
     control,
     formState: { errors, isDirty, isSubmitting },
@@ -89,12 +99,19 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
     register,
     setError,
   } = useForm<AccountFormData>({
-    defaultValues: {
-      dataSaldoInicial: today("America/Sao_Paulo").toString(),
-      moeda: "BRL",
-      nome: "",
-      saldoInicial: 0,
-    },
+    defaultValues: account
+      ? {
+          dataSaldoInicial: account.dataSaldoInicial,
+          moeda: account.moeda,
+          nome: account.nome,
+          saldoInicial: account.saldoInicial,
+        }
+      : {
+          dataSaldoInicial: today(transactionTimeZone).toString(),
+          moeda: "BRL",
+          nome: "",
+          saldoInicial: 0,
+        },
     mode: "onSubmit",
     resolver: zodResolver(accountFormSchema),
   });
@@ -116,22 +133,48 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
 
   const handleFormSubmit = async (data: AccountFormData) => {
     setSubmitError(null);
+    let successMessage: string;
 
     try {
-      await createAccountMutation.mutateAsync({
-        dataSaldoInicial: data.dataSaldoInicial,
-        moeda: data.moeda,
-        nome: data.nome.trim(),
-        saldoInicial: data.saldoInicial,
-      });
-      await queryClient.invalidateQueries({ queryKey: accountsQueryKey });
+      if (account) {
+        await editAccountMutation.mutateAsync({
+          id: account.id,
+          input: {
+            ativo: account.ativo,
+            dataSaldoInicial: data.dataSaldoInicial,
+            moeda: data.moeda,
+            nome: data.nome.trim(),
+            saldoInicial: data.saldoInicial,
+          },
+        });
+        successMessage = "Conta atualizada com sucesso.";
+      } else {
+        await createAccountMutation.mutateAsync({
+          dataSaldoInicial: data.dataSaldoInicial,
+          moeda: data.moeda,
+          nome: data.nome.trim(),
+          saldoInicial: data.saldoInicial,
+        });
+        successMessage = "Conta criada com sucesso.";
+      }
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: accountsQueryKey }),
+        queryClient.invalidateQueries({ queryKey: transactionsQueryKey }),
+      ]);
     } catch (error) {
-      applyAccountFormError(error, setError, setSubmitError);
+      applyAccountFormError(
+        error,
+        setError,
+        setSubmitError,
+        isEditing
+          ? "Não foi possível atualizar a conta. Tente novamente."
+          : "Não foi possível cadastrar a conta. Tente novamente.",
+      );
       return;
     }
 
     onClose();
-    void onSaved("Conta criada com sucesso.");
+    void onSaved(successMessage);
   };
 
   return (
@@ -148,12 +191,13 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
         }}
         size="md"
       >
-        <ModalHeader>
-          <ModalTitle>Nova conta</ModalTitle>
+        <ModalHeader showClose={!isSubmitting && !isDiscardModalOpen}>
+          <ModalTitle>{isEditing ? "Editar conta" : "Nova conta"}</ModalTitle>
           <ModalDescription>
-            Cadastre uma conta e informe o saldo a partir da data escolhida.
+            {isEditing
+              ? "Atualize os dados desta conta. O status ativa ou inativa é alterado na listagem."
+              : "Cadastre uma conta e informe o saldo a partir da data escolhida."}
           </ModalDescription>
-          {!isSubmitting && !isDiscardModalOpen && <ModalClose />}
         </ModalHeader>
 
         <form
@@ -166,6 +210,7 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
             {submitError && <InlineMessage tone="danger">{submitError}</InlineMessage>}
 
             <TextField
+              defaultValue={account?.nome ?? ""}
               errorMessage={errors.nome?.message}
               inputRef={(input) => {
                 nameInputRef.current = input;
@@ -181,6 +226,7 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
             />
 
             <TextField
+              defaultValue={account?.moeda ?? "BRL"}
               errorMessage={errors.moeda?.message}
               inputRef={currencyField.ref}
               isDisabled={isSubmitting}
@@ -213,7 +259,7 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
               name="dataSaldoInicial"
               render={({ field }) => (
                 <DatePicker
-                  todayValue={today("America/Sao_Paulo")}
+                  todayValue={today(transactionTimeZone)}
                   errorMessage={errors.dataSaldoInicial?.message}
                   inputRef={field.ref}
                   isDisabled={isSubmitting}
@@ -238,7 +284,7 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
               Cancelar
             </Button>
             <Button form="account-editor-form" isPending={isSubmitting} size="sm" type="submit">
-              Cadastrar conta
+              {isEditing ? "Salvar alterações" : "Cadastrar conta"}
             </Button>
           </ModalFooter>
         </form>

@@ -2,8 +2,9 @@ import { useState } from "react";
 
 import { ArrowLeftIcon } from "@phosphor-icons/react/dist/csr/ArrowLeft";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/csr/MagnifyingGlass";
+import { PencilSimpleIcon } from "@phosphor-icons/react/dist/csr/PencilSimple";
 import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { Button } from "../../../components/Button";
@@ -12,9 +13,26 @@ import { IconSlot } from "../../../components/IconSlot";
 import { InlineMessage } from "../../../components/InlineMessage";
 import { Link } from "../../../components/Link";
 import { PageHeading } from "../../../components/PageHeading";
+import { Switch } from "../../../components/Switch";
+import { isApiError } from "../../../lib/api-errors";
+import { putConta } from "../../../services/accounts/api";
 import { type ContaResponse } from "../../../services/accounts/contracts";
-import { accountsQueryOptions } from "../../../services/accounts/queries";
+import { accountsQueryKey, accountsQueryOptions } from "../../../services/accounts/queries";
+import { transactionsQueryKey } from "../../../services/transactions/queries";
 import { AccountEditorModal } from "./-components/AccountEditorModal";
+import { AccountToggleConfirmation } from "./-components/AccountToggleConfirmation";
+
+import type { PendingAccountToggle } from "./-components/account-types";
+
+type AccountEditorValue = ContaResponse | null | undefined;
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (!isApiError(error)) {
+    return fallback;
+  }
+
+  return error.problem?.detail ?? error.message ?? fallback;
+}
 
 const accountStatusFilters = [
   { label: "Todas", value: "all" },
@@ -67,7 +85,7 @@ function filterAccounts(accounts: readonly ContaResponse[], status: AccountStatu
 function AccountStatus({ isActive }: { isActive: boolean }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-caption-strong ${isActive ? "border-success/25 bg-success-soft text-success" : "border-warning/25 bg-warning-soft text-warning"}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-caption ${isActive ? "border-success/25 bg-success-soft text-success" : "border-warning/25 bg-warning-soft text-warning"}`}
     >
       <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
       {isActive ? "Ativa" : "Inativa"}
@@ -96,10 +114,10 @@ function AccountsEmptyState({
         </IconSlot>
       </div>
       <div className="grid gap-1.5">
-        <h3 className="text-title-compact text-foreground">
+        <h3 className="text-title text-foreground">
           {hasAccounts && isFiltered ? "Nenhuma conta nesse filtro" : "Nenhuma conta cadastrada"}
         </h3>
-        <p className="m-0 max-w-[36ch] text-body-small text-muted">
+        <p className="m-0 max-w-[36ch] text-body text-muted">
           {hasAccounts && isFiltered
             ? "Altere o filtro para visualizar outras contas."
             : "Crie uma conta para começar a registrar suas movimentações."}
@@ -111,13 +129,88 @@ function AccountsEmptyState({
 
 function AccountsPage() {
   const { data: accounts } = useSuspenseQuery(accountsQueryOptions());
+  const queryClient = useQueryClient();
+  const toggleAccountMutation = useMutation({
+    mutationFn: ({ account, nextActive }: PendingAccountToggle) =>
+      putConta(account.id, {
+        ativo: nextActive,
+        dataSaldoInicial: account.dataSaldoInicial,
+        moeda: account.moeda,
+        nome: account.nome,
+        saldoInicial: account.saldoInicial,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: accountsQueryKey }).catch(() => undefined);
+      void queryClient.invalidateQueries({ queryKey: transactionsQueryKey }).catch(() => undefined);
+    },
+  });
   const [accountStatus, setAccountStatus] = useState<AccountStatusFilter>("all");
-  const [isCreationOpen, setIsCreationOpen] = useState(false);
+  const [editorAccount, setEditorAccount] = useState<AccountEditorValue>(undefined);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [pendingAccountId, setPendingAccountId] = useState<string | null>(null);
+  const [pendingToggle, setPendingToggle] = useState<PendingAccountToggle | null>(null);
+  const [toggleError, setToggleError] = useState<string | null>(null);
   const filteredAccounts = filterAccounts(accounts, accountStatus);
 
   const handleSaved = async (message: string) => {
     setFeedback(message);
+  };
+
+  const commitAccountToggle = async ({ account, nextActive }: PendingAccountToggle) => {
+    if (pendingAccountId !== null) {
+      return;
+    }
+
+    setFeedback(null);
+    setToggleError(null);
+    setPendingAccountId(account.id);
+
+    try {
+      await toggleAccountMutation.mutateAsync({ account, nextActive });
+    } catch (error) {
+      setToggleError(
+        getErrorMessage(
+          error,
+          nextActive
+            ? "Não foi possível ativar a conta. Tente novamente."
+            : "Não foi possível inativar a conta. Tente novamente.",
+        ),
+      );
+      setPendingAccountId(null);
+      return;
+    }
+
+    setPendingToggle(null);
+    setFeedback(nextActive ? "Conta ativada com sucesso." : "Conta inativada com sucesso.");
+    setPendingAccountId(null);
+  };
+
+  const handleAccountToggle = (account: ContaResponse, nextActive: boolean) => {
+    if (pendingAccountId !== null) {
+      return;
+    }
+
+    setFeedback(null);
+    setToggleError(null);
+
+    if (!nextActive) {
+      setPendingToggle({ account, nextActive });
+      return;
+    }
+
+    void commitAccountToggle({ account, nextActive });
+  };
+
+  const handleEdit = (account: ContaResponse) => {
+    setFeedback(null);
+    setToggleError(null);
+    setEditorAccount(account);
+  };
+
+  const handleOpenCreate = () => {
+    setFeedback(null);
+    setToggleError(null);
+    setEditorAccount(null);
   };
 
   return (
@@ -146,11 +239,9 @@ function AccountsPage() {
           />
           <Button
             className="w-full md:w-auto"
+            isDisabled={pendingAccountId !== null}
             leadingIcon={<PlusIcon aria-hidden="true" />}
-            onPress={() => {
-              setFeedback(null);
-              setIsCreationOpen(true);
-            }}
+            onPress={handleOpenCreate}
             size="md"
           >
             Nova conta
@@ -158,11 +249,14 @@ function AccountsPage() {
         </header>
 
         {feedback && <InlineMessage>{feedback}</InlineMessage>}
+        {toggleError && !pendingToggle && (
+          <InlineMessage tone="danger">{toggleError}</InlineMessage>
+        )}
 
         <Card as="section" aria-labelledby="accounts-list-title">
           <CardHeader className="flex-col items-start md:flex-row md:items-center">
             <div className="min-w-0">
-              <h2 className="m-0 text-title-compact text-foreground" id="accounts-list-title">
+              <h2 className="m-0 text-title text-foreground" id="accounts-list-title">
                 Todas as contas
               </h2>
               <p className="m-0 mt-1.5 text-caption text-muted">
@@ -195,28 +289,34 @@ function AccountsPage() {
                   <thead>
                     <tr className="border-b border-border">
                       <th
-                        className="px-5.5 py-3.5 text-left text-caption-strong tracking-label text-subtle uppercase max-[40rem]:px-4"
+                        className="px-5.5 py-3.5 text-left text-caption text-subtle max-[40rem]:px-4"
                         scope="col"
                       >
                         Conta
                       </th>
                       <th
-                        className="px-5.5 py-3.5 text-left text-caption-strong tracking-label text-subtle uppercase max-[40rem]:px-4"
+                        className="px-5.5 py-3.5 text-left text-caption text-subtle max-[40rem]:px-4"
                         scope="col"
                       >
                         Status
                       </th>
                       <th
-                        className="px-5.5 py-3.5 text-left text-caption-strong tracking-label text-subtle uppercase max-[40rem]:hidden"
+                        className="px-5.5 py-3.5 text-left text-caption text-subtle max-[40rem]:hidden"
                         scope="col"
                       >
                         Data inicial
                       </th>
                       <th
-                        className="px-5.5 py-3.5 text-right text-caption-strong tracking-label text-subtle uppercase max-[40rem]:px-4"
+                        className="px-5.5 py-3.5 text-right text-caption text-subtle max-[40rem]:px-4"
                         scope="col"
                       >
                         Saldo inicial
+                      </th>
+                      <th
+                        className="px-5.5 py-3.5 text-right text-caption text-subtle max-[40rem]:px-4"
+                        scope="col"
+                      >
+                        <span className="sr-only">Ações</span>
                       </th>
                     </tr>
                   </thead>
@@ -224,7 +324,7 @@ function AccountsPage() {
                     {filteredAccounts.map((account) => (
                       <tr className="border-b border-border last:border-b-0" key={account.id}>
                         <td className="min-w-0 px-5.5 py-4 align-middle max-[40rem]:px-4">
-                          <span className="block truncate text-label text-foreground">
+                          <span className="block truncate text-body-strong text-foreground">
                             {account.nome}
                           </span>
                           <span className="mt-1 block text-caption text-subtle">
@@ -234,11 +334,34 @@ function AccountsPage() {
                         <td className="px-5.5 py-4 align-middle max-[40rem]:px-4">
                           <AccountStatus isActive={account.ativo} />
                         </td>
-                        <td className="px-5.5 py-4 align-middle text-body-small text-muted max-[40rem]:hidden">
+                        <td className="px-5.5 py-4 align-middle text-body text-muted max-[40rem]:hidden">
                           {formatInitialBalanceDate(account.dataSaldoInicial)}
                         </td>
-                        <td className="px-5.5 py-4 text-right align-middle text-label text-foreground tabular-nums max-[40rem]:px-4">
+                        <td className="px-5.5 py-4 text-right align-middle text-body-strong text-foreground tabular-nums max-[40rem]:px-4">
                           {formatAccountBalance(account.saldoInicial, account.moeda)}
+                        </td>
+                        <td className="px-5.5 py-4 align-middle max-[40rem]:px-4">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              aria-label={`Editar conta ${account.nome}`}
+                              isDisabled={pendingAccountId !== null}
+                              isIconOnly
+                              onPress={() => handleEdit(account)}
+                              size="sm"
+                              variant="ghost"
+                            >
+                              <PencilSimpleIcon aria-hidden="true" />
+                            </Button>
+                            <Switch
+                              aria-label={`${account.ativo ? "Inativar" : "Ativar"} conta ${account.nome}`}
+                              isDisabled={pendingAccountId !== null}
+                              isSelected={account.ativo}
+                              onChange={(nextActive) => handleAccountToggle(account, nextActive)}
+                            />
+                            {pendingAccountId === account.id && (
+                              <span className="sr-only">Salvando alteração</span>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -252,9 +375,29 @@ function AccountsPage() {
         </Card>
       </div>
 
-      {isCreationOpen && (
-        <AccountEditorModal onClose={() => setIsCreationOpen(false)} onSaved={handleSaved} />
+      {editorAccount !== undefined && (
+        <AccountEditorModal
+          account={editorAccount}
+          onClose={() => setEditorAccount(undefined)}
+          onSaved={handleSaved}
+        />
       )}
+      <AccountToggleConfirmation
+        errorMessage={toggleError}
+        isPending={pendingAccountId !== null}
+        onCancel={() => {
+          if (pendingAccountId === null) {
+            setPendingToggle(null);
+            setToggleError(null);
+          }
+        }}
+        onConfirm={() => {
+          if (pendingToggle) {
+            void commitAccountToggle(pendingToggle);
+          }
+        }}
+        pendingToggle={pendingToggle}
+      />
     </section>
   );
 }

@@ -6,14 +6,13 @@ import {
   type TextFieldProps as AriaTextFieldProps,
 } from "react-aria-components";
 
-import { tv } from "tailwind-variants";
-
+import { tv } from "../utils/tailwind";
 import { Description } from "./Description";
 import { FieldError } from "./FieldError";
 import { Label } from "./Label";
 
 const control = tv({
-  base: "min-h-28 min-w-0 resize-y rounded-xl border bg-surface px-3.5 py-3 text-body-small text-foreground caret-brand outline-none transition-colors placeholder:text-subtle motion-reduce:transition-none",
+  base: "min-h-28 min-w-0 resize-y rounded-xl border bg-surface px-3.5 py-3 text-body max-md:text-md text-foreground caret-brand outline-none transition-colors placeholder:text-subtle motion-reduce:transition-none",
   variants: {
     disabled: {
       false: "",

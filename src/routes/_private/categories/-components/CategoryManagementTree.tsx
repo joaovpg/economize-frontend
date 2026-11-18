@@ -68,7 +68,7 @@ export function CategoryManagementTree({
         {resultMessage}
       </output>
       {tree.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border-strong p-4 text-body-small text-muted">
+        <p className="rounded-xl border border-dashed border-border-strong p-4 text-body text-muted">
           {hasSearch ? "Nenhuma categoria encontrada." : "Nenhuma categoria cadastrada."}
         </p>
       ) : (

@@ -5,26 +5,21 @@ import { DotsThreeVerticalIcon } from "@phosphor-icons/react/dist/csr/DotsThreeV
 import { PencilSimpleIcon } from "@phosphor-icons/react/dist/csr/PencilSimple";
 import { RepeatIcon } from "@phosphor-icons/react/dist/csr/Repeat";
 import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
-import { tv } from "tailwind-variants";
 
 import { Button } from "../../../../components/Button";
 import { formatCurrency, formatSignedCurrency } from "../../../../lib/formatters";
 import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../../../services/categories/contracts";
 import { type ConsultaTransacaoItem } from "../../../../services/transactions/contracts";
-import { tailwindMergeConfig } from "../../../../utils/tailwindMergeConfig";
+import { tv } from "../../../../utils/tailwind";
 import { getAccountLabel, getCategoryLabel } from "./transaction-labels";
 
-const moneyStyles = tv(
-  {
-    base: "whitespace-nowrap tabular-nums",
-    variants: {
-      positive: { true: "text-success", false: "text-danger" },
-      size: { total: "text-card-title", entry: "text-caption-strong" },
-    },
+const moneyStyles = tv({
+  base: "whitespace-nowrap text-body-strong tabular-nums",
+  variants: {
+    positive: { true: "text-success", false: "text-danger" },
   },
-  { twMergeConfig: tailwindMergeConfig },
-);
+});
 
 type TransactionTableProps = {
   accounts: readonly ContaResponse[];
@@ -83,8 +78,17 @@ function isRecurringItem(item: ConsultaTransacaoItem) {
   return item.origem === "TRANSACAO_RECORRENTE" || item.origem === "PARCELA";
 }
 
+// Um valor nulo é tratado como Planejada para a exibição. O saldo inicial, que a API envia sem
+// situação, não é um lançamento planejado e fica sem o selo.
+function isPlannedItem(item: ConsultaTransacaoItem) {
+  if (item.origem === "SALDO_INICIAL_CONTA") return false;
+  return (item.situacao ?? "PLANEJADA") === "PLANEJADA";
+}
+
 function getTransactionDescription(item: ConsultaTransacaoItem) {
-  const { descricao, numeroParcela, totalParcelas } = item;
+  const { descricao } = item;
+  const numeroParcela = item.serie?.numeroParcela;
+  const totalParcelas = item.serie?.totalParcelas;
 
   if (
     typeof numeroParcela === "number" &&
@@ -109,7 +113,7 @@ function formatTransactionDate(date: string) {
 }
 
 function getItemKey(item: ConsultaTransacaoItem) {
-  return `${item.operacaoId ?? item.segmentoRecorrenciaId ?? item.grupoRecorrenciaId ?? "item"}-${item.contaId}-${item.dataFinanceira}-${item.origem}`;
+  return item.chaveItem;
 }
 
 function TransactionActions({
@@ -135,7 +139,7 @@ function TransactionActions({
       >
         <Menu aria-label={`Ações de ${getTransactionDescription(item)}`} className="outline-none">
           <MenuItem
-            className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-body-small text-foreground outline-none data-focused:bg-surface-muted"
+            className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-body text-foreground outline-none data-focused:bg-surface-muted"
             onAction={() => onEdit(item)}
             textValue="Editar"
           >
@@ -143,7 +147,7 @@ function TransactionActions({
             Editar
           </MenuItem>
           <MenuItem
-            className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-body-small text-danger outline-none data-focused:bg-danger-soft"
+            className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-body text-danger outline-none data-focused:bg-danger-soft"
             onAction={() => onDelete(item)}
             textValue="Excluir"
           >
@@ -177,10 +181,10 @@ export function TransactionTable({
       <table className="block w-full border-collapse text-left md:table md:table-fixed">
         <caption className="block border-b border-border p-5.5 text-left md:table-caption">
           <span className="flex items-baseline justify-between gap-4">
-            <span className="text-card-title text-foreground" id="transactions-list-title">
+            <span className="text-title text-foreground" id="transactions-list-title">
               {title}
             </span>
-            <span className="text-meta text-subtle">
+            <span className="text-caption text-subtle">
               {items.length} {items.length === 1 ? "item" : "itens"}
             </span>
           </span>
@@ -212,7 +216,7 @@ export function TransactionTable({
             <tr className="grid grid-cols-[minmax(0,1fr)_auto_2rem] items-center border-b border-border bg-surface-muted py-4 pr-3 pl-4 md:table-row md:p-0">
               <th
                 aria-label="Saldo de abertura, antes da primeira movimentação"
-                className="min-w-0 p-0 pr-3 text-left text-caption-strong text-foreground md:px-5 md:py-4"
+                className="min-w-0 p-0 pr-3 text-left text-body-strong text-foreground md:px-5 md:py-4"
                 colSpan={2}
                 scope="row"
               >
@@ -225,7 +229,7 @@ export function TransactionTable({
                 aria-label={`Saldo de abertura ${formatCurrency(openingBalance)}`}
                 className="p-0 pr-1 text-right md:py-4 md:pl-5"
               >
-                <strong className={moneyStyles({ positive: openingBalance >= 0, size: "total" })}>
+                <strong className={moneyStyles({ positive: openingBalance >= 0 })}>
                   {formatCurrency(openingBalance)}
                 </strong>
               </td>
@@ -234,7 +238,7 @@ export function TransactionTable({
           )}
           {items.length === 0 && (
             <tr className="block md:table-row">
-              <td className="block p-5.5 text-body-small text-muted md:table-cell" colSpan={4}>
+              <td className="block p-5.5 text-body text-muted md:table-cell" colSpan={4}>
                 Nenhuma movimentação encontrada com esses filtros.
               </td>
             </tr>
@@ -255,7 +259,7 @@ export function TransactionTable({
                   )}
                 </td>
                 <td
-                  aria-label={`${getTransactionDescription(item)}${isRecurringItem(item) ? ", transação recorrente" : ""}${item.situacao === "PLANEJADA" ? ", planejada" : ""}, ${getCategoryLabel(item, categories)}, ${getAccountLabel(item, accounts)}`}
+                  aria-label={`${getTransactionDescription(item)}${isRecurringItem(item) ? ", transação recorrente" : ""}${isPlannedItem(item) ? ", planejada" : ""}, ${getCategoryLabel(item, categories)}, ${getAccountLabel(item, accounts)}`}
                   className="min-w-0 p-0 pr-3 md:px-5 md:py-3 md:align-top"
                 >
                   <div className="flex flex-col gap-1">
@@ -269,11 +273,11 @@ export function TransactionTable({
                           <span className="sr-only">Transação recorrente</span>
                         </span>
                       )}
-                      <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-1 text-caption-strong wrap-break-word text-foreground">
+                      <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-1 text-body-strong wrap-break-word text-foreground">
                         <span className="min-w-0 wrap-break-word">
                           {getTransactionDescription(item)}
                         </span>
-                        {item.situacao === "PLANEJADA" && (
+                        {isPlannedItem(item) && (
                           <span className="inline-block rounded border border-border px-1 text-caption text-muted">
                             Planejada
                           </span>
@@ -286,7 +290,7 @@ export function TransactionTable({
                   </div>
                 </td>
                 <td className="p-0 pr-1 text-right md:py-3 md:pl-5 md:align-middle">
-                  <strong className={moneyStyles({ positive: item.valor >= 0, size: "entry" })}>
+                  <strong className={moneyStyles({ positive: item.valor >= 0 })}>
                     {formatSignedCurrency(item.valor)}
                   </strong>
                 </td>
@@ -305,10 +309,10 @@ export function TransactionTable({
                 scope="row"
               >
                 <span className="flex flex-col gap-1">
-                  <span className="text-caption-strong text-foreground">
+                  <span className="text-body-strong text-foreground">
                     Fechamento {formatTransactionDate(group.date)}
                   </span>
-                  <span className="text-caption wrap-break-word text-muted">
+                  <span className="text-caption wrap-break-word text-muted tabular-nums">
                     Recebido {formatCurrency(group.entries)} · Gasto {formatCurrency(group.exits)}
                   </span>
                 </span>
@@ -319,7 +323,7 @@ export function TransactionTable({
               >
                 <div className="flex flex-col items-end gap-1">
                   <span className="text-caption text-muted">{balanceLabel}</span>
-                  <strong className={moneyStyles({ positive: group.balance >= 0, size: "total" })}>
+                  <strong className={moneyStyles({ positive: group.balance >= 0 })}>
                     {formatCurrency(group.balance)}
                   </strong>
                 </div>

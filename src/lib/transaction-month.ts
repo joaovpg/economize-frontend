@@ -1,8 +1,9 @@
 import { Temporal } from "@js-temporal/polyfill";
 import { z } from "zod";
 
+import { transactionTimeZone } from "./date";
+
 const yearMonthPattern = /^\d{4}-(0[1-9]|1[0-2])$/;
-const transactionTimeZone = "America/Sao_Paulo";
 
 export const yearMonthSchema = z.string().regex(yearMonthPattern, "Use o formato yyyy-MM.");
 

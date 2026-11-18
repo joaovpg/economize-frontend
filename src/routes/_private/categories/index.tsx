@@ -170,7 +170,7 @@ function CategoriesPage() {
             />
             <div className="flex w-full flex-col justify-between gap-4 md:flex-row md:items-end">
               <div className="flex w-full min-w-0 flex-col gap-1.5 md:w-auto">
-                <h2 className="text-title-compact text-foreground" id="categories-list-title">
+                <h2 className="text-title text-foreground" id="categories-list-title">
                   Suas categorias
                 </h2>
                 <p className="text-caption text-muted">

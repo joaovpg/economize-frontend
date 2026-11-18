@@ -7,11 +7,12 @@ import {
 
 import { CheckIcon } from "@phosphor-icons/react/dist/csr/Check";
 import { MinusIcon } from "@phosphor-icons/react/dist/csr/Minus";
-import { tv } from "tailwind-variants";
+
+import { tv } from "../utils/tailwind";
 
 const checkboxRootStyles = tv(
   {
-    base: "group flex min-h-6.5 min-w-0 cursor-pointer select-none items-center gap-2 text-label text-muted outline-none transition-colors duration-150 ease-out data-disabled:cursor-not-allowed data-disabled:opacity-50 max-[48rem]:min-h-11 motion-reduce:transition-none",
+    base: "group flex min-h-6.5 min-w-0 cursor-pointer select-none items-center gap-2 text-body-strong text-muted outline-none transition-colors duration-150 ease-out data-disabled:cursor-not-allowed data-disabled:opacity-50 max-[48rem]:min-h-11 motion-reduce:transition-none",
     defaultVariants: {
       invalid: false,
       size: "default",

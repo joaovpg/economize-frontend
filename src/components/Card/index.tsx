@@ -1,7 +1,8 @@
 import { createElement, type ComponentPropsWithRef } from "react";
 
-import { twMerge } from "tailwind-merge";
-import { tv, type VariantProps } from "tailwind-variants";
+import { tv, twMerge } from "../../utils/tailwind";
+
+import type { VariantProps } from "tailwind-variants";
 
 type CardElement = "div" | "section" | "aside" | "form" | "output";
 export type CardProps<T extends CardElement = "div"> = ComponentPropsWithRef<T> & { as?: T };

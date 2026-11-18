@@ -13,9 +13,8 @@ import {
 
 import { today, getLocalTimeZone, type CalendarDate } from "@internationalized/date";
 import { CalendarBlankIcon } from "@phosphor-icons/react/dist/csr/CalendarBlank";
-import { twMerge } from "tailwind-merge";
-import { tv } from "tailwind-variants";
 
+import { tv, twMerge } from "../../utils/tailwind";
 import { Description } from "../Description";
 import { FieldError } from "../FieldError";
 import { Label } from "../Label";
@@ -96,7 +95,7 @@ export function DatePicker({
             <Group className={control({ disabled: isDisabled, invalid: hasError && !isDisabled })}>
               <DateInput
                 key={clearVersion}
-                className="flex min-w-0 flex-1 overflow-x-auto text-body-small text-foreground outline-none data-disabled:text-subtle"
+                className="flex min-w-0 flex-1 overflow-x-auto text-body text-foreground outline-none data-disabled:text-subtle max-md:text-md"
               >
                 {(segment) =>
                   segment.type === "day" ? (

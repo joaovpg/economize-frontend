@@ -1,10 +1,10 @@
-import { tv } from "tailwind-variants";
+import { tv } from "../../utils/tailwind";
 
 import type { VariantProps } from "tailwind-variants";
 
 export const buttonStyles = tv(
   {
-    base: "inline-flex cursor-pointer select-none items-center justify-center gap-2 whitespace-nowrap rounded-control border border-transparent py-0 text-button no-underline shadow-none outline-none transition-colors duration-150 ease-out data-disabled:cursor-not-allowed data-pending:cursor-wait data-focus-visible:outline-solid data-focus-visible:outline-2 data-focus-visible:outline-offset-2 motion-reduce:transition-none [&>svg]:size-4.5 [&>svg]:shrink-0",
+    base: "inline-flex cursor-pointer select-none items-center justify-center gap-2 whitespace-nowrap rounded-control border border-transparent py-0 text-body-strong no-underline shadow-none outline-none transition-colors duration-150 ease-out data-disabled:cursor-not-allowed data-pending:cursor-wait data-focus-visible:outline-solid data-focus-visible:outline-2 data-focus-visible:outline-offset-2 motion-reduce:transition-none [&>svg]:size-4.5 [&>svg]:shrink-0",
     compoundVariants: [
       {
         class: "!h-auto !min-h-5",
@@ -13,16 +13,11 @@ export const buttonStyles = tv(
       },
     ],
     defaultVariants: {
-      emphasis: "default",
       isIconOnly: false,
       size: "md",
       variant: "primary",
     },
     variants: {
-      emphasis: {
-        default: "",
-        strong: "font-bold",
-      },
       isIconOnly: {
         false: "h-[var(--button-height)] min-w-max px-(--button-padding-x)",
         true: "size-[var(--button-height)] min-w-0 flex-none px-0",

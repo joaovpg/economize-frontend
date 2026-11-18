@@ -12,7 +12,7 @@ export const categoriaResponseSchema = z.looseObject({
 
 export const categoriasResponseSchema = z.array(categoriaResponseSchema);
 
-const categoriaNomeSchema = z.string().regex(/\S/);
+const categoriaNomeSchema = z.string().max(80, "Use até 80 caracteres.").regex(/\S/);
 const categoriaCorSchema = z
   .string()
   .refine((value) => /^(#[0-9A-Fa-f]{6})?$/.test(value.trim()))

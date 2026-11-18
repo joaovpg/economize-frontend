@@ -6,7 +6,7 @@
   --shadow-nav-active: inset 0 1px 0
     color-mix(in oklch, var(--color-surface-value) 82%, transparent);
   --shadow-popover: 0 12px 32px rgb(15 23 42 / 0.12);
-  --shadow-dialog: 0 24px 64px rgb(15 23 42 / 0.18);
+  --shadow-dialog: 0 1px 2px rgb(15 23 42 / 0.05), 0 6px 20px rgb(15 23 42 / 0.08);
   --shadow-tree-node: 0 1px 2px rgb(15 23 42 / 0.18);
 
   --blur-header: 14px;

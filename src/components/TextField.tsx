@@ -7,9 +7,8 @@ import {
 
 import { EyeIcon } from "@phosphor-icons/react/dist/csr/Eye";
 import { EyeSlashIcon } from "@phosphor-icons/react/dist/csr/EyeSlash";
-import { twMerge } from "tailwind-merge";
-import { tv } from "tailwind-variants";
 
+import { tv, twMerge } from "../utils/tailwind";
 import { Button } from "./Button";
 import { Description } from "./Description";
 import { FieldError } from "./FieldError";
@@ -33,7 +32,7 @@ const control = tv({
 
 const inputStyles = tv(
   {
-    base: "min-w-0 flex-1 border-0 bg-transparent text-body-small caret-brand outline-none placeholder:text-subtle",
+    base: "min-w-0 flex-1 border-0 bg-transparent text-body max-md:text-md caret-brand outline-none placeholder:text-subtle",
     defaultVariants: {
       disabled: false,
     },

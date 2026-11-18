@@ -110,7 +110,7 @@ function RegisterPage() {
           className="block h-1 w-10 rounded-full bg-linear-to-r from-brand to-teal-200"
           aria-hidden="true"
         />
-        <h1 className="m-0 max-w-[11ch] text-display-hero text-balance" id="auth-title">
+        <h1 className="m-0 max-w-[11ch] text-title-page text-balance" id="auth-title">
           Crie sua conta.
         </h1>
         <p className="m-0 max-w-[35ch] text-body text-pretty text-muted">
@@ -123,7 +123,7 @@ function RegisterPage() {
         <CardBody spacing="compact">
           {submitError && (
             <p
-              className="m-0 rounded-md bg-danger-soft px-3 py-2 text-validation text-danger"
+              className="m-0 rounded-md bg-danger-soft px-3 py-2 text-caption text-danger"
               role="alert"
               aria-live="assertive"
             >

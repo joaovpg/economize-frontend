@@ -15,9 +15,9 @@ import {
 
 import { CaretDownIcon } from "@phosphor-icons/react/dist/csr/CaretDown";
 import { CheckIcon } from "@phosphor-icons/react/dist/csr/Check";
-import { tv, cn } from "tailwind-variants";
 
 import { composeTailwindRenderProps } from "../utils/composeTailwindRenderProps";
+import { cn, tv } from "../utils/tailwind";
 import { Description } from "./Description";
 import { FieldError } from "./FieldError";
 import { IconSlot } from "./IconSlot";
@@ -45,7 +45,7 @@ const control = tv({
 
 const inputStyles = tv(
   {
-    base: "min-w-0 flex-1 border-0 bg-transparent text-body-small caret-brand outline-none placeholder:text-subtle",
+    base: "min-w-0 flex-1 border-0 bg-transparent text-body max-md:text-md caret-brand outline-none placeholder:text-subtle",
     defaultVariants: {
       disabled: false,
     },
@@ -60,7 +60,7 @@ const inputStyles = tv(
 );
 
 const itemStyles = tv({
-  base: "group flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-body-small text-foreground outline-none transition-colors duration-150 ease-out data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focused:bg-surface-muted data-selected:bg-brand-soft data-selected:text-brand-hover motion-reduce:transition-none",
+  base: "group flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-body text-foreground outline-none transition-colors duration-150 ease-out data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focused:bg-surface-muted data-selected:bg-brand-soft data-selected:text-brand-hover motion-reduce:transition-none",
 });
 
 const itemIndicatorStyles = tv({
@@ -278,7 +278,7 @@ export function Select<T = object, M extends SelectionMode = "single">({
             listBoxClassName,
           )}
           renderEmptyState={() => (
-            <span className="px-3 py-2 text-body-small text-subtle">Nenhuma opção encontrada</span>
+            <span className="px-3 py-2 text-body text-subtle">Nenhuma opção encontrada</span>
           )}
         >
           {children}

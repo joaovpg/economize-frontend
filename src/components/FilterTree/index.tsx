@@ -176,7 +176,7 @@ export function FilterTree<TSelectionKey extends string>({
             <div
               className={[
                 "flex min-h-6.5 min-w-0 items-center gap-2 rounded-lg pl-[calc((var(--tree-item-level)-1)*1rem)] text-caption text-muted max-[48rem]:min-h-11",
-                hasChildren(item) ? "font-medium" : "",
+                hasChildren(item) ? "font-semibold" : "",
                 isFocusVisible ? "outline-2 outline-offset-2 outline-solid outline-brand" : "",
               ]
                 .filter(Boolean)

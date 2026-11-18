@@ -255,10 +255,12 @@ export function TransactionTypeField({
 }
 
 export function TransactionSituationField({
+  description,
   isDisabled = false,
   onChange,
   value,
 }: {
+  description?: string;
   isDisabled?: boolean;
   onChange: (value: TransactionSituation) => void;
   value: TransactionSituation;
@@ -266,6 +268,7 @@ export function TransactionSituationField({
   return (
     <RadioGroup
       appearance="segmented"
+      description={description}
       isDisabled={isDisabled}
       label="Situação"
       name="situacao"

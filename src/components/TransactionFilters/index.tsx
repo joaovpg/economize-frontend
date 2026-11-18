@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { GearSixIcon } from "@phosphor-icons/react/dist/csr/GearSix";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/csr/MagnifyingGlass";
 import { XIcon } from "@phosphor-icons/react/dist/csr/X";
-import { tv } from "tailwind-variants";
 
 import { buildCategoryTree, type CategoryTreeNode } from "../../lib/category-tree";
 import {
@@ -19,28 +18,23 @@ import {
 import { parseTransactionMonth, toYearMonth } from "../../lib/transaction-month";
 import { type ContaResponse } from "../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../services/categories/contracts";
+import { tv } from "../../utils/tailwind";
 import { Button } from "../Button";
 import { Card, CardBody, CardFooter, CardHeader } from "../Card";
 import { Checkbox } from "../Checkbox";
 import { FilterTree, type FilterTreeItem } from "../FilterTree";
 import { Label } from "../Label";
 import { Link } from "../Link";
+import { ModalBody, ModalFooter } from "../Modal";
 import { MonthYearFilter } from "../MonthYearFilter";
 
+// Estilo da barra lateral. No modo modal o componente não usa Card: corpo e rodapé vêm do Modal.
 const filtersStyles = tv({
-  base: "sticky top-6 w-auto self-start m-[1.5rem_0_1.5rem_1.5rem] max-h-[calc(100svh-3rem)] overflow-auto",
-  defaultVariants: {
-    presentation: "sidebar",
-  },
+  base: "sticky top-6 w-auto self-start m-[1.5rem_0_1.5rem_1.5rem] max-h-[calc(100svh-3rem)] overflow-auto max-[48rem]:static max-[48rem]:m-[0_1rem_1rem] max-[48rem]:max-h-none",
   variants: {
     open: {
       false: "max-[48rem]:hidden",
       true: "max-[48rem]:grid",
-    },
-    presentation: {
-      modal:
-        "!static !m-0 !max-h-none !overflow-visible !rounded-none !border-0 !bg-transparent !shadow-none",
-      sidebar: "max-[48rem]:static max-[48rem]:m-[0_1rem_1rem] max-[48rem]:max-h-none",
     },
   },
 });
@@ -254,157 +248,170 @@ export function TransactionFilters({
     onClear();
   };
 
+  const isModal = presentation === "modal";
+  const { Body, Footer } = isModal
+    ? { Body: ModalBody, Footer: ModalFooter }
+    : { Body: CardBody, Footer: CardFooter };
+  const formProps = isModal
+    ? { "aria-label": ariaLabel, className: "flex min-h-0 min-w-0 flex-1 flex-col", id: filterId }
+    : { className: "grid gap-5.5" };
+  const sidebarFooterColumns = applyOnChange ? "grid-cols-1" : "grid-cols-2 gap-2";
+  const sidebarHeader = isModal ? null : (
+    <CardHeader>
+      <div>
+        <h2 className="m-0 text-title">Filtros</h2>
+        <p className="m-0 text-caption text-subtle">
+          {activeFilterCount} {activeFilterCount === 1 ? "ativo" : "ativos"}
+        </p>
+      </div>
+      <Button
+        className="hidden! max-[48rem]:inline-flex!"
+        variant="ghost"
+        size="sm"
+        isIconOnly
+        aria-label="Fechar filtros"
+        onPress={onClose}
+      >
+        <XIcon aria-hidden="true" />
+      </Button>
+    </CardHeader>
+  );
+
+  const filterForm = (
+    <form
+      {...formProps}
+      onSubmit={(event) => {
+        if (applyOnChange) {
+          event.preventDefault();
+          if (presentation === "modal") {
+            onClose();
+          }
+          return;
+        }
+
+        void handleSubmit(onApply)(event);
+      }}
+    >
+      <Body className="gap-5.5">
+        <AriaTextField className="grid gap-2.5">
+          <Label className="m-0 text-body-strong text-muted">Buscar transação</Label>
+          <div className="flex min-h-10.5 min-w-0 items-center gap-2.5 rounded-xl border border-border bg-surface px-3 text-subtle transition-colors duration-150 ease-out focus-within:border-brand focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand hover:border-border-strong hover:bg-surface-muted motion-reduce:transition-none [&>svg]:size-4 [&>svg]:shrink-0">
+            <MagnifyingGlassIcon aria-hidden="true" />
+            <Input
+              {...searchField}
+              id={`${filterId}-search`}
+              className="min-w-0 flex-1 border-0 bg-transparent text-body text-foreground caret-brand outline-none placeholder:text-subtle max-md:text-md"
+              onChange={(event) => {
+                void searchField.onChange(event);
+                if (applyOnChange) {
+                  onSearchChange?.(event.currentTarget.value);
+                }
+              }}
+              placeholder="Nome, descrição..."
+              type="search"
+            />
+          </div>
+        </AriaTextField>
+
+        <fieldset className="grid min-w-0 gap-2.5 border-0 p-0">
+          <legend className="m-0 flex w-full items-center justify-between gap-2 text-caption text-muted">
+            <span>Categorias</span>
+            <Link
+              aria-label="Gerenciar categorias"
+              className="size-8! min-h-8! rounded-lg!"
+              isIconOnly
+              preload="intent"
+              size="sm"
+              to="/categories"
+              variant="ghost"
+            >
+              <GearSixIcon aria-hidden="true" />
+            </Link>
+          </legend>
+          <FilterTree
+            ariaLabel="Categorias"
+            items={categoryFilterItems}
+            onSelectionChange={handleCategoryTreeSelectionChange}
+            selectedKeys={selectedCategories}
+          />
+        </fieldset>
+
+        <fieldset className="grid min-w-0 gap-2.5 border-0 p-0">
+          <legend className="m-0 flex w-full items-center justify-between gap-2 text-caption text-muted">
+            <span>Contas</span>
+            <Link
+              aria-label="Gerenciar contas"
+              className="size-8! min-h-8! rounded-lg!"
+              isIconOnly
+              preload="intent"
+              size="sm"
+              to="/accounts"
+              variant="ghost"
+            >
+              <GearSixIcon aria-hidden="true" />
+            </Link>
+          </legend>
+          <FilterTree
+            ariaLabel="Contas"
+            items={accountFilterItems}
+            onSelectionChange={handleAccountTreeSelectionChange}
+            selectedKeys={selectedAccounts}
+          />
+        </fieldset>
+
+        <div className="grid gap-2.5">
+          {showMonth && (
+            <MonthYearFilter
+              onChange={(month) => setValue("month", toYearMonth(month), { shouldDirty: true })}
+              value={parseTransactionMonth(selectedMonth)}
+            />
+          )}
+          <TransactionFilterCheckbox
+            isDisabled={isPreviousBalanceDisabled}
+            isSelected={selectedIncludePreviousBalance}
+            onChange={handlePreviousBalanceChange}
+          >
+            Incluir saldo anterior
+          </TransactionFilterCheckbox>
+          {isPreviousBalanceDisabled && (
+            <p className="m-0 text-caption text-subtle">
+              Disponível sem recortes de conta, categoria ou busca.
+            </p>
+          )}
+        </div>
+      </Body>
+      <Footer className={isModal ? undefined : sidebarFooterColumns}>
+        <Button variant="secondary" size="sm" type="button" onPress={handleClearFilters}>
+          Limpar
+        </Button>
+        {(!applyOnChange || presentation === "modal") && (
+          <Button
+            variant="primary"
+            size="sm"
+            type={applyOnChange ? "button" : "submit"}
+            onPress={applyOnChange ? onClose : undefined}
+          >
+            {applyOnChange ? "Concluir" : "Aplicar"}
+          </Button>
+        )}
+      </Footer>
+    </form>
+  );
+
+  if (isModal) {
+    return filterForm;
+  }
+
   return (
     <Card
       as="aside"
       aria-label={ariaLabel}
-      className={filtersStyles({ open: isOpen, presentation })}
+      className={filtersStyles({ open: isOpen })}
       data-presentation={presentation}
       id={filterId}
     >
-      <CardHeader>
-        <div>
-          <h2 className="m-0 text-title-compact">Filtros</h2>
-          <p className="m-0 text-meta text-subtle">
-            {activeFilterCount} {activeFilterCount === 1 ? "ativo" : "ativos"}
-          </p>
-        </div>
-        <Button
-          className={presentation === "modal" ? "inline-flex!" : "hidden! max-[48rem]:inline-flex!"}
-          variant="ghost"
-          size="sm"
-          isIconOnly
-          aria-label="Fechar filtros"
-          onPress={onClose}
-        >
-          <XIcon aria-hidden="true" />
-        </Button>
-      </CardHeader>
-
-      <form
-        className="grid gap-5.5"
-        onSubmit={(event) => {
-          if (applyOnChange) {
-            event.preventDefault();
-            if (presentation === "modal") {
-              onClose();
-            }
-            return;
-          }
-
-          void handleSubmit(onApply)(event);
-        }}
-      >
-        <CardBody className="gap-5.5">
-          <AriaTextField className="grid gap-2.5">
-            <Label className="m-0 text-caption-strong! tracking-label text-muted! uppercase">
-              Buscar transação
-            </Label>
-            <div className="flex min-h-10.5 min-w-0 items-center gap-2.5 rounded-xl border border-border bg-surface px-3 text-subtle transition-colors duration-150 ease-out focus-within:border-brand focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand hover:border-border-strong hover:bg-surface-muted motion-reduce:transition-none [&>svg]:size-4 [&>svg]:shrink-0">
-              <MagnifyingGlassIcon aria-hidden="true" />
-              <Input
-                {...searchField}
-                id={`${filterId}-search`}
-                className="min-w-0 flex-1 border-0 bg-transparent text-body-small text-foreground caret-brand outline-none placeholder:text-subtle"
-                onChange={(event) => {
-                  void searchField.onChange(event);
-                  if (applyOnChange) {
-                    onSearchChange?.(event.currentTarget.value);
-                  }
-                }}
-                placeholder="Nome, descrição..."
-                type="search"
-              />
-            </div>
-          </AriaTextField>
-
-          <fieldset className="grid min-w-0 gap-2.5 border-0 p-0">
-            <legend className="m-0 flex w-full items-center justify-between gap-2 text-caption-strong tracking-label text-muted uppercase">
-              <span>Categorias</span>
-              <Link
-                aria-label="Gerenciar categorias"
-                className="size-8! min-h-8! rounded-lg!"
-                isIconOnly
-                preload="intent"
-                size="sm"
-                to="/categories"
-                variant="ghost"
-              >
-                <GearSixIcon aria-hidden="true" />
-              </Link>
-            </legend>
-            <FilterTree
-              ariaLabel="Categorias"
-              items={categoryFilterItems}
-              onSelectionChange={handleCategoryTreeSelectionChange}
-              selectedKeys={selectedCategories}
-            />
-          </fieldset>
-
-          <fieldset className="grid min-w-0 gap-2.5 border-0 p-0">
-            <legend className="m-0 flex w-full items-center justify-between gap-2 text-caption-strong tracking-label text-muted uppercase">
-              <span>Contas</span>
-              <Link
-                aria-label="Gerenciar contas"
-                className="size-8! min-h-8! rounded-lg!"
-                isIconOnly
-                preload="intent"
-                size="sm"
-                to="/accounts"
-                variant="ghost"
-              >
-                <GearSixIcon aria-hidden="true" />
-              </Link>
-            </legend>
-            <FilterTree
-              ariaLabel="Contas"
-              items={accountFilterItems}
-              onSelectionChange={handleAccountTreeSelectionChange}
-              selectedKeys={selectedAccounts}
-            />
-          </fieldset>
-
-          <div className="grid gap-2.5">
-            {showMonth && (
-              <MonthYearFilter
-                onChange={(month) => setValue("month", toYearMonth(month), { shouldDirty: true })}
-                value={parseTransactionMonth(selectedMonth)}
-              />
-            )}
-            <TransactionFilterCheckbox
-              isDisabled={isPreviousBalanceDisabled}
-              isSelected={selectedIncludePreviousBalance}
-              onChange={handlePreviousBalanceChange}
-            >
-              Incluir saldo anterior
-            </TransactionFilterCheckbox>
-            {isPreviousBalanceDisabled && (
-              <p className="m-0 text-caption text-subtle">
-                Disponível sem recortes de conta, categoria ou busca.
-              </p>
-            )}
-          </div>
-        </CardBody>
-        <CardFooter
-          className={
-            applyOnChange && presentation === "sidebar" ? "grid-cols-1" : "grid-cols-2 gap-2"
-          }
-        >
-          <Button variant="secondary" size="sm" type="button" onPress={handleClearFilters}>
-            Limpar
-          </Button>
-          {(!applyOnChange || presentation === "modal") && (
-            <Button
-              variant="primary"
-              size="sm"
-              type={applyOnChange ? "button" : "submit"}
-              onPress={applyOnChange ? onClose : undefined}
-            >
-              {applyOnChange ? "Concluir" : "Aplicar"}
-            </Button>
-          )}
-        </CardFooter>
-      </form>
+      {sidebarHeader}
+      {filterForm}
     </Card>
   );
 }

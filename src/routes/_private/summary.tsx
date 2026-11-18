@@ -123,7 +123,7 @@ function SummaryPage({ accounts, categories }: SummaryPageProps) {
             aria-label="Filtros ativos"
             aria-live="polite"
           >
-            <span className="text-meta text-subtle uppercase">Filtros ativos</span>
+            <span className="text-caption text-subtle">Filtros ativos</span>
             <div className="flex flex-wrap gap-2">
               <FilterChip>Mês: {getMonthLabel(search.month)}</FilterChip>
               {search.categories.length > 0 && (
@@ -136,19 +136,19 @@ function SummaryPage({ accounts, categories }: SummaryPageProps) {
           <Card as="section" aria-labelledby="summary-empty-title">
             <CardHeader>
               <div>
-                <h2 className="m-0 text-title-compact text-foreground" id="summary-empty-title">
+                <h2 className="m-0 text-title text-foreground" id="summary-empty-title">
                   Resumo indisponível
                 </h2>
-                <p className="m-0 mt-1.5 text-body-small text-muted">
+                <p className="m-0 mt-1.5 text-body text-muted">
                   O resumo será disponibilizado quando existir uma rota própria para seus dados.
                 </p>
               </div>
-              <span className="text-meta text-subtle">
+              <span className="text-caption text-subtle">
                 {activeFilterCount} {activeFilterCount === 1 ? "filtro" : "filtros"}
               </span>
             </CardHeader>
             <CardBody>
-              <p className="m-0 text-body-small text-muted">
+              <p className="m-0 text-body text-muted">
                 Enquanto isso, consulte suas movimentações na tela de transações.
               </p>
             </CardBody>

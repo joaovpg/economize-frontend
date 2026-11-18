@@ -33,3 +33,9 @@ export async function postLogin(input: LoginRequest): Promise<void> {
   const { csrfToken } = await parseApiResponse(response, csrfTokenResponseSchema);
   saveCsrfToken(csrfToken);
 }
+
+export async function postLogout(): Promise<void> {
+  await api.post("autenticacao/logout", {
+    retry: { limit: 0 },
+  });
+}

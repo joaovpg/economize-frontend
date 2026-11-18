@@ -9,9 +9,8 @@ import {
   type RadioGroupProps as AriaRadioGroupProps,
 } from "react-aria-components";
 
-import { tv } from "tailwind-variants";
-
 import { composeTailwindRenderProps } from "../utils/composeTailwindRenderProps";
+import { tv } from "../utils/tailwind";
 import { Description } from "./Description";
 import { FieldError } from "./FieldError";
 import { IconSlot } from "./IconSlot";
@@ -64,10 +63,10 @@ const radioButtonStyles = tv(
     variants: {
       appearance: {
         default:
-          "min-h-11 gap-2 rounded-lg text-label text-muted data-hovered:bg-surface-muted data-hovered:text-foreground data-pressed:bg-surface-strong data-pressed:text-foreground data-selected:text-foreground",
-        pill: "min-h-11 max-w-full gap-2 rounded-full border border-border bg-surface px-3.5 py-2 text-button text-foreground data-hovered:border-border-strong data-hovered:bg-surface-muted data-pressed:border-border-strong data-pressed:bg-surface-strong data-selected:border-brand data-selected:bg-brand-soft data-selected:text-brand-hover",
+          "min-h-11 gap-2 rounded-lg text-body-strong text-muted data-hovered:bg-surface-muted data-hovered:text-foreground data-pressed:bg-surface-strong data-pressed:text-foreground data-selected:text-foreground",
+        pill: "min-h-11 max-w-full gap-2 rounded-full border border-border bg-surface px-3.5 py-2 text-body-strong text-foreground data-hovered:border-border-strong data-hovered:bg-surface-muted data-pressed:border-border-strong data-pressed:bg-surface-strong data-selected:border-brand data-selected:bg-brand-soft data-selected:text-brand-hover",
         segmented:
-          "min-h-11 w-full justify-center gap-2 rounded-lg px-3 py-2 text-center text-button text-muted data-hovered:bg-surface data-hovered:text-foreground data-pressed:bg-surface-strong data-pressed:text-foreground data-selected:bg-surface data-selected:text-foreground data-selected:shadow-sm",
+          "min-h-11 w-full justify-center gap-2 rounded-lg px-3 py-2 text-center text-body-strong text-muted data-hovered:bg-surface data-hovered:text-foreground data-pressed:bg-surface-strong data-pressed:text-foreground data-selected:bg-surface data-selected:text-foreground data-selected:shadow-sm",
       },
       invalid: {
         false: "",

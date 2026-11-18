@@ -1,44 +1,58 @@
-import { z } from "zod";
-
 import { api, parseApiResponse, type ApiRequestOptions } from "../../lib/api";
 import {
   alterarTransacaoRequestSchema,
   consultaTransacoesResponseSchema,
   criarTransacaoRequestSchema,
+  escopoEdicaoTransacaoSchema,
   getTransacoesQuerySchema,
-  transacaoResponseSchema,
+  consultaTransacaoItemSchema,
   type AlterarTransacaoRequest,
   type CriarTransacaoRequest,
+  type DeleteTransacaoOptions,
   type GetTransacoesOptions,
 } from "./contracts";
+import { chaveEdicaoSchema, versaoEdicaoSchema } from "./shared";
 
 export async function postTransacao(input: CriarTransacaoRequest, options: ApiRequestOptions = {}) {
   const request = criarTransacaoRequestSchema.parse(input);
 
   return parseApiResponse(
     api.post("transacoes", { json: request, signal: options.signal }),
-    transacaoResponseSchema,
+    consultaTransacaoItemSchema,
   );
 }
 
 export async function putTransacao(
-  id: string,
+  chaveEdicao: string,
   input: AlterarTransacaoRequest,
   options: ApiRequestOptions = {},
 ) {
-  const transactionId = z.uuid().parse(id);
+  const editKey = chaveEdicaoSchema.parse(chaveEdicao);
   const request = alterarTransacaoRequestSchema.parse(input);
 
   return parseApiResponse(
-    api.put(`transacoes/${transactionId}`, { json: request, signal: options.signal }),
-    transacaoResponseSchema,
+    api.put(`transacoes/${encodeURIComponent(editKey)}`, {
+      json: request,
+      signal: options.signal,
+    }),
+    consultaTransacaoItemSchema,
   );
 }
 
-export async function deleteTransacao(id: string, options: ApiRequestOptions = {}) {
-  const transactionId = z.uuid().parse(id);
+export async function deleteTransacao(chaveEdicao: string, options: DeleteTransacaoOptions) {
+  const editKey = chaveEdicaoSchema.parse(chaveEdicao);
+  const versaoEdicao = versaoEdicaoSchema.parse(options.versaoEdicao);
+  const escopo = escopoEdicaoTransacaoSchema.optional().parse(options.escopo);
+  const searchParams = new URLSearchParams({ versaoEdicao });
 
-  await api.delete(`transacoes/${transactionId}`, { signal: options.signal });
+  if (escopo) {
+    searchParams.set("escopo", escopo);
+  }
+
+  await api.delete(`transacoes/${encodeURIComponent(editKey)}`, {
+    searchParams,
+    signal: options.signal,
+  });
 }
 
 export async function getTransacoes(options: GetTransacoesOptions) {

@@ -5,7 +5,6 @@ import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
   ModalBody,
-  ModalClose,
   ModalDescription,
   ModalFooter,
   ModalHeader,
@@ -49,13 +48,12 @@ export function CategoryToggleConfirmation({
       role="alertdialog"
       size="sm"
     >
-      <ModalHeader>
+      <ModalHeader showClose={!isPending}>
         <ModalTitle>Inativar categoria?</ModalTitle>
         <ModalDescription>
           “{pendingToggle.category.nome}” deixará de aparecer nos filtros e nos novos cadastros de
           transações. As transações existentes serão preservadas.
         </ModalDescription>
-        {!isPending && <ModalClose />}
       </ModalHeader>
       {errorMessage && (
         <ModalBody>

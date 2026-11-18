@@ -1,7 +1,7 @@
 import { forwardRef, type ReactNode } from "react";
 import { Text as AriaText, type TextProps as AriaTextProps } from "react-aria-components";
 
-import { tv } from "tailwind-variants";
+import { tv } from "../utils/tailwind";
 
 const descriptionStyles = tv(
   {

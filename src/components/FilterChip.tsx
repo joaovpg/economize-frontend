@@ -1,6 +1,6 @@
 import { type ComponentPropsWithoutRef } from "react";
 
-import { twMerge } from "tailwind-merge";
+import { twMerge } from "../utils/tailwind";
 
 /**
  * Chip compacto para exibir um filtro aplicado ou outro recorte contextual.

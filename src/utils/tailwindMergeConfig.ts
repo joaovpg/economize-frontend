@@ -5,25 +5,7 @@ export const tailwindMergeConfig = {
     classGroups: {
       "font-size": [
         {
-          text: [
-            "display-hero",
-            "page-title",
-            "section-title",
-            "card-title",
-            "title-compact",
-            "metric",
-            "body-large",
-            "body",
-            "body-small",
-            "label",
-            "button",
-            "caption",
-            "caption-strong",
-            "validation",
-            "meta",
-            "code",
-            "token",
-          ],
+          text: ["title-page", "title", "body", "body-strong", "caption", "metric"],
         },
       ],
     },

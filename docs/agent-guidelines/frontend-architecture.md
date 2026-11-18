@@ -6,6 +6,7 @@
 - Os layouts de grupo ficam em `src/routes/_public/route.tsx` e `src/routes/_private/route.tsx`.
 - `src/components/` contém componentes reutilizáveis entre telas.
 - `src/lib/` contém acesso a dados, schemas e funções compartilhadas, incluindo o cliente HTTP Ky e o `ApiError`.
+- Schemas de formulário ficam nos `-components` da rota (por exemplo, `transaction-form.ts`); os `contracts.ts` dos serviços guardam somente os contratos da API.
 
 ## Rotas e carregamento
 
@@ -33,7 +34,7 @@ O `QueryClient` único é criado em `src/main.tsx`, fornecido pelo `QueryClientP
 - Requests e responses são validados na fronteira por schemas Zod, com tipos inferidos desses schemas.
 - Erros são normalizados em `ApiError` (`src/lib/api-errors.ts`) a partir do Problem Details do backend, incluindo erros HTTP, de rede, timeout e de contrato. Cancelamentos continuam sendo cancelamentos.
 - Nomes de operação seguem o domínio e a rota HTTP, como `postLogin` e `getCategorias`, para facilitar a comparação com o Swagger.
-- Retries são conservadores: não há retry automático de `POST`. O login desativa retry (`retry: { limit: 0 }`).
+- Retries são conservadores: não há retry automático de `POST`, `PUT` nem `DELETE`. Com Versão de edição, repetir um `PUT` ou `DELETE` só produziria conflito. O login desativa retry (`retry: { limit: 0 }`).
 - A autenticação usa cookie com `credentials: "include"`; o JavaScript não lê cookies nem infere cabeçalhos. O token CSRF é salvo após o login, enviado no cabeçalho `X-CSRF-Token` em métodos mutáveis (exceto nas requisições públicas de autenticação) e limpo quando a API responde `401`. O cliente redireciona para `/login` nesse caso, fora das rotas públicas.
 
 ## Transações
@@ -42,7 +43,8 @@ O `QueryClient` único é criado em `src/main.tsx`, fornecido pelo `QueryClientP
 - Contas, categorias e busca por texto são aplicadas localmente. A opção "Todas as contas" não é enviada à API.
 - Os filtros da tela de transações ficam em um store Zustand persistido em `localStorage`, separado dos filtros do resumo. Login e cadastro limpam o store para os padrões. O mês permanece nos search params e, sem mês explícito, usa o mês atual.
 - A busca por texto usa debounce de 300 ms. Seleções de conta, categoria e saldo anterior são aplicadas imediatamente.
-- A API retorna valores assinados e não expõe campo `tipo`. Transferências têm categoria nula; a origem `TRANSFERENCIA` aparece como a categoria "Transferência". As origens `TRANSACAO_RECORRENTE` e `PARCELA` são sinalizadas com ícone de recorrência. `SALDO_INICIAL_CONTA` é preservada na tabela como saldo inicial.
+- A API retorna valores assinados; `tipo` é nulo nas transferências. Transferências têm categoria nula; a origem `TRANSFERENCIA` aparece como a categoria "Transferência". As origens `TRANSACAO_RECORRENTE` e `PARCELA` são sinalizadas com ícone de recorrência. `SALDO_INICIAL_CONTA` é preservada na tabela como saldo inicial.
+- Cada item é identificado na listagem por `chaveItem`. Edição e exclusão de transação simples ou ocorrência usam a Chave de edição (`chaveEdicao`) e a Versão de edição (`versaoEdicao`) da última leitura ou escrita; a chave é opaca e não é validada como UUID. Ocorrências de série enviam o escopo (`SOMENTE_ESTA` ou `ESTA_E_AS_PROXIMAS`), definido em `escoposDisponiveis`. Transferências são editadas e excluídas pelo `operacaoId`. Os erros de concorrência e de série (`VERSAO_DESATUALIZADA`, `RECURSO_NAO_ENCONTRADO`, `OCORRENCIA_EFETIVADA_APOS_CORTE`, `SEGMENTO_NAO_ATUAL`) têm mensagem orientativa em `getGuidedApiErrorMessage`.
 - `saldoAbertura` aparece como saldo anterior em bloco separado quando "Incluir saldo anterior" está ativo.
 - Indicadores e acumulados usam os itens visíveis. Com recorte por conta, categoria ou texto, o cenário começa em zero e é apresentado como projeção do recorte. O saldo de abertura agregado não é atribuído ao recorte, e o controle "Incluir saldo anterior" fica indisponível. Sem recorte, o cálculo usa `saldoAbertura` como base somente com o controle ativo.
 - A tabela de transações é mobile first: em telas pequenas, cada linha se reorganiza como um bloco legível, sem rolagem horizontal.

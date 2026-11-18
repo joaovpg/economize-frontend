@@ -154,7 +154,7 @@ function CalendarContent({
               <CalendarCell
                 date={date}
                 data-current-day={date.compare(todayValue) === 0 || undefined}
-                className="flex size-10 items-center justify-center rounded-lg text-body-small text-foreground tabular-nums outline-none data-current-day:font-bold data-current-day:not-data-selected:text-brand data-disabled:text-subtle data-disabled:opacity-40 data-focus-visible:outline-2 data-focus-visible:outline-brand data-hovered:bg-surface-muted data-outside-month:text-subtle data-outside-month:opacity-40 data-selected:bg-brand data-selected:text-brand-foreground data-unavailable:text-subtle data-unavailable:opacity-40"
+                className="flex size-10 items-center justify-center rounded-lg text-body text-foreground tabular-nums outline-none data-current-day:font-semibold data-current-day:not-data-selected:text-brand data-disabled:text-subtle data-disabled:opacity-40 data-focus-visible:outline-2 data-focus-visible:outline-brand data-hovered:bg-surface-muted data-outside-month:text-subtle data-outside-month:opacity-40 data-selected:bg-brand data-selected:text-brand-foreground data-unavailable:text-subtle data-unavailable:opacity-40"
               />
             )}
           </CalendarGridBody>
@@ -254,7 +254,7 @@ function CalendarContent({
               calendar.setFocusedDate(todayValue);
               showDays();
             }}
-            className="h-10 cursor-pointer rounded-lg px-2 text-label text-brand outline-none data-disabled:cursor-not-allowed data-disabled:text-subtle data-focus-visible:outline-2 data-focus-visible:outline-brand data-hovered:bg-brand-soft"
+            className="h-10 cursor-pointer rounded-lg px-2 text-body-strong text-brand outline-none data-disabled:cursor-not-allowed data-disabled:text-subtle data-focus-visible:outline-2 data-focus-visible:outline-brand data-hovered:bg-brand-soft"
           >
             Ir para hoje
           </Button>

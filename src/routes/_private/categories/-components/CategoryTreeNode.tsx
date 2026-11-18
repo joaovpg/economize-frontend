@@ -1,9 +1,8 @@
-import { SwitchButton, SwitchField } from "react-aria-components";
-
 import { PencilSimpleIcon } from "@phosphor-icons/react/dist/csr/PencilSimple";
-import { cn } from "tailwind-variants";
 
 import { Button } from "../../../../components/Button";
+import { Switch } from "../../../../components/Switch";
+import { cn } from "../../../../utils/tailwind";
 
 import type { CategoriaResponse } from "../../../../services/categories/contracts";
 import type { CategoryNode } from "./category-types";
@@ -40,11 +39,11 @@ export function CategoryTreeNode({
             )}
           />
           <div className="flex min-w-0 flex-col gap-1">
-            <span className="truncate text-label text-foreground">{node.nome}</span>
+            <span className="truncate text-body-strong text-foreground">{node.nome}</span>
             <span className="flex flex-wrap items-center gap-2 text-caption text-subtle">
               <span
                 className={cn(
-                  "rounded-full border px-2 py-0.5 text-caption-strong",
+                  "rounded-full border px-2 py-0.5 text-caption",
                   node.ativo
                     ? "border-success/25 bg-success-soft text-success"
                     : "border-border bg-surface text-muted",
@@ -71,19 +70,12 @@ export function CategoryTreeNode({
           >
             <PencilSimpleIcon aria-hidden="true" />
           </Button>
-          <SwitchField
+          <Switch
             aria-label={`${node.ativo ? "Inativar" : "Ativar"} categoria ${node.nome}`}
-            className="contents"
             isDisabled={pendingCategoryId !== null}
             isSelected={node.ativo}
             onChange={(nextActive) => onToggle(node, nextActive)}
-          >
-            <SwitchButton className="group inline-flex min-h-9 cursor-pointer items-center rounded-lg p-1 transition-colors outline-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focus-visible:bg-surface-muted">
-              <span className="relative block h-5 w-9 rounded-full bg-border-strong transition-colors duration-150 ease-out group-data-selected:bg-brand motion-reduce:transition-none">
-                <span className="absolute top-0.5 left-0.5 block size-4 rounded-full bg-surface shadow-tree-node transition-transform duration-150 ease-out group-data-selected:translate-x-4 motion-reduce:transition-none" />
-              </span>
-            </SwitchButton>
-          </SwitchField>
+          />
           {isPending && <span className="sr-only">Salvando alteração</span>}
         </div>
       </div>

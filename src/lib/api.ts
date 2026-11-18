@@ -59,8 +59,9 @@ export const api = ky.create({
     ],
   },
   prefix: import.meta.env.VITE_API_URL,
+  // PUT e DELETE não são retentados: com Versão de edição, a repetição só geraria conflito.
   retry: {
-    methods: ["get", "head", "options", "trace", "put", "delete"],
+    methods: ["get", "head", "options", "trace"],
   },
 });
 

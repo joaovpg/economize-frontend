@@ -5,11 +5,11 @@ import {
   type FieldErrorProps as AriaFieldErrorProps,
 } from "react-aria-components";
 
-import { tv } from "tailwind-variants";
+import { tv } from "../utils/tailwind";
 
 const fieldErrorStyles = tv(
   {
-    base: "block text-validation wrap-break-word text-danger",
+    base: "block text-caption wrap-break-word text-danger",
   },
   { twMerge: false },
 );

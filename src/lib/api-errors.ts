@@ -74,6 +74,42 @@ export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError;
 }
 
+export const guidedApiErrorCodes = [
+  "OCORRENCIA_EFETIVADA_APOS_CORTE",
+  "RECURSO_NAO_ENCONTRADO",
+  "SEGMENTO_NAO_ATUAL",
+  "VERSAO_DESATUALIZADA",
+] as const;
+
+export type GuidedApiErrorCode = (typeof guidedApiErrorCodes)[number];
+
+const guidedApiErrorMessages: Record<GuidedApiErrorCode, string> = {
+  OCORRENCIA_EFETIVADA_APOS_CORTE:
+    "Há lançamentos efetivados a partir desta data. Edite somente esta ocorrência ou a partir da próxima não efetivada.",
+  RECURSO_NAO_ENCONTRADO:
+    "Este lançamento não existe mais ou foi alterado. Feche e consulte novamente.",
+  SEGMENTO_NAO_ATUAL:
+    "Esta série já foi alterada a partir de uma data posterior. Edite a partir de uma ocorrência mais recente.",
+  VERSAO_DESATUALIZADA:
+    "Este lançamento foi alterado em outro lugar. Feche e abra novamente para ver a versão atual.",
+};
+
+function isGuidedApiErrorCode(code: string): code is GuidedApiErrorCode {
+  return (guidedApiErrorCodes as readonly string[]).includes(code);
+}
+
+/**
+ * Mensagem orientativa para os erros de edição e exclusão de lançamentos (Conflito de versão,
+ * lançamento inexistente e regras de série). Retorna undefined para os demais erros.
+ */
+export function getGuidedApiErrorMessage(error: unknown): string | undefined {
+  if (!isApiError(error) || error.code === undefined || !isGuidedApiErrorCode(error.code)) {
+    return undefined;
+  }
+
+  return guidedApiErrorMessages[error.code];
+}
+
 export function createContractApiError(cause: unknown) {
   return new ApiError({
     cause,

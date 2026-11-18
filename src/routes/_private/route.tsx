@@ -1,17 +1,49 @@
 import { Suspense } from "react";
 
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { SignOutIcon } from "@phosphor-icons/react/dist/csr/SignOut";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 
+import { Button } from "../../components/Button";
 import { Link } from "../../components/Link";
 import LoadingPage from "../../components/LoadingPage";
 import LogoMark from "../../components/LogoMark";
 import { RouteError, RoutePending } from "../../components/RouteStates";
+import { clearCsrfToken } from "../../lib/csrf";
+import { postLogout } from "../../services/auth/api";
 
 export const Route = createFileRoute("/_private")({
   component: PrivateLayout,
   errorComponent: RouteError,
   pendingComponent: RoutePending,
 });
+
+function LogoutButton() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const logoutMutation = useMutation({
+    mutationFn: postLogout,
+    // A limpeza local e o redirecionamento ocorrem mesmo se a API falhar.
+    // O cache é limpo depois de sair da área privada para evitar refetch com a sessão encerrada.
+    onSettled: async () => {
+      clearCsrfToken();
+      await navigate({ replace: true, to: "/login" });
+      queryClient.clear();
+    },
+  });
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      leadingIcon={<SignOutIcon weight="bold" />}
+      isPending={logoutMutation.isPending}
+      onPress={() => logoutMutation.mutate()}
+    >
+      Sair
+    </Button>
+  );
+}
 
 function PrivateLayout() {
   return (
@@ -28,6 +60,7 @@ function PrivateLayout() {
             <LogoMark />
             <span>economize</span>
           </Link>
+          <LogoutButton />
         </header>
 
         <main className="min-w-0">

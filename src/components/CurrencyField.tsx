@@ -6,9 +6,7 @@ import {
 } from "react-aria-components";
 import { NumberFormatBase, type NumberFormatBaseProps } from "react-number-format";
 
-import { twMerge } from "tailwind-merge";
-import { tv } from "tailwind-variants";
-
+import { tv, twMerge } from "../utils/tailwind";
 import { Description } from "./Description";
 import { FieldError } from "./FieldError";
 import { IconSlot } from "./IconSlot";
@@ -31,7 +29,7 @@ const control = tv({
 
 const inputStyles = tv(
   {
-    base: "min-w-0 flex-1 border-0 bg-transparent text-body-small caret-brand outline-none placeholder:text-subtle",
+    base: "min-w-0 flex-1 border-0 bg-transparent text-body max-md:text-md tabular-nums caret-brand outline-none placeholder:text-subtle",
     variants: {
       disabled: {
         false: "text-foreground",

@@ -1,6 +1,6 @@
 @layer base {
   html {
-    @apply bg-canvas font-sans text-foreground;
+    @apply bg-canvas font-ui text-foreground;
     height: 100%;
     overflow: hidden;
     text-rendering: optimizeLegibility;

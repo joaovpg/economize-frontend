@@ -2,15 +2,15 @@
   /* Raios de componentes fora da escala padrão de radius */
   --radius-control: 10px;
   --radius-check: 0.3125rem;
-  --radius-modal: 1.125rem;
+  --radius-modal: 0.75rem;
   --radius-logo: 9px;
 
   /* Opacidade de controles desabilitados ou em processamento */
   --opacity-disabled: 0.42;
 
   /* Espaçamento interno de modais e recuo para áreas seguras do dispositivo */
-  --spacing-modal: 1.375rem;
-  --spacing-modal-mobile: 1rem;
+  --spacing-modal: 1.5rem;
+  --spacing-modal-mobile: 1.25rem;
   --spacing-modal-inset-top: max(var(--spacing-modal), env(safe-area-inset-top));
   --spacing-modal-inset-right: max(var(--spacing-modal), env(safe-area-inset-right));
   --spacing-modal-inset-bottom: max(var(--spacing-modal), env(safe-area-inset-bottom));

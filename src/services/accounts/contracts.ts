@@ -18,5 +18,10 @@ export const cadastrarContaRequestSchema = z.object({
   saldoInicial: z.number(),
 });
 
+export const editarContaRequestSchema = cadastrarContaRequestSchema.extend({
+  ativo: z.boolean(),
+});
+
 export type ContaResponse = z.infer<typeof contaResponseSchema>;
 export type CadastrarContaRequest = z.infer<typeof cadastrarContaRequestSchema>;
+export type EditarContaRequest = z.infer<typeof editarContaRequestSchema>;

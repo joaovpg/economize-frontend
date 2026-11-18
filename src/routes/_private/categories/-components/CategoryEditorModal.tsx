@@ -9,7 +9,6 @@ import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
   ModalBody,
-  ModalClose,
   ModalDescription,
   DiscardChangesModal,
   ModalFooter,
@@ -172,14 +171,13 @@ export function CategoryEditorModal({
         }}
         size="md"
       >
-        <ModalHeader>
+        <ModalHeader showClose={!isSubmitting && !isDiscardModalOpen}>
           <ModalTitle>{isEditing ? "Editar categoria" : "Nova categoria"}</ModalTitle>
           <ModalDescription>
             {isEditing
               ? "Atualize o nome e a organização desta categoria."
               : "Crie uma categoria para organizar suas transações."}
           </ModalDescription>
-          {!isSubmitting && !isDiscardModalOpen && <ModalClose />}
         </ModalHeader>
         <form
           className="contents"

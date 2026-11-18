@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { api, parseApiResponse, type ApiRequestOptions } from "../../lib/api";
+import { versaoEdicaoSchema } from "../transactions/shared";
 import {
   alterarTransferenciaRequestSchema,
   criarTransferenciaRequestSchema,
@@ -8,6 +9,10 @@ import {
   type AlterarTransferenciaRequest,
   type CriarTransferenciaRequest,
 } from "./contracts";
+
+export type DeleteTransferenciaOptions = ApiRequestOptions & {
+  versaoEdicao: string;
+};
 
 export async function postTransferencia(
   input: CriarTransferenciaRequest,
@@ -35,8 +40,12 @@ export async function putTransferencia(
   );
 }
 
-export async function deleteTransferencia(id: string, options: ApiRequestOptions = {}) {
+export async function deleteTransferencia(id: string, options: DeleteTransferenciaOptions) {
   const transferId = z.uuid().parse(id);
+  const versaoEdicao = versaoEdicaoSchema.parse(options.versaoEdicao);
 
-  await api.delete(`transferencias/${transferId}`, { signal: options.signal });
+  await api.delete(`transferencias/${transferId}`, {
+    searchParams: new URLSearchParams({ versaoEdicao }),
+    signal: options.signal,
+  });
 }

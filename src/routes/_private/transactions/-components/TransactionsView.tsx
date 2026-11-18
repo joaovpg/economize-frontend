@@ -8,7 +8,7 @@ import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
 import { Button } from "../../../../components/Button";
 import { Card } from "../../../../components/Card";
 import { FilterChip } from "../../../../components/FilterChip";
-import { Modal, ModalBody } from "../../../../components/Modal";
+import { Modal, ModalHeader, ModalTitle } from "../../../../components/Modal";
 import { PageHeading } from "../../../../components/PageHeading";
 import { TransactionFilters } from "../../../../components/TransactionFilters";
 import { formatCurrency } from "../../../../lib/formatters";
@@ -135,7 +135,7 @@ function MonthStepper({
       >
         <CaretLeftIcon aria-hidden="true" />
       </Button>
-      <span className="min-w-28 text-center text-caption-strong text-foreground uppercase">
+      <span className="min-w-28 text-center text-body-strong text-foreground">
         {getMonthLabel(toYearMonth(value))}
       </span>
       <Button
@@ -177,16 +177,16 @@ function BalanceHero({
         <div className="mb-5.5 flex items-start justify-between gap-4 border-b border-brand-foreground/30 pb-5.5 sm:items-center">
           <div className="min-w-0">
             <h2
-              className="m-0 text-caption-strong tracking-label text-brand-foreground/80 uppercase"
+              className="m-0 text-caption text-brand-foreground/80"
               id="transactions-opening-balance-title"
             >
               Saldo de abertura
             </h2>
-            <p className="m-0 mt-1 text-body-small text-brand-foreground/80">
+            <p className="m-0 mt-1 text-body text-brand-foreground/80">
               Seu ponto de partida no mês
             </p>
           </div>
-          <strong className="text-card-title whitespace-nowrap tabular-nums sm:text-section-title">
+          <strong className="text-body-strong whitespace-nowrap tabular-nums">
             {formatCurrency(metrics.openingBalance)}
           </strong>
         </div>
@@ -194,7 +194,7 @@ function BalanceHero({
       <div className="grid grid-cols-2 gap-4 min-[60rem]:grid-cols-[minmax(10rem,1.35fr)_repeat(2,minmax(0,1fr))] min-[60rem]:items-center">
         <div className="col-span-2 min-w-0 min-[60rem]:col-span-1">
           <p
-            className="m-0 text-caption-strong tracking-label text-brand-foreground/80 uppercase"
+            className="m-0 text-caption text-brand-foreground/80"
             id="transactions-projection-title"
           >
             {hasTransactionScope
@@ -218,10 +218,8 @@ function BalanceHero({
 function Metric({ label, value }: { label: string; value: number }) {
   return (
     <div className="min-w-0 border-t border-brand-foreground/30 pt-3.5 min-[60rem]:border-t-0 min-[60rem]:border-l min-[60rem]:pl-5">
-      <p className="m-0 text-caption-strong tracking-label text-brand-foreground/75 uppercase">
-        {label}
-      </p>
-      <strong className="mt-2 block text-label whitespace-nowrap tabular-nums">
+      <p className="m-0 text-caption text-brand-foreground/75">{label}</p>
+      <strong className="mt-2 block text-body-strong whitespace-nowrap tabular-nums">
         {value >= 0 ? `+ ${formatCurrency(value)}` : `− ${formatCurrency(Math.abs(value))}`}
       </strong>
     </div>
@@ -254,7 +252,6 @@ function TransactionsHeader({
         <PageHeading
           description={<>Movimentações de {getMonthLabel(data.inicio)}.</>}
           id="transactions-title"
-          size="compact"
           title="Transações"
         />
         <div className="grid w-full gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:justify-end">
@@ -406,24 +403,25 @@ function MobileFilterModal({
       }}
       size="md"
     >
-      <ModalBody>
-        <TransactionFilters
-          ariaLabel="Filtros avançados de transações"
-          applyOnChange
-          accounts={accounts}
-          categories={categories}
-          disablePreviousBalance={hasTransactionScope}
-          filterId="transactions-filters-modal"
-          isOpen
-          onApply={onApplyFilters}
-          onClear={onClearFilters}
-          onClose={onClose}
-          onSearchChange={onSearchChange}
-          presentation="modal"
-          showMonth={false}
-          value={search}
-        />
-      </ModalBody>
+      <ModalHeader closeLabel="Fechar filtros">
+        <ModalTitle>Filtros</ModalTitle>
+      </ModalHeader>
+      <TransactionFilters
+        ariaLabel="Filtros avançados de transações"
+        applyOnChange
+        accounts={accounts}
+        categories={categories}
+        disablePreviousBalance={hasTransactionScope}
+        filterId="transactions-filters-modal"
+        isOpen
+        onApply={onApplyFilters}
+        onClear={onClearFilters}
+        onClose={onClose}
+        onSearchChange={onSearchChange}
+        presentation="modal"
+        showMonth={false}
+        value={search}
+      />
     </Modal>
   );
 }
@@ -467,7 +465,7 @@ export function TransactionsView(props: TransactionsViewProps) {
         includePreviousBalance={props.search.includePreviousBalance}
         items={props.items}
       />
-      {props.feedback && <p className="m-0 text-body-small text-success">{props.feedback}</p>}
+      {props.feedback && <p className="m-0 text-body text-success">{props.feedback}</p>}
       <TransactionList
         accounts={props.accounts}
         categories={props.categories}

@@ -1,23 +1,20 @@
 import { forwardRef, type ReactNode } from "react";
 import { Label as AriaLabel, type LabelProps as AriaLabelProps } from "react-aria-components";
 
-import { tv } from "tailwind-variants";
+import { tv } from "../utils/tailwind";
 
-const labelStyles = tv(
-  {
-    base: "text-label",
-    defaultVariants: {
-      disabled: false,
-    },
-    variants: {
-      disabled: {
-        false: "text-foreground",
-        true: "text-subtle",
-      },
+const labelStyles = tv({
+  base: "text-body-strong",
+  defaultVariants: {
+    disabled: false,
+  },
+  variants: {
+    disabled: {
+      false: "text-foreground",
+      true: "text-subtle",
     },
   },
-  { twMerge: false },
-);
+});
 
 /**
  * Props da label estilizada do Economize.

@@ -12,7 +12,6 @@ import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
   ModalBody,
-  ModalClose,
   ModalDescription,
   ModalFooter,
   ModalHeader,
@@ -21,31 +20,24 @@ import {
 import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
 import { TextArea } from "../../../../components/TextArea";
 import { TextField } from "../../../../components/TextField";
-import { parseFormDate } from "../../../../lib/date";
+import { parseFormDate, transactionTimeZone } from "../../../../lib/date";
 import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../../../services/categories/contracts";
-import { postRecorrencia } from "../../../../services/recurrences/api";
 import { postTransacao } from "../../../../services/transactions/api";
-import {
-  formularioOperacaoFinanceiraSchema,
-  type FormularioOperacaoFinanceira,
-} from "../../../../services/transactions/contracts";
 import { transactionsQueryKey } from "../../../../services/transactions/queries";
 import { postTransferencia } from "../../../../services/transfers/api";
 import { DiscardChangesModal, type DiscardAction } from "./DiscardChangesModal";
 import { applyFormError, getServerFieldName } from "./form-errors";
-import { RecurrenceFields } from "./RecurrenceFields";
 import {
-  getDayOfWeekForDate,
+  formularioOperacaoFinanceiraSchema,
   getInitialEntryDate,
-  getMonthDayForDate,
-  isValidFormDate,
-  toCreateInstallmentRequest,
-  toCreateRecurrenceRequest,
   toCreateTransactionRequest,
   toCreateTransferRequest,
+  type FormularioOperacaoFinanceira,
 } from "./transaction-form";
+import { createRepeticaoFormValues } from "./transaction-repetition-form";
 import { AccountSelect, CategorySelect } from "./TransactionFormFields";
+import { TransactionRepetitionFields } from "./TransactionRepetitionFields";
 
 interface TransactionCreationModalProps {
   accounts: readonly ContaResponse[];
@@ -56,7 +48,6 @@ interface TransactionCreationModalProps {
 }
 
 type CreateOperationResponse =
-  | Awaited<ReturnType<typeof postRecorrencia>>
   | Awaited<ReturnType<typeof postTransacao>>
   | Awaited<ReturnType<typeof postTransferencia>>;
 
@@ -65,44 +56,18 @@ function getTransactionCreationField(
 ): keyof FormularioOperacaoFinanceira | null {
   const fieldName = getServerFieldName(field);
 
-  if (
-    fieldName === "dataFinanceira" ||
-    fieldName === "dataInicio" ||
-    fieldName === "dataPrimeiraOcorrencia" ||
-    fieldName === "inicio"
-  ) {
+  if (fieldName === "dataFinanceira") {
     return "data";
   }
 
-  if (fieldName === "dataFim" || fieldName === "termino") {
-    return "ate";
-  }
-
-  if (fieldName === "count") {
-    return "quantidadeOcorrencias";
-  }
-
-  if (fieldName === "valorPorParcela") {
-    return "valor";
-  }
-
   const validFields: readonly (keyof FormularioOperacaoFinanceira)[] = [
-    "ate",
     "categoriaId",
     "contaDestinoId",
     "contaId",
     "contaOrigemId",
     "data",
     "descricao",
-    "diasMes",
-    "diasSemana",
-    "frequencia",
-    "intervalo",
-    "numeroPrimeiraParcela",
     "observacoes",
-    "quantidadeOcorrencias",
-    "quantidadeTotalOriginal",
-    "semTermino",
     "situacao",
     "tipo",
     "tipoOperacao",
@@ -118,10 +83,6 @@ function getSubmitLabel(operation: FormularioOperacaoFinanceira["tipoOperacao"])
       return "Cadastrar transação";
     case "TRANSFERENCIA":
       return "Cadastrar transferência";
-    case "RECORRENCIA":
-      return "Cadastrar recorrência";
-    case "PARCELAMENTO":
-      return "Cadastrar parcelamento";
     default: {
       const exhaustive: never = operation;
       return exhaustive;
@@ -135,10 +96,6 @@ function getSuccessMessage(operation: FormularioOperacaoFinanceira["tipoOperacao
       return "Transação cadastrada com sucesso.";
     case "TRANSFERENCIA":
       return "Transferência cadastrada com sucesso.";
-    case "RECORRENCIA":
-      return "Recorrência cadastrada com sucesso.";
-    case "PARCELAMENTO":
-      return "Parcelamento cadastrado com sucesso.";
     default: {
       const exhaustive: never = operation;
       return exhaustive;
@@ -168,10 +125,6 @@ export function TransactionCreationModal({
           return postTransacao(toCreateTransactionRequest(data));
         case "TRANSFERENCIA":
           return postTransferencia(toCreateTransferRequest(data));
-        case "RECORRENCIA":
-          return postRecorrencia(toCreateRecurrenceRequest(data));
-        case "PARCELAMENTO":
-          return postRecorrencia(toCreateInstallmentRequest(data));
         default: {
           const exhaustive: never = data.tipoOperacao;
           return exhaustive;
@@ -191,22 +144,14 @@ export function TransactionCreationModal({
     clearErrors,
   } = useForm<FormularioOperacaoFinanceira>({
     defaultValues: {
-      ate: "",
       categoriaId: null,
       contaDestinoId: "",
       contaId: "",
       contaOrigemId: "",
       data: initialEntryDate,
       descricao: "",
-      diasMes: [getMonthDayForDate(initialEntryDate)],
-      diasSemana: [],
-      frequencia: "MONTHLY",
-      intervalo: "1",
-      numeroPrimeiraParcela: "1",
       observacoes: "",
-      quantidadeOcorrencias: "",
-      quantidadeTotalOriginal: "",
-      semTermino: true,
+      repeticao: createRepeticaoFormValues(false),
       situacao: "PLANEJADA",
       tipo: "DESPESA",
       tipoOperacao: "TRANSACAO",
@@ -216,14 +161,12 @@ export function TransactionCreationModal({
     resolver: zodResolver(formularioOperacaoFinanceiraSchema),
   });
   const tipoOperacao = useWatch({ control, name: "tipoOperacao" });
-  let financialDateLabel = "Data financeira";
-  if (tipoOperacao === "RECORRENCIA") {
-    financialDateLabel = "Data inicial";
-  } else if (tipoOperacao === "PARCELAMENTO") {
-    financialDateLabel = "Data da primeira parcela";
-  }
-  const startDate = useWatch({ control, name: "data" });
   const situation = useWatch({ control, name: "situacao" });
+  const entryDate = useWatch({ control, name: "data" });
+  const repetitionActive = useWatch({ control, name: "repeticao.ativa" });
+  const repetitionEndType = useWatch({ control, name: "repeticao.termino.tipo" });
+  const isInstallment =
+    tipoOperacao === "TRANSACAO" && repetitionActive && repetitionEndType === "PARCELAS";
   const accountId = useWatch({ control, name: "contaId" });
   const categoryId = useWatch({ control, name: "categoriaId" });
   const originAccountId = useWatch({ control, name: "contaOrigemId" });
@@ -292,35 +235,6 @@ export function TransactionCreationModal({
       shouldDirty: true,
       shouldValidate: false,
     });
-
-    if (nextOperation === "RECORRENCIA") {
-      setValue("frequencia", "MONTHLY", { shouldDirty: true, shouldValidate: false });
-      setValue("intervalo", "1", { shouldDirty: true, shouldValidate: false });
-      setValue("diasMes", isValidFormDate(startDate) ? [getMonthDayForDate(startDate)] : [], {
-        shouldDirty: true,
-        shouldValidate: false,
-      });
-      setValue("diasSemana", isValidFormDate(startDate) ? [getDayOfWeekForDate(startDate)] : [], {
-        shouldDirty: true,
-        shouldValidate: false,
-      });
-      setValue("semTermino", true, { shouldDirty: true, shouldValidate: false });
-      setValue("ate", "", { shouldDirty: true, shouldValidate: false });
-      setValue("quantidadeOcorrencias", "", { shouldDirty: true, shouldValidate: false });
-    } else {
-      setValue("frequencia", null, { shouldDirty: true, shouldValidate: false });
-      setValue("diasMes", [], { shouldDirty: true, shouldValidate: false });
-      setValue("diasSemana", [], { shouldDirty: true, shouldValidate: false });
-      setValue("semTermino", true, { shouldDirty: true, shouldValidate: false });
-      setValue("ate", "", { shouldDirty: true, shouldValidate: false });
-      setValue("quantidadeOcorrencias", "", { shouldDirty: true, shouldValidate: false });
-    }
-
-    if (nextOperation === "PARCELAMENTO") {
-      setValue("intervalo", "1", { shouldDirty: true, shouldValidate: false });
-      setValue("numeroPrimeiraParcela", "1", { shouldDirty: true, shouldValidate: false });
-      setValue("quantidadeTotalOriginal", "", { shouldDirty: true, shouldValidate: false });
-    }
   };
 
   const handleFormSubmit = async (data: FormularioOperacaoFinanceira) => {
@@ -375,12 +289,11 @@ export function TransactionCreationModal({
         }}
         size="lg"
       >
-        <ModalHeader>
+        <ModalHeader showClose={!isSubmitting && discardAction === null}>
           <ModalTitle>Nova movimentação</ModalTitle>
           <ModalDescription>
             Informe os dados da movimentação que deseja cadastrar.
           </ModalDescription>
-          {!isSubmitting && discardAction === null && <ModalClose />}
         </ModalHeader>
         <form className="contents" noValidate onSubmit={handleSubmit(handleFormSubmit)}>
           <ModalBody>
@@ -399,8 +312,6 @@ export function TransactionCreationModal({
                     switch (nextValue) {
                       case "TRANSACAO":
                       case "TRANSFERENCIA":
-                      case "RECORRENCIA":
-                      case "PARCELAMENTO":
                         handleOperationChange(nextValue);
                         break;
                     }
@@ -411,8 +322,6 @@ export function TransactionCreationModal({
                     Transação
                   </RadioItem>
                   <RadioItem value="TRANSFERENCIA">Transferência</RadioItem>
-                  <RadioItem value="RECORRENCIA">Recorrência</RadioItem>
-                  <RadioItem value="PARCELAMENTO">Parcelamento</RadioItem>
                 </RadioGroup>
               )}
             />
@@ -469,7 +378,7 @@ export function TransactionCreationModal({
                     className="min-w-0"
                     errorMessage={errors.valor?.message}
                     isDisabled={isSubmitting}
-                    label={tipoOperacao === "PARCELAMENTO" ? "Valor da parcela" : "Valor"}
+                    label={isInstallment ? "Valor de cada parcela" : "Valor"}
                     name={field.name}
                     onBlur={field.onBlur}
                     onValueChange={field.onChange}
@@ -487,14 +396,14 @@ export function TransactionCreationModal({
                 name="data"
                 render={({ field }) => (
                   <DatePicker
-                    todayValue={today("America/Sao_Paulo")}
+                    todayValue={today(transactionTimeZone)}
                     errorMessage={errors.data?.message}
                     isDisabled={isSubmitting}
-                    label={financialDateLabel}
+                    label="Data financeira"
                     maxValue={
                       (tipoOperacao === "TRANSACAO" || tipoOperacao === "TRANSFERENCIA") &&
                       situation === "EFETIVADA"
-                        ? today("America/Sao_Paulo")
+                        ? today(transactionTimeZone)
                         : undefined
                     }
                     name={field.name}
@@ -512,6 +421,11 @@ export function TransactionCreationModal({
                   render={({ field }) => (
                     <RadioGroup
                       appearance="segmented"
+                      description={
+                        tipoOperacao === "TRANSACAO" && repetitionActive
+                          ? "Vale só para a primeira ocorrência"
+                          : undefined
+                      }
                       isDisabled={isSubmitting}
                       label="Situação"
                       name={field.name}
@@ -608,81 +522,12 @@ export function TransactionCreationModal({
               </div>
             )}
 
-            {tipoOperacao === "RECORRENCIA" && (
-              <RecurrenceFields control={control} setValue={setValue} />
-            )}
-
-            {tipoOperacao === "PARCELAMENTO" && (
-              <fieldset className="grid min-w-0 gap-3.5 border-0 p-0">
-                <legend className="text-label text-foreground">Parcelamento</legend>
-                <div className="grid min-w-0 gap-3.5 sm:grid-cols-3">
-                  <Controller
-                    control={control}
-                    name="numeroPrimeiraParcela"
-                    render={({ field }) => (
-                      <TextField
-                        errorMessage={errors.numeroPrimeiraParcela?.message}
-                        inputMode="numeric"
-                        isDisabled={isSubmitting}
-                        label="Número inicial"
-                        maxLength={10}
-                        name={field.name}
-                        onBlur={field.onBlur}
-                        onInput={field.onChange}
-                        inputRef={field.ref}
-                        placeholder="1"
-                        value={field.value}
-                      />
-                    )}
-                  />
-                  <Controller
-                    control={control}
-                    name="quantidadeTotalOriginal"
-                    render={({ field }) => (
-                      <TextField
-                        errorMessage={errors.quantidadeTotalOriginal?.message}
-                        inputMode="numeric"
-                        isDisabled={isSubmitting}
-                        label="Total de parcelas"
-                        maxLength={10}
-                        name={field.name}
-                        onBlur={field.onBlur}
-                        onInput={field.onChange}
-                        inputRef={field.ref}
-                        placeholder="Ex.: 12"
-                        value={field.value}
-                      />
-                    )}
-                  />
-                  <Controller
-                    control={control}
-                    name="intervalo"
-                    render={({ field }) => (
-                      <TextField
-                        description="Use 1 para repetir todo mês."
-                        errorMessage={errors.intervalo?.message}
-                        inputMode="numeric"
-                        isDisabled={isSubmitting}
-                        label="Intervalo"
-                        maxLength={10}
-                        name={field.name}
-                        onBlur={field.onBlur}
-                        onInput={field.onChange}
-                        inputRef={field.ref}
-                        placeholder="1"
-                        value={field.value}
-                      />
-                    )}
-                  />
-                </div>
-                <output
-                  aria-live="polite"
-                  className="rounded-xl border border-border bg-surface-muted px-3.5 py-3 text-body-small text-muted"
-                >
-                  O backend ajustará automaticamente os meses sem o dia escolhido para o último dia
-                  do mês.
-                </output>
-              </fieldset>
+            {tipoOperacao === "TRANSACAO" && (
+              <TransactionRepetitionFields
+                control={control}
+                dataFinanceira={entryDate}
+                isDisabled={isSubmitting}
+              />
             )}
 
             <Controller
