@@ -6,8 +6,11 @@ import { today } from "@internationalized/date";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
-import { CurrencyField } from "../../../../components/CurrencyField";
-import { DatePicker } from "../../../../components/DatePicker";
+import { CurrencyField } from "../../../../components/fields/CurrencyField";
+import { DatePicker } from "../../../../components/fields/DatePicker";
+import { RadioGroup, RadioItem } from "../../../../components/fields/RadioGroup";
+import { TextArea } from "../../../../components/fields/TextArea";
+import { TextField } from "../../../../components/fields/TextField";
 import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
@@ -17,9 +20,6 @@ import {
   ModalHeader,
   ModalTitle,
 } from "../../../../components/Modal";
-import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
-import { TextArea } from "../../../../components/TextArea";
-import { TextField } from "../../../../components/TextField";
 import { parseFormDate, transactionTimeZone } from "../../../../lib/date";
 import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../../../services/categories/contracts";
@@ -303,8 +303,9 @@ export function TransactionCreationModal({
               name="tipoOperacao"
               render={({ field }) => (
                 <RadioGroup
-                  appearance="segmented"
+                  orientation="horizontal"
                   isDisabled={isSubmitting}
+                  isRequired
                   label="Tipo de movimentação"
                   name={field.name}
                   onBlur={field.onBlur}
@@ -332,8 +333,9 @@ export function TransactionCreationModal({
                 name="tipo"
                 render={({ field }) => (
                   <RadioGroup
-                    appearance="segmented"
+                    orientation="horizontal"
                     isDisabled={isSubmitting}
+                    isRequired
                     label="Tipo"
                     name={field.name}
                     onBlur={field.onBlur}
@@ -358,12 +360,13 @@ export function TransactionCreationModal({
                     className="min-w-0"
                     errorMessage={errors.descricao?.message}
                     isDisabled={isSubmitting}
+                    isRequired
                     label="Descrição"
                     maxLength={255}
                     name={field.name}
                     onBlur={field.onBlur}
-                    onInput={field.onChange}
-                    inputRef={field.ref}
+                    onChange={field.onChange}
+                    ref={field.ref}
                     placeholder="Ex.: Supermercado"
                     value={field.value}
                   />
@@ -378,11 +381,12 @@ export function TransactionCreationModal({
                     className="min-w-0"
                     errorMessage={errors.valor?.message}
                     isDisabled={isSubmitting}
+                    isRequired
                     label={isInstallment ? "Valor de cada parcela" : "Valor"}
                     name={field.name}
                     onBlur={field.onBlur}
-                    onValueChange={field.onChange}
-                    inputRef={field.ref}
+                    onChange={field.onChange}
+                    ref={field.ref}
                     placeholder="R$ 0,00"
                     value={field.value}
                   />
@@ -399,6 +403,7 @@ export function TransactionCreationModal({
                     todayValue={today(transactionTimeZone)}
                     errorMessage={errors.data?.message}
                     isDisabled={isSubmitting}
+                    isRequired
                     label="Data financeira"
                     maxValue={
                       (tipoOperacao === "TRANSACAO" || tipoOperacao === "TRANSFERENCIA") &&
@@ -409,7 +414,7 @@ export function TransactionCreationModal({
                     name={field.name}
                     onBlur={field.onBlur}
                     onChange={(date) => field.onChange(date?.toString() ?? "")}
-                    inputRef={field.ref}
+                    ref={field.ref}
                     value={parseFormDate(field.value)}
                   />
                 )}
@@ -420,13 +425,14 @@ export function TransactionCreationModal({
                   name="situacao"
                   render={({ field }) => (
                     <RadioGroup
-                      appearance="segmented"
+                      orientation="horizontal"
                       description={
                         tipoOperacao === "TRANSACAO" && repetitionActive
                           ? "Vale só para a primeira ocorrência"
                           : undefined
                       }
                       isDisabled={isSubmitting}
+                      isRequired
                       label="Situação"
                       name={field.name}
                       onBlur={field.onBlur}
@@ -454,6 +460,7 @@ export function TransactionCreationModal({
                       accounts={accounts}
                       errorMessage={errors.contaOrigemId?.message}
                       isDisabled={isSubmitting}
+                      isRequired
                       label="Conta de origem"
                       name={field.name}
                       onBlur={field.onBlur}
@@ -477,6 +484,7 @@ export function TransactionCreationModal({
                       errorMessage={errors.contaDestinoId?.message}
                       excludedAccountId={originAccountId}
                       isDisabled={isSubmitting}
+                      isRequired
                       label="Conta de destino"
                       name={field.name}
                       onBlur={field.onBlur}
@@ -496,6 +504,7 @@ export function TransactionCreationModal({
                       accounts={accounts}
                       errorMessage={errors.contaId?.message}
                       isDisabled={isSubmitting}
+                      isRequired
                       label="Conta"
                       name={field.name}
                       onBlur={field.onBlur}
@@ -541,8 +550,8 @@ export function TransactionCreationModal({
                   maxLength={2000}
                   name={field.name}
                   onBlur={field.onBlur}
-                  onInput={field.onChange}
-                  textAreaRef={field.ref}
+                  onChange={field.onChange}
+                  ref={field.ref}
                   value={field.value}
                   placeholder="Adicione uma observação opcional"
                 />

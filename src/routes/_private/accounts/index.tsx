@@ -9,11 +9,11 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { Button } from "../../../components/Button";
 import { Card, CardBody, CardHeader } from "../../../components/Card";
+import { Switch } from "../../../components/fields/Switch";
 import { IconSlot } from "../../../components/IconSlot";
 import { InlineMessage } from "../../../components/InlineMessage";
 import { Link } from "../../../components/Link";
 import { PageHeading } from "../../../components/PageHeading";
-import { Switch } from "../../../components/Switch";
 import { isApiError } from "../../../lib/api-errors";
 import { putConta } from "../../../services/accounts/api";
 import { type ContaResponse } from "../../../services/accounts/contracts";

@@ -2,11 +2,11 @@ import { useController, useFormState, type Control } from "react-hook-form";
 
 import { today } from "@internationalized/date";
 
-import { DatePicker } from "../../../../components/DatePicker";
-import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
-import { Select, SelectItem } from "../../../../components/Select";
-import { Switch } from "../../../../components/Switch";
-import { TextField } from "../../../../components/TextField";
+import { DatePicker } from "../../../../components/fields/DatePicker";
+import { RadioGroup, RadioItem } from "../../../../components/fields/RadioGroup";
+import { Select, SelectItem } from "../../../../components/fields/Select";
+import { Switch } from "../../../../components/fields/Switch";
+import { TextField } from "../../../../components/fields/TextField";
 import { parseFormDate, transactionTimeZone } from "../../../../lib/date";
 import { type FormularioOperacaoFinanceira } from "./transaction-form";
 import {
@@ -113,7 +113,7 @@ export function TransactionRepetitionFields({
 
           {repeticao.frequencia === "MENSAL" && (
             <RadioGroup
-              appearance="segmented"
+              orientation="horizontal"
               errorMessage={repeticaoErrors?.ancoragem?.message}
               isDisabled={isDisabled}
               label="Ancoragem"

@@ -8,10 +8,10 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { Button } from "../../../components/Button";
 import { Card, CardBody, CardHeader } from "../../../components/Card";
+import { TextField } from "../../../components/fields/TextField";
 import { InlineMessage } from "../../../components/InlineMessage";
 import { Link } from "../../../components/Link";
 import { PageHeading } from "../../../components/PageHeading";
-import { TextField } from "../../../components/TextField";
 import { isApiError } from "../../../lib/api-errors";
 import { putCategoria } from "../../../services/categories/api";
 import { type CategoriaResponse } from "../../../services/categories/contracts";

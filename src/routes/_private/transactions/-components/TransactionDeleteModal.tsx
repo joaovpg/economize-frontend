@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
+import { RadioGroup, RadioItem } from "../../../../components/fields/RadioGroup";
 import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
@@ -12,7 +13,6 @@ import {
   ModalHeader,
   ModalTitle,
 } from "../../../../components/Modal";
-import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
 import { getGuidedApiErrorMessage, isApiError } from "../../../../lib/api-errors";
 import { deleteTransacao } from "../../../../services/transactions/api";
 import { transactionsQueryKey } from "../../../../services/transactions/queries";

@@ -6,7 +6,9 @@ import { today } from "@internationalized/date";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
-import { DatePicker } from "../../../../components/DatePicker";
+import { DatePicker } from "../../../../components/fields/DatePicker";
+import { NumberField } from "../../../../components/fields/NumberField";
+import { TextField } from "../../../../components/fields/TextField";
 import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
@@ -17,8 +19,6 @@ import {
   ModalHeader,
   ModalTitle,
 } from "../../../../components/Modal";
-import { NumberField } from "../../../../components/NumberField";
-import { TextField } from "../../../../components/TextField";
 import { isApiError } from "../../../../lib/api-errors";
 import { parseFormDate, transactionTimeZone } from "../../../../lib/date";
 import { postConta, putConta } from "../../../../services/accounts/api";
@@ -96,7 +96,6 @@ export function AccountEditorModal({ account, onClose, onSaved }: AccountEditorM
     control,
     formState: { errors, isDirty, isSubmitting },
     handleSubmit,
-    register,
     setError,
   } = useForm<AccountFormData>({
     defaultValues: account
@@ -115,8 +114,6 @@ export function AccountEditorModal({ account, onClose, onSaved }: AccountEditorM
     mode: "onSubmit",
     resolver: zodResolver(accountFormSchema),
   });
-  const nameField = register("nome");
-  const currencyField = register("moeda");
 
   const requestClose = () => {
     if (isSubmitting) {
@@ -209,33 +206,40 @@ export function AccountEditorModal({ account, onClose, onSaved }: AccountEditorM
           <ModalBody>
             {submitError && <InlineMessage tone="danger">{submitError}</InlineMessage>}
 
-            <TextField
-              defaultValue={account?.nome ?? ""}
-              errorMessage={errors.nome?.message}
-              inputRef={(input) => {
-                nameInputRef.current = input;
-                nameField.ref(input);
-              }}
-              isDisabled={isSubmitting}
-              label="Nome"
-              maxLength={120}
-              name={nameField.name}
-              onBlur={nameField.onBlur}
-              onInput={nameField.onChange}
-              placeholder="Ex.: Conta corrente"
+            <Controller
+              control={control}
+              name="nome"
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  errorMessage={errors.nome?.message}
+                  isDisabled={isSubmitting}
+                  isRequired
+                  label="Nome"
+                  maxLength={120}
+                  placeholder="Ex.: Conta corrente"
+                  ref={(input) => {
+                    nameInputRef.current = input;
+                    field.ref(input);
+                  }}
+                />
+              )}
             />
 
-            <TextField
-              defaultValue={account?.moeda ?? "BRL"}
-              errorMessage={errors.moeda?.message}
-              inputRef={currencyField.ref}
-              isDisabled={isSubmitting}
-              label="Moeda"
-              maxLength={3}
-              name={currencyField.name}
-              onBlur={currencyField.onBlur}
-              onInput={currencyField.onChange}
-              placeholder="BRL"
+            <Controller
+              control={control}
+              name="moeda"
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  errorMessage={errors.moeda?.message}
+                  isDisabled={isSubmitting}
+                  isRequired
+                  label="Moeda"
+                  maxLength={3}
+                  placeholder="BRL"
+                />
+              )}
             />
 
             <Controller
@@ -244,6 +248,7 @@ export function AccountEditorModal({ account, onClose, onSaved }: AccountEditorM
               render={({ field }) => (
                 <NumberField
                   errorMessage={errors.saldoInicial?.message}
+                  isRequired
                   formatOptions={{ maximumFractionDigits: 4 }}
                   isDisabled={isSubmitting}
                   label="Saldo inicial"
@@ -261,8 +266,9 @@ export function AccountEditorModal({ account, onClose, onSaved }: AccountEditorM
                 <DatePicker
                   todayValue={today(transactionTimeZone)}
                   errorMessage={errors.dataSaldoInicial?.message}
-                  inputRef={field.ref}
                   isDisabled={isSubmitting}
+                  isRequired
+                  ref={field.ref}
                   label="Data do saldo inicial"
                   name={field.name}
                   onBlur={field.onBlur}

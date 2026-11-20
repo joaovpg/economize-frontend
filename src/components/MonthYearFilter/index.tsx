@@ -7,8 +7,10 @@ import {
   monthOptions,
   type TransactionMonth,
 } from "../../lib/transaction-month";
+import { cn } from "../../utils/tailwind";
 import { Button } from "../Button";
-import { Select, SelectItem } from "../Select";
+import { Select, SelectItem } from "../fields/Select";
+import { Legend } from "../primitives/Legend";
 
 const yearWindowRadius = 10;
 
@@ -36,18 +38,10 @@ export function MonthYearFilter({ className, onChange, value }: MonthYearFilterP
   const canGoToNextMonth = isYearMonthWithinApiFormat(nextMonth);
 
   return (
-    <fieldset
-      className={[
-        "flex min-w-0 items-center gap-0 rounded-control border border-border bg-surface p-1",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      <legend className="sr-only">Selecionar mês e ano</legend>
+    <fieldset className={cn("flex min-w-0 items-center gap-1 border-0 p-0", className)}>
+      <Legend className="sr-only">Selecionar mês e ano</Legend>
       <Button
         aria-label="Mês anterior"
-        shape="segment"
         className="text-muted!"
         isDisabled={!canGoToPreviousMonth}
         isIconOnly
@@ -58,10 +52,8 @@ export function MonthYearFilter({ className, onChange, value }: MonthYearFilterP
         <CaretLeftIcon aria-hidden="true" />
       </Button>
       <Select
-        appearance="compact"
+        aria-label="Mês"
         className="min-w-0 flex-1 gap-0"
-        label="Mês"
-        labelClassName="sr-only"
         onChange={(nextValue) => {
           if (typeof nextValue !== "string") {
             return;
@@ -74,6 +66,7 @@ export function MonthYearFilter({ className, onChange, value }: MonthYearFilterP
           }
         }}
         reserveErrorSpace={false}
+        size="sm"
         value={String(value.month)}
       >
         {monthOptions.map((month) => (
@@ -82,12 +75,9 @@ export function MonthYearFilter({ className, onChange, value }: MonthYearFilterP
           </SelectItem>
         ))}
       </Select>
-      <span aria-hidden="true" className="h-4 w-px bg-border" />
       <Select
-        appearance="compact"
+        aria-label="Ano"
         className="w-24 shrink-0 gap-0"
-        label="Ano"
-        labelClassName="sr-only"
         onChange={(nextValue) => {
           if (typeof nextValue !== "string") {
             return;
@@ -100,6 +90,7 @@ export function MonthYearFilter({ className, onChange, value }: MonthYearFilterP
           }
         }}
         reserveErrorSpace={false}
+        size="sm"
         value={String(value.year)}
       >
         {yearOptions.map((year) => (
@@ -110,7 +101,6 @@ export function MonthYearFilter({ className, onChange, value }: MonthYearFilterP
       </Select>
       <Button
         aria-label="Próximo mês"
-        shape="segment"
         className="text-muted!"
         isDisabled={!canGoToNextMonth}
         isIconOnly

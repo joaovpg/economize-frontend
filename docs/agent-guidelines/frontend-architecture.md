@@ -4,7 +4,7 @@
 
 - `src/routes/` contém os módulos de rota e as telas específicas de cada rota. Use o prefixo `-` em arquivos e diretórios auxiliares exclusivos da rota para excluí-los da geração de rotas.
 - Os layouts de grupo ficam em `src/routes/_public/route.tsx` e `src/routes/_private/route.tsx`.
-- `src/components/` contém componentes reutilizáveis entre telas.
+- `src/components/` contém componentes reutilizáveis entre telas. Os campos de formulário ficam em `src/components/fields/`, montados a partir dos primitivos de `src/components/primitives/` (ver [Campos de formulário](ui-and-styling.md#campos-de-formulário)).
 - `src/lib/` contém acesso a dados, schemas e funções compartilhadas, incluindo o cliente HTTP Ky e o `ApiError`.
 - Schemas de formulário ficam nos `-components` da rota (por exemplo, `transaction-form.ts`); os `contracts.ts` dos serviços guardam somente os contratos da API.
 

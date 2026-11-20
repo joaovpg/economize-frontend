@@ -1,5 +1,5 @@
-import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
-import { Select, SelectItem } from "../../../../components/Select";
+import { RadioGroup, RadioItem } from "../../../../components/fields/RadioGroup";
+import { Select, SelectItem } from "../../../../components/fields/Select";
 import { buildCategoryTree, type CategoryTreeNode } from "../../../../lib/category-tree";
 import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../../../services/categories/contracts";
@@ -13,6 +13,7 @@ const NO_CATEGORY_OPTION = "__no_category__";
 
 type AccountSelectProps = {
   accounts: readonly ContaResponse[];
+  isRequired?: boolean;
   currency?: string;
   description?: string;
   errorMessage?: string;
@@ -29,6 +30,7 @@ type AccountSelectProps = {
 export function AccountSelect({
   accounts,
   currency,
+  isRequired = false,
   description,
   errorMessage,
   excludedAccountId,
@@ -54,6 +56,8 @@ export function AccountSelect({
       description={description}
       errorMessage={errorMessage}
       isDisabled={isDisabled || !hasOptions}
+      isRequired={isRequired}
+      isSearchable
       label={label}
       name={name}
       onBlur={onBlur}
@@ -147,10 +151,10 @@ export function CategorySelect({
       className="min-w-0"
       errorMessage={errorMessage}
       isDisabled={isDisabled}
+      isSearchable
       label={label}
       name={name}
       onBlur={onBlur}
-      onSearchClear={() => onChange(null)}
       onChange={(nextValue) =>
         onChange(
           nextValue === null || String(nextValue) === NO_CATEGORY_OPTION ? null : String(nextValue),
@@ -158,19 +162,6 @@ export function CategorySelect({
       }
       value={value ?? NO_CATEGORY_OPTION}
       placeholder="Sem categoria"
-      selectedText={(key) => {
-        if (key === null || key === NO_CATEGORY_OPTION) {
-          return "";
-        }
-
-        const selectedCategory = activeCategories.find((category) => category.id === key);
-
-        if (!selectedCategory) {
-          return "";
-        }
-
-        return `${selectedCategory.nome}${selectedCategory.ativo ? "" : " · inativa"}`;
-      }}
     >
       <SelectItem id={NO_CATEGORY_OPTION} textValue="Sem categoria">
         Sem categoria
@@ -218,18 +209,21 @@ const transactionSituationChoices = [
 export function TransactionTypeField({
   focusOnOpen = false,
   isDisabled = false,
+  isRequired = false,
   onChange,
   value,
 }: {
   focusOnOpen?: boolean;
   isDisabled?: boolean;
+  isRequired?: boolean;
   onChange: (value: TransactionType) => void;
   value: TransactionType;
 }) {
   return (
     <RadioGroup
-      appearance="segmented"
+      orientation="horizontal"
       isDisabled={isDisabled}
+      isRequired={isRequired}
       label="Tipo"
       name="tipo"
       onChange={(nextValue) => {
@@ -257,19 +251,22 @@ export function TransactionTypeField({
 export function TransactionSituationField({
   description,
   isDisabled = false,
+  isRequired = false,
   onChange,
   value,
 }: {
   description?: string;
   isDisabled?: boolean;
+  isRequired?: boolean;
   onChange: (value: TransactionSituation) => void;
   value: TransactionSituation;
 }) {
   return (
     <RadioGroup
-      appearance="segmented"
+      orientation="horizontal"
       description={description}
       isDisabled={isDisabled}
+      isRequired={isRequired}
       label="Situação"
       name="situacao"
       onChange={(nextValue) => {

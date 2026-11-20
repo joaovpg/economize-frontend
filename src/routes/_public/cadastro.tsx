@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/csr/ArrowRight";
@@ -9,7 +9,8 @@ import { z } from "zod";
 import { AuthConsent } from "../../components/AuthConsent";
 import { Button } from "../../components/Button";
 import { Card, CardBody } from "../../components/Card";
-import { TextField } from "../../components/TextField";
+import { PasswordField } from "../../components/fields/PasswordField";
+import { TextField } from "../../components/fields/TextField";
 import { isApiError } from "../../lib/api-errors";
 import { postCadastro, postLogin } from "../../services/auth/api";
 import { cadastroRequestSchema } from "../../services/auth/contracts";
@@ -45,17 +46,14 @@ function RegisterPage() {
   const timezone = new Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
   const {
     formState: { errors, isSubmitting },
+    control,
     handleSubmit,
-    register,
     setError,
   } = useForm<RegisterFormData>({
+    defaultValues: { nome: "", email: "", senha: "", confirmacao: "" },
     mode: "onSubmit",
     resolver: zodResolver(cadastroSchema),
   });
-  const nomeField = register("nome");
-  const emailField = register("email");
-  const senhaField = register("senha");
-  const confirmacaoField = register("confirmacao");
 
   const handleFormSubmit = async (data: RegisterFormData) => {
     setSubmitError(null);
@@ -126,53 +124,67 @@ function RegisterPage() {
               {submitError}
             </p>
           )}
-          <TextField
-            label="Nome completo"
-            name={nomeField.name}
-            onBlur={nomeField.onBlur}
-            onInput={nomeField.onChange}
-            inputRef={nomeField.ref}
-            autoComplete="name"
-            maxLength={120}
-            placeholder="Como você gosta de ser chamado?"
-            errorMessage={errors.nome?.message}
+          <Controller
+            control={control}
+            name="nome"
+            render={({ field }) => (
+              <TextField
+                {...field}
+                autoComplete="name"
+                errorMessage={errors.nome?.message}
+                isRequired
+                label="Nome completo"
+                maxLength={120}
+                placeholder="Como você gosta de ser chamado?"
+              />
+            )}
           />
-          <TextField
-            label="E-mail"
-            name={emailField.name}
-            onBlur={emailField.onBlur}
-            onInput={emailField.onChange}
-            inputRef={emailField.ref}
-            autoComplete="email"
-            maxLength={320}
-            placeholder="voce@exemplo.com"
-            type="email"
-            errorMessage={errors.email?.message}
+          <Controller
+            control={control}
+            name="email"
+            render={({ field }) => (
+              <TextField
+                {...field}
+                autoComplete="email"
+                errorMessage={errors.email?.message}
+                isRequired
+                label="E-mail"
+                maxLength={320}
+                placeholder="voce@exemplo.com"
+                type="email"
+              />
+            )}
           />
-          <TextField
-            label="Senha"
-            description="Use entre 8 e 128 caracteres."
-            name={senhaField.name}
-            onBlur={senhaField.onBlur}
-            onInput={senhaField.onChange}
-            inputRef={senhaField.ref}
-            type="password"
-            autoComplete="new-password"
-            maxLength={128}
-            placeholder="Crie uma senha segura"
-            errorMessage={errors.senha?.message}
+          <Controller
+            control={control}
+            name="senha"
+            render={({ field }) => (
+              <PasswordField
+                {...field}
+                autoComplete="new-password"
+                description="Use entre 8 e 128 caracteres."
+                errorMessage={errors.senha?.message}
+                isRequired
+                label="Senha"
+                maxLength={128}
+                placeholder="Crie uma senha segura"
+              />
+            )}
           />
-          <TextField
-            label="Confirme sua senha"
-            name={confirmacaoField.name}
-            onBlur={confirmacaoField.onBlur}
-            onInput={confirmacaoField.onChange}
-            inputRef={confirmacaoField.ref}
-            type="password"
-            autoComplete="new-password"
-            maxLength={128}
-            placeholder="Repita sua senha"
-            errorMessage={errors.confirmacao?.message}
+          <Controller
+            control={control}
+            name="confirmacao"
+            render={({ field }) => (
+              <PasswordField
+                {...field}
+                autoComplete="new-password"
+                errorMessage={errors.confirmacao?.message}
+                isRequired
+                label="Confirme sua senha"
+                maxLength={128}
+                placeholder="Repita sua senha"
+              />
+            )}
           />
           <p className="m-0 flex items-center gap-2 text-caption text-pretty text-muted before:size-2 before:flex-none before:shrink-0 before:rounded-full before:bg-muted before:content-['']">
             Fuso horário detectado: <strong>{timezone}</strong>

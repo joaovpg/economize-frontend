@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute } from "@tanstack/react-router";
@@ -8,7 +8,8 @@ import { getRouteApi } from "@tanstack/react-router";
 import { AuthConsent } from "../../components/AuthConsent";
 import { Button } from "../../components/Button";
 import { Card, CardBody } from "../../components/Card";
-import { TextField } from "../../components/TextField";
+import { PasswordField } from "../../components/fields/PasswordField";
+import { TextField } from "../../components/fields/TextField";
 import { isApiError } from "../../lib/api-errors";
 import { postLogin } from "../../services/auth/api";
 import { loginRequestSchema, type LoginRequest } from "../../services/auth/contracts";
@@ -33,15 +34,14 @@ function LoginPage() {
   const navigate = loginRoute.useNavigate();
   const {
     formState: { errors, isSubmitting },
+    control,
     handleSubmit,
-    register,
     setError,
   } = useForm<LoginFormData>({
+    defaultValues: { email: "", senha: "" },
     mode: "onSubmit",
     resolver: zodResolver(loginRequestSchema),
   });
-  const emailField = register("email");
-  const senhaField = register("senha");
 
   const handleFormSubmit = async (data: LoginFormData) => {
     setSubmitError(null);
@@ -104,29 +104,36 @@ function LoginPage() {
               {submitError}
             </p>
           )}
-          <TextField
-            label="E-mail"
-            name={emailField.name}
-            onBlur={emailField.onBlur}
-            onInput={emailField.onChange}
-            inputRef={emailField.ref}
-            autoComplete="email"
-            maxLength={320}
-            placeholder="voce@exemplo.com"
-            type="email"
-            errorMessage={errors.email?.message}
+          <Controller
+            control={control}
+            name="email"
+            render={({ field }) => (
+              <TextField
+                {...field}
+                autoComplete="email"
+                errorMessage={errors.email?.message}
+                isRequired
+                label="E-mail"
+                maxLength={320}
+                placeholder="voce@exemplo.com"
+                type="email"
+              />
+            )}
           />
-          <TextField
-            label="Senha"
-            name={senhaField.name}
-            onBlur={senhaField.onBlur}
-            onInput={senhaField.onChange}
-            inputRef={senhaField.ref}
-            type="password"
-            autoComplete="current-password"
-            maxLength={128}
-            placeholder="Digite sua senha"
-            errorMessage={errors.senha?.message}
+          <Controller
+            control={control}
+            name="senha"
+            render={({ field }) => (
+              <PasswordField
+                {...field}
+                autoComplete="current-password"
+                errorMessage={errors.senha?.message}
+                isRequired
+                label="Senha"
+                maxLength={128}
+                placeholder="Digite sua senha"
+              />
+            )}
           />
           <div className="flex justify-end">
             <Button type="button" variant="link">

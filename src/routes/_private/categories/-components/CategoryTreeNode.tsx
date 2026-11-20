@@ -1,7 +1,7 @@
 import { PencilSimpleIcon } from "@phosphor-icons/react/dist/csr/PencilSimple";
 
 import { Button } from "../../../../components/Button";
-import { Switch } from "../../../../components/Switch";
+import { Switch } from "../../../../components/fields/Switch";
 import { cn } from "../../../../utils/tailwind";
 
 import type { CategoriaResponse } from "../../../../services/categories/contracts";

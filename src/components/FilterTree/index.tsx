@@ -4,7 +4,7 @@ import { Tree, TreeItem, TreeItemContent, type Selection } from "react-aria-comp
 import { CaretDownIcon } from "@phosphor-icons/react/dist/csr/CaretDown";
 
 import { Button } from "../Button";
-import { Checkbox } from "../Checkbox";
+import { Checkbox } from "../fields/Checkbox";
 
 export type FilterTreeItem<TSelectionKey extends string = string> =
   | {

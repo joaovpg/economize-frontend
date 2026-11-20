@@ -1,6 +1,6 @@
 import { Controller, type Control } from "react-hook-form";
 
-import { Select, SelectItem } from "../../../../components/Select";
+import { Select, SelectItem } from "../../../../components/fields/Select";
 import { buildCategoryTree } from "../../../../lib/category-tree";
 
 import type { CategoriaResponse } from "../../../../services/categories/contracts";
@@ -109,6 +109,7 @@ export function CategoryParentField({
           className="min-w-0"
           errorMessage={errorMessage}
           isDisabled={isDisabled}
+          isSearchable
           label="Categoria-pai"
           onBlur={field.onBlur}
           onChange={(nextValue) => {

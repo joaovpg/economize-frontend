@@ -43,6 +43,28 @@
 - Controles têm 40px (`h-10`) e, no `size="sm"`, 32px (`h-8`). No celular, o `md` e os campos usam
   44px (`max-md:h-touch`).
 
+## Campos de formulário
+
+- Duas camadas. `src/components/primitives/` tem a anatomia: `field/` (`FieldGroup`, `Input`, `TextArea`, `FieldButton`, `FieldIcon`, `Label`, `Description`, `FieldHeader`, `FieldError` e `fieldStyles.ts`), `listbox/` (`Popover`, `ListBox`, `ListBoxItem`, `SearchInput`) e `Legend.tsx`. `src/components/fields/` monta os campos só com primitivos: `TextField`, `PasswordField`, `TextArea`, `NumberField`, `CurrencyField`, `Select` (+ `SelectItem`), `DatePicker`, `Checkbox`, `RadioGroup` (+ `RadioItem`) e `Switch`.
+- Primitivos leem o estado pelo contexto e pelos `data-*` do React Aria. Não passe `isDisabled` a um primitivo só para colorir o texto.
+- Campos aceitam `label`, `description`, `errorMessage`, `isInvalid`, `reserveErrorSpace`, `isRequired`, `isDisabled`, `isReadOnly`, `size` (`md` ou `sm`) e `className`. Todos usam `validationBehavior="aria"`. Validação fica no Zod; o campo só exibe a mensagem.
+- Modelo de estados, igual na caixa do input, no botão do Select e na área de texto:
+  - repouso: `rounded-control border border-border bg-surface`;
+  - hover: `border-border-strong`;
+  - foco: `border-brand` com anel de 1px (`outline-1 outline-solid outline-brand`, total de 2px);
+  - inválido: `border-danger`, com anel `outline-danger` quando focado;
+  - pressionado (só o botão do Select): `bg-surface-muted`;
+  - desabilitado: `bg-surface-muted text-muted`, sem hover nem anel;
+  - somente leitura: igual ao repouso, sem hover nem anel.
+- Os estados vêm de `data-*`. A raiz de cada campo é o grupo nomeado `group/field`; inválido, desabilitado e somente leitura são lidos com `group-data-<estado>/field` (o nome evita herdar o estado de outro `group` ancestral), e foco e hover, do próprio elemento. Toda regra com estado tem guardas `not-*`, para que as regras sejam exclusivas e não dependam da ordem do CSS. Inválido vence hover e foco de marca.
+- Pilha do campo: cabeçalho (`FieldHeader`, rótulo e descrição colados), caixa e erro com `min-h-4` reservado. A raiz usa `row-span-3 grid-rows-subgrid`: em uma grade com colunas, cabeçalho, caixa e erro alinham com os vizinhos; fora de grade, comporta-se como um grid comum.
+- Obrigatório: `isRequired` mostra "(obrigatório)" à direita do rótulo, com `aria-hidden`, porque o campo já anuncia `aria-required`. Passe `isRequired` aos campos que o schema Zod torna obrigatórios. Campos opcionais não recebem a marca.
+- Contrato com React Hook Form: use `Controller` e espalhe `{...field}`. Ele entrega `value`, `onChange(value)`, `onBlur`, `name` e `ref`, e o `ref` aponta para o elemento focável: input, textarea, botão do Select ou segmento de data. Passe `errorMessage={fieldState.error?.message}`. Não use `register` em campo novo: o `onChange` dele recebe evento, não valor.
+- `Checkbox`, `RadioGroup` e `Switch` não recebem `ref`, porque não têm um único elemento focável.
+- Radio: só o clássico, sem pill nem segmentado. Use `orientation="horizontal"` para opções curtas, e o padrão `vertical` para as demais.
+- Select: `isSearchable` mostra uma busca no topo da lista e filtra pelo texto. Use em contas e categorias. O botão mostra o `textValue` do item escolhido. Sem resultado, a lista mostra "Nenhuma opção encontrada".
+- Ícone decorativo dentro da caixa é `FieldIcon`; botão de ação dentro da caixa (olho da senha, calendário, stepper) é `FieldButton`.
+
 ## Responsividade
 
 - Escreva mobile-first: o estilo base vale para o celular, e `sm:`, `md:` e `lg:` ampliam o layout.

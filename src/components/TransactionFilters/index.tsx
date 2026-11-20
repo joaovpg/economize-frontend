@@ -1,6 +1,5 @@
 import { type ReactNode, useEffect } from "react";
-import { Input, TextField as AriaTextField } from "react-aria-components";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GearSixIcon } from "@phosphor-icons/react/dist/csr/GearSix";
@@ -21,9 +20,9 @@ import { type CategoriaResponse } from "../../services/categories/contracts";
 import { tv } from "../../utils/tailwind";
 import { Button } from "../Button";
 import { Card, CardBody, CardFooter, CardHeader } from "../Card";
-import { Checkbox } from "../Checkbox";
+import { Checkbox } from "../fields/Checkbox";
+import { TextField } from "../fields/TextField";
 import { FilterTree, type FilterTreeItem } from "../FilterTree";
-import { Label } from "../Label";
 import { Link } from "../Link";
 import { ModalBody, ModalFooter } from "../Modal";
 import { MonthYearFilter } from "../MonthYearFilter";
@@ -148,7 +147,7 @@ export function TransactionFilters({
   } = value;
   const categoryFilterItems = buildCategoryFilterItems(categories);
   const accountFilterItems = buildAccountFilterItems(accounts);
-  const { control, getValues, handleSubmit, register, reset, setFocus, setValue } =
+  const { control, getValues, handleSubmit, reset, setFocus, setValue } =
     useForm<TransactionFilterFormData>({
       defaultValues: toFormValues(value),
       resolver: zodResolver(transactionFilterFormSchema),
@@ -166,7 +165,6 @@ export function TransactionFilters({
     Number(appliedSearchTerm.trim().length > 0) +
     Number(appliedCategories.length > 0) +
     Number(hasAccountFilter);
-  const searchField = register("search");
   const isPreviousBalanceDisabled =
     disablePreviousBalance || (applyOnChange && selectedSearchTerm.trim().length > 0);
 
@@ -293,25 +291,26 @@ export function TransactionFilters({
       }}
     >
       <Body className="gap-6">
-        <AriaTextField className="grid gap-2">
-          <Label className="m-0 text-body-strong text-muted">Buscar transação</Label>
-          <div className="flex h-10 min-h-10 min-w-0 items-center gap-2 rounded-control border border-border bg-surface px-3 text-muted transition-colors duration-150 ease-out focus-within:border-brand focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand hover:border-border-strong hover:bg-surface-muted motion-reduce:transition-none max-md:h-touch max-md:min-h-touch [&>svg]:size-4 [&>svg]:shrink-0">
-            <MagnifyingGlassIcon aria-hidden="true" />
-            <Input
-              {...searchField}
-              id={`${filterId}-search`}
-              className="min-w-0 flex-1 border-0 bg-transparent text-body text-foreground caret-brand outline-none placeholder:text-muted max-md:text-md"
-              onChange={(event) => {
-                void searchField.onChange(event);
+        <Controller
+          control={control}
+          name="search"
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Buscar transação"
+              leadingIcon={<MagnifyingGlassIcon aria-hidden="true" />}
+              onChange={(nextSearch) => {
+                field.onChange(nextSearch);
                 if (applyOnChange) {
-                  onSearchChange?.(event.currentTarget.value);
+                  onSearchChange?.(nextSearch);
                 }
               }}
               placeholder="Nome, descrição..."
+              reserveErrorSpace={false}
               type="search"
             />
-          </div>
-        </AriaTextField>
+          )}
+        />
 
         <fieldset className="grid min-w-0 gap-2 border-0 p-0">
           <legend className="m-0 flex w-full items-center justify-between gap-2 text-caption text-muted">
