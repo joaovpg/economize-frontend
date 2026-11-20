@@ -8,7 +8,7 @@ import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
 import { Button } from "../../../../components/Button";
 import { Card } from "../../../../components/Card";
 import { FilterChip } from "../../../../components/FilterChip";
-import { Modal, ModalBody } from "../../../../components/Modal";
+import { Modal, ModalHeader, ModalTitle } from "../../../../components/Modal";
 import { PageHeading } from "../../../../components/PageHeading";
 import { TransactionFilters } from "../../../../components/TransactionFilters";
 import { formatCurrency } from "../../../../lib/formatters";
@@ -118,7 +118,7 @@ function MonthStepper({
   return (
     <fieldset
       className={[
-        "flex min-w-0 items-center justify-between gap-2 rounded-2xl border border-border card-background p-1",
+        "flex min-w-0 items-center justify-between gap-2 rounded-control border border-border bg-surface p-1",
         className,
       ]
         .filter(Boolean)
@@ -127,6 +127,7 @@ function MonthStepper({
       <legend className="sr-only">Selecionar mês</legend>
       <Button
         aria-label="Mês anterior"
+        shape="segment"
         isDisabled={!isYearMonthWithinApiFormat(previousMonth)}
         isIconOnly
         onPress={() => onChange(previousMonth)}
@@ -135,11 +136,12 @@ function MonthStepper({
       >
         <CaretLeftIcon aria-hidden="true" />
       </Button>
-      <span className="min-w-28 text-center text-caption-strong text-foreground uppercase">
+      <span className="min-w-month text-center text-body-strong text-foreground">
         {getMonthLabel(toYearMonth(value))}
       </span>
       <Button
         aria-label="Próximo mês"
+        shape="segment"
         isDisabled={!isYearMonthWithinApiFormat(nextMonth)}
         isIconOnly
         onPress={() => onChange(nextMonth)}
@@ -171,58 +173,66 @@ function BalanceHero({
   return (
     <section
       aria-labelledby="transactions-projection-title"
-      className="overflow-hidden rounded-3xl bg-brand p-5.5 text-brand-foreground min-[60rem]:p-7"
+      className="overflow-hidden rounded-surface border border-border bg-surface p-4 text-foreground md:p-6"
     >
       {showOpeningBalance && (
-        <div className="mb-5.5 flex items-start justify-between gap-4 border-b border-brand-foreground/30 pb-5.5 sm:items-center">
+        <div className="mb-6 flex items-start justify-between gap-4 border-b border-border pb-6 sm:items-center">
           <div className="min-w-0">
-            <h2
-              className="m-0 text-caption-strong tracking-label text-brand-foreground/80 uppercase"
-              id="transactions-opening-balance-title"
-            >
+            <h2 className="m-0 text-caption text-muted" id="transactions-opening-balance-title">
               Saldo de abertura
             </h2>
-            <p className="m-0 mt-1 text-body-small text-brand-foreground/80">
-              Seu ponto de partida no mês
-            </p>
+            <p className="m-0 mt-1 text-body text-muted">Seu ponto de partida no mês</p>
           </div>
-          <strong className="text-card-title whitespace-nowrap tabular-nums sm:text-section-title">
+          <strong className="text-body-strong whitespace-nowrap tabular-nums">
             {formatCurrency(metrics.openingBalance)}
           </strong>
         </div>
       )}
-      <div className="grid grid-cols-2 gap-4 min-[60rem]:grid-cols-[minmax(10rem,1.35fr)_repeat(2,minmax(0,1fr))] min-[60rem]:items-center">
-        <div className="col-span-2 min-w-0 min-[60rem]:col-span-1">
-          <p
-            className="m-0 text-caption-strong tracking-label text-brand-foreground/80 uppercase"
-            id="transactions-projection-title"
-          >
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-[minmax(var(--spacing-metric-min),1.35fr)_repeat(2,minmax(0,1fr))] lg:items-center">
+        <div className="col-span-2 min-w-0 lg:col-span-1">
+          <p className="m-0 text-caption text-muted" id="transactions-projection-title">
             {hasTransactionScope
               ? `Projeção do recorte em ${getMonthLabel(data.fim)}`
               : `Saldo projetado em ${getMonthLabel(data.fim)}`}
           </p>
           <p className="m-0 mt-2 text-metric">{formatCurrency(metrics.projectedBalance)}</p>
           {isScenario && (
-            <p className="m-0 mt-1.5 text-caption text-brand-foreground/80">
+            <p className="m-0 mt-1 text-caption text-muted">
               Cenário calculado a partir de R$ 0,00 com os movimentos exibidos.
             </p>
           )}
         </div>
-        <Metric label="Entradas" value={metrics.entries} />
-        <Metric label="Saídas" value={-metrics.exits} />
+        <Metric label="Entradas" tone="success" value={metrics.entries} />
+        <Metric label="Saídas" tone="danger" value={-metrics.exits} />
       </div>
     </section>
   );
 }
 
-function Metric({ label, value }: { label: string; value: number }) {
+function Metric({
+  label,
+  tone,
+  value,
+}: {
+  label: string;
+  tone: "danger" | "success";
+  value: number;
+}) {
+  let toneClassName = tone === "success" ? "text-success" : "text-danger";
+  if (value === 0) toneClassName = "text-foreground";
+  const sign = Math.sign(value);
+  const formattedValue = formatCurrency(Math.abs(value));
+  let displayValue = formattedValue;
+  if (sign > 0) displayValue = `+ ${formattedValue}`;
+  if (sign < 0) displayValue = `− ${formattedValue}`;
+
   return (
-    <div className="min-w-0 border-t border-brand-foreground/30 pt-3.5 min-[60rem]:border-t-0 min-[60rem]:border-l min-[60rem]:pl-5">
-      <p className="m-0 text-caption-strong tracking-label text-brand-foreground/75 uppercase">
-        {label}
-      </p>
-      <strong className="mt-2 block text-label whitespace-nowrap tabular-nums">
-        {value >= 0 ? `+ ${formatCurrency(value)}` : `− ${formatCurrency(Math.abs(value))}`}
+    <div className="min-w-0 border-t border-border pt-4 lg:border-t-0 lg:border-l lg:border-border lg:pl-5">
+      <p className="m-0 text-caption text-muted">{label}</p>
+      <strong
+        className={`mt-2 block text-body-strong whitespace-nowrap tabular-nums ${toneClassName}`}
+      >
+        {displayValue}
       </strong>
     </div>
   );
@@ -250,11 +260,10 @@ function TransactionsHeader({
 >) {
   return (
     <>
-      <header className="flex items-start justify-between gap-5 max-[48rem]:flex-col max-[48rem]:gap-4 sm:items-end">
+      <header className="flex items-start justify-between gap-5 max-md:flex-col max-md:gap-4 sm:items-end">
         <PageHeading
           description={<>Movimentações de {getMonthLabel(data.inicio)}.</>}
           id="transactions-title"
-          size="compact"
           title="Transações"
         />
         <div className="grid w-full gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:justify-end">
@@ -271,7 +280,7 @@ function TransactionsHeader({
             Nova movimentação
           </Button>
           <Button
-            className="hidden! max-[60rem]:inline-flex!"
+            className="hidden! max-lg:inline-flex!"
             ref={filterTriggerRef}
             aria-controls="transactions-filters"
             aria-expanded={isFiltersOpen}
@@ -406,24 +415,25 @@ function MobileFilterModal({
       }}
       size="md"
     >
-      <ModalBody>
-        <TransactionFilters
-          ariaLabel="Filtros avançados de transações"
-          applyOnChange
-          accounts={accounts}
-          categories={categories}
-          disablePreviousBalance={hasTransactionScope}
-          filterId="transactions-filters-modal"
-          isOpen
-          onApply={onApplyFilters}
-          onClear={onClearFilters}
-          onClose={onClose}
-          onSearchChange={onSearchChange}
-          presentation="modal"
-          showMonth={false}
-          value={search}
-        />
-      </ModalBody>
+      <ModalHeader closeLabel="Fechar filtros">
+        <ModalTitle>Filtros</ModalTitle>
+      </ModalHeader>
+      <TransactionFilters
+        ariaLabel="Filtros avançados de transações"
+        applyOnChange
+        accounts={accounts}
+        categories={categories}
+        disablePreviousBalance={hasTransactionScope}
+        filterId="transactions-filters-modal"
+        isOpen
+        onApply={onApplyFilters}
+        onClear={onClearFilters}
+        onClose={onClose}
+        onSearchChange={onSearchChange}
+        presentation="modal"
+        showMonth={false}
+        value={search}
+      />
     </Modal>
   );
 }
@@ -437,15 +447,15 @@ function TransactionsFrame({
 }) {
   return (
     <>
-      <div className="mx-auto grid w-full max-w-7xl min-w-0 items-start min-[60rem]:grid-cols-[18.25rem_minmax(0,1fr)]">
-        <div className="hidden min-[60rem]:block">
+      <div className="mx-auto grid w-full max-w-7xl min-w-0 items-start lg:grid-cols-[var(--spacing-sidebar)_minmax(0,1fr)]">
+        <div className="hidden lg:block">
           <FiltersRail {...props} />
         </div>
-        <main className="min-w-0 px-4 pt-5.5 pb-8 sm:px-6 min-[60rem]:px-7 min-[60rem]:pt-8 min-[60rem]:pb-10">
-          <div className="flex w-full min-w-0 flex-col gap-5.5 min-[60rem]:gap-7">{children}</div>
+        <main className="min-w-0 px-4 pt-6 pb-8 sm:px-6 lg:px-8 lg:pt-8 lg:pb-10">
+          <div className="flex w-full min-w-0 flex-col gap-6 lg:gap-8">{children}</div>
         </main>
       </div>
-      <div className="min-[60rem]:hidden">
+      <div className="lg:hidden">
         <MobileFilterModal {...props} onClose={props.onCloseFilters} />
       </div>
     </>
@@ -467,7 +477,7 @@ export function TransactionsView(props: TransactionsViewProps) {
         includePreviousBalance={props.search.includePreviousBalance}
         items={props.items}
       />
-      {props.feedback && <p className="m-0 text-body-small text-success">{props.feedback}</p>}
+      {props.feedback && <p className="m-0 text-body text-success">{props.feedback}</p>}
       <TransactionList
         accounts={props.accounts}
         categories={props.categories}

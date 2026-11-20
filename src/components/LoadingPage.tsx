@@ -1,4 +1,4 @@
-import { cn } from "tailwind-variants";
+import { cn } from "../utils/tailwind";
 
 type LoadingPageProps = {
   className?: string;
@@ -7,7 +7,7 @@ type LoadingPageProps = {
 function LoadingPage({ className = "min-h-svh" }: LoadingPageProps) {
   return (
     <div className={cn("grid place-items-center bg-canvas px-5 py-8", className)}>
-      <output className="m-0 text-body-small text-muted" aria-live="polite">
+      <output className="m-0 text-body text-muted" aria-live="polite">
         Carregando...
       </output>
     </div>

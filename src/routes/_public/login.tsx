@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute } from "@tanstack/react-router";
@@ -8,7 +8,8 @@ import { getRouteApi } from "@tanstack/react-router";
 import { AuthConsent } from "../../components/AuthConsent";
 import { Button } from "../../components/Button";
 import { Card, CardBody } from "../../components/Card";
-import { TextField } from "../../components/TextField";
+import { PasswordField } from "../../components/fields/PasswordField";
+import { TextField } from "../../components/fields/TextField";
 import { isApiError } from "../../lib/api-errors";
 import { postLogin } from "../../services/auth/api";
 import { loginRequestSchema, type LoginRequest } from "../../services/auth/contracts";
@@ -33,15 +34,14 @@ function LoginPage() {
   const navigate = loginRoute.useNavigate();
   const {
     formState: { errors, isSubmitting },
+    control,
     handleSubmit,
-    register,
     setError,
   } = useForm<LoginFormData>({
+    defaultValues: { email: "", senha: "" },
     mode: "onSubmit",
     resolver: zodResolver(loginRequestSchema),
   });
-  const emailField = register("email");
-  const senhaField = register("senha");
 
   const handleFormSubmit = async (data: LoginFormData) => {
     setSubmitError(null);
@@ -80,18 +80,14 @@ function LoginPage() {
 
   return (
     <section
-      className="grid min-h-107.5 grid-cols-[minmax(0,1fr)_22.5rem] items-end gap-26 max-[56.25rem]:min-h-0 max-[56.25rem]:grid-cols-1 max-[56.25rem]:gap-8.5"
+      className="grid min-h-auth grid-cols-[minmax(0,1fr)_var(--spacing-auth-card)] items-end gap-24 max-lg:min-h-0 max-lg:grid-cols-1 max-lg:gap-8"
       aria-labelledby="auth-title"
     >
-      <div className="flex flex-col gap-5 pb-5.5 max-[56.25rem]:pb-0">
-        <span
-          className="block h-1 w-10 rounded-full bg-linear-to-r from-brand to-teal-200"
-          aria-hidden="true"
-        />
-        <h1 className="m-0 max-w-[11ch] text-display-hero text-balance" id="auth-title">
+      <div className="flex flex-col gap-5 pb-6 max-lg:pb-0">
+        <h1 className="m-0 max-w-measure-heading text-title-page text-balance" id="auth-title">
           Vamos deixar isso simples.
         </h1>
-        <p className="m-0 max-w-[35ch] text-body text-pretty text-muted">
+        <p className="m-0 max-w-measure-lead text-body text-pretty text-muted">
           Entre para acompanhar sua vida financeira com clareza. Sem destaque chamativo, sem ruído,
           sem promessas exageradas.
         </p>
@@ -101,39 +97,46 @@ function LoginPage() {
         <CardBody spacing="compact">
           {submitError && (
             <p
-              className="m-0 rounded-md bg-danger-soft px-3 py-2 text-validation text-danger"
+              className="m-0 rounded-control bg-danger-soft px-3 py-2 text-caption text-danger"
               role="alert"
               aria-live="assertive"
             >
               {submitError}
             </p>
           )}
-          <TextField
-            label="E-mail"
-            name={emailField.name}
-            onBlur={emailField.onBlur}
-            onInput={emailField.onChange}
-            inputRef={emailField.ref}
-            autoComplete="email"
-            maxLength={320}
-            placeholder="voce@exemplo.com"
-            type="email"
-            errorMessage={errors.email?.message}
+          <Controller
+            control={control}
+            name="email"
+            render={({ field }) => (
+              <TextField
+                {...field}
+                autoComplete="email"
+                errorMessage={errors.email?.message}
+                isRequired
+                label="E-mail"
+                maxLength={320}
+                placeholder="voce@exemplo.com"
+                type="email"
+              />
+            )}
           />
-          <TextField
-            label="Senha"
-            name={senhaField.name}
-            onBlur={senhaField.onBlur}
-            onInput={senhaField.onChange}
-            inputRef={senhaField.ref}
-            type="password"
-            autoComplete="current-password"
-            maxLength={128}
-            placeholder="Digite sua senha"
-            errorMessage={errors.senha?.message}
+          <Controller
+            control={control}
+            name="senha"
+            render={({ field }) => (
+              <PasswordField
+                {...field}
+                autoComplete="current-password"
+                errorMessage={errors.senha?.message}
+                isRequired
+                label="Senha"
+                maxLength={128}
+                placeholder="Digite sua senha"
+              />
+            )}
           />
           <div className="flex justify-end">
-            <Button emphasis="strong" type="button" variant="link">
+            <Button type="button" variant="link">
               Esqueci minha senha
             </Button>
           </div>

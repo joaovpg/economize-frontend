@@ -1,35 +1,32 @@
 .dark {
   color-scheme: dark;
 
-  --color-canvas-value: var(--color-slate-950);
-  --color-surface-value: var(--color-slate-900);
-  --color-surface-muted-value: var(--color-slate-800);
-  --color-scrim-value: color-mix(in oklch, var(--color-slate-950) 58%, transparent);
+  --color-canvas-value: var(--neutral-950);
+  --color-surface-value: var(--neutral-900);
+  --color-surface-muted-value: var(--neutral-800);
+  --color-surface-strong-value: var(--neutral-700);
+  --color-scrim-value: color-mix(in oklch, var(--neutral-950) 58%, transparent);
 
-  --color-foreground-value: var(--color-slate-50);
-  --color-muted-value: var(--color-slate-300);
-  --color-subtle-value: var(--color-slate-400);
+  --color-foreground-value: var(--neutral-50);
+  --color-muted-value: var(--neutral-400);
 
-  --color-border-value: var(--color-slate-800);
-  --color-border-strong-value: var(--color-slate-700);
+  --color-border-value: var(--neutral-800);
+  --color-border-strong-value: var(--neutral-700);
 
-  --color-brand-value: var(--color-teal-300);
-  --color-brand-hover-value: var(--color-teal-200);
-  --color-brand-pressed-value: var(--color-teal-100);
-  --color-brand-soft-value: color-mix(in oklch, var(--color-teal-500) 12%, transparent);
-  --color-brand-foreground-value: var(--color-teal-950);
-  --color-page-glow-value: color-mix(in oklch, var(--color-teal-400) 12%, transparent);
+  --color-brand-value: var(--emerald-300);
+  --color-brand-hover-value: var(--emerald-200);
+  --color-brand-pressed-value: var(--emerald-100);
+  --color-brand-soft-value: color-mix(in oklch, var(--emerald-300) 16%, transparent);
+  --color-brand-foreground-value: var(--emerald-900);
 
-  --color-surface-strong-value: var(--color-slate-700);
+  --color-danger-value: oklch(80% 0.1 25);
+  --color-danger-hover-value: oklch(85% 0.09 25);
+  --color-danger-pressed-value: oklch(90% 0.07 25);
+  --color-danger-soft-value: color-mix(in oklch, oklch(60% 0.19 25) 16%, transparent);
 
-  --color-danger-value: var(--color-red-100);
-  --color-danger-hover-value: color-mix(in oklch, var(--color-red-100) 90%, var(--color-red-600));
-  --color-danger-pressed-value: color-mix(in oklch, var(--color-red-100) 76%, var(--color-red-600));
-  --color-danger-soft-value: color-mix(in oklch, var(--color-red-600) 14%, transparent);
+  --color-success-value: var(--color-brand-value);
+  --color-success-soft-value: var(--color-brand-soft-value);
 
-  --color-success-value: var(--color-green-100);
-  --color-success-soft-value: color-mix(in oklch, var(--color-green-600) 14%, transparent);
-
-  --color-warning-value: var(--color-amber-100);
-  --color-warning-soft-value: color-mix(in oklch, var(--color-amber-600) 14%, transparent);
+  --color-warning-value: oklch(86% 0.13 85);
+  --color-warning-soft-value: color-mix(in oklch, oklch(66.6% 0.157 58.3) 16%, transparent);
 }

@@ -4,7 +4,7 @@
 **Escopo:** Vite, React 19, TypeScript, TanStack Router, Ky, Zod e a organização atual de `src/services`.  
 **Objetivo:** registrar recomendações aplicáveis ao Economize sem implementar a refatoração.
 
-**Status:** A recomendação de integração do TanStack Query foi implementada posteriormente pela [ADR-0008](../adr/0008-integracao-do-tanstack-query-com-o-tanstack-router.md). As observações abaixo preservam a pesquisa original; quando houver conflito, a ADR e as diretrizes atuais do frontend são a fonte de verdade.
+**Status:** A recomendação de integração do TanStack Query foi implementada posteriormente e está descrita em [Arquitetura frontend](../agent-guidelines/frontend-architecture.md). As observações abaixo preservam a pesquisa original; quando houver conflito, as diretrizes atuais do frontend são a fonte de verdade.
 
 ## Resumo executivo
 
@@ -25,7 +25,7 @@ Recomendação para este projeto:
 - [`src/services/accounts/`](../../src/services/accounts/), [`src/services/auth/`](../../src/services/auth/) e [`src/services/categories/`](../../src/services/categories/) reservam a divisão por domínio; cada pasta separa operações em `api.ts` dos schemas e tipos em `contracts.ts`.
 - A consulta de transações já está isolada em [`src/services/transactions/`](../../src/services/transactions/), com o serviço HTTP separado dos contratos Zod e consumido pelo loader da rota. O resumo não possui rota correspondente na API e permanece sem dados demonstrativos; o login ainda chama o cliente diretamente em [`src/routes/_public/login.tsx`](../../src/routes/_public/login.tsx), que continua sendo um ponto de migração futura.
 - As diretrizes do projeto já recomendam [`src/lib/api.ts`](../../docs/agent-guidelines/frontend-architecture.md) para integrações HTTP, loaders para obter dados necessários à rota e estado compartilhado/restaurável na URL.
-- O projeto agora declara `@tanstack/react-query` em [`package.json`](../../package.json), com `QueryClient` único no contexto do Router e query options por domínio. A pesquisa original tratava essa adoção como futura; a implementação atual está descrita na ADR-0008.
+- O projeto agora declara `@tanstack/react-query` em [`package.json`](../../package.json), com `QueryClient` único no contexto do Router e query options por domínio. A pesquisa original tratava essa adoção como futura; a implementação atual está descrita em [Arquitetura frontend](../agent-guidelines/frontend-architecture.md).
 
 ## Recomendações
 
@@ -194,7 +194,7 @@ Para a integração Router + Query, a documentação oficial mostra passar `Quer
 - usar loaders do Router para dados necessários à rota, passando o `signal` para os serviços;
 - manter `loaderDeps` mínimo e derivado de search params validados;
 - manter cache compartilhado, refetch e mutations coordenadas pelo TanStack Query;
-- usar `QueryClient` único, query keys por domínio e invalidação após mutation, conforme a ADR-0008.
+- usar `QueryClient` único, query keys por domínio e invalidação após mutation, conforme as diretrizes de arquitetura.
 
 ### Fase 4 — contrato gerado, se houver OpenAPI
 

@@ -1,6 +1,6 @@
 import { type ComponentPropsWithoutRef } from "react";
 
-import { twMerge } from "tailwind-merge";
+import { twMerge } from "../utils/tailwind";
 
 /**
  * Chip compacto para exibir um filtro aplicado ou outro recorte contextual.
@@ -15,7 +15,7 @@ export function FilterChip({ className, ...props }: FilterChipProps) {
     <span
       {...props}
       className={twMerge(
-        "inline-flex items-center rounded-full border border-border bg-surface-overlay-strong px-2.5 py-1.5 text-caption text-muted",
+        "inline-flex items-center rounded-full border border-border bg-surface px-3 py-1 text-caption text-muted",
         className,
       )}
       data-slot="filter-chip"

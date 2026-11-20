@@ -8,10 +8,10 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { Button } from "../../../components/Button";
 import { Card, CardBody, CardHeader } from "../../../components/Card";
+import { TextField } from "../../../components/fields/TextField";
 import { InlineMessage } from "../../../components/InlineMessage";
 import { Link } from "../../../components/Link";
 import { PageHeading } from "../../../components/PageHeading";
-import { TextField } from "../../../components/TextField";
 import { isApiError } from "../../../lib/api-errors";
 import { putCategoria } from "../../../services/categories/api";
 import { type CategoriaResponse } from "../../../services/categories/contracts";
@@ -122,9 +122,9 @@ function CategoriesPage() {
   return (
     <section
       aria-labelledby="categories-title"
-      className="flex min-w-0 flex-col pt-8 pr-7 pb-10 pl-7 max-[48rem]:pt-6 max-[48rem]:pr-4 max-[48rem]:pb-8 max-[48rem]:pl-4"
+      className="flex min-w-0 flex-col px-6 pt-8 pb-10 max-md:px-4 max-md:pt-6 max-md:pb-8"
     >
-      <div className="flex w-full max-w-320 flex-col gap-5.5 self-center">
+      <div className="flex w-full max-w-7xl flex-col gap-6 self-center">
         <Link
           leadingIcon={<ArrowLeftIcon aria-hidden="true" />}
           linkVariant="back"
@@ -135,7 +135,7 @@ function CategoriesPage() {
           Voltar para transações
         </Link>
 
-        <header className="flex items-end justify-between gap-5 max-[40rem]:flex-col max-[40rem]:items-start max-[40rem]:gap-4">
+        <header className="flex items-end justify-between gap-5 max-sm:flex-col max-sm:items-start max-sm:gap-4">
           <PageHeading
             description="Organize a forma como suas transações aparecem no Economize."
             id="categories-title"
@@ -169,15 +169,15 @@ function CategoriesPage() {
               value={categorySearch}
             />
             <div className="flex w-full flex-col justify-between gap-4 md:flex-row md:items-end">
-              <div className="flex w-full min-w-0 flex-col gap-1.5 md:w-auto">
-                <h2 className="text-title-compact text-foreground" id="categories-list-title">
+              <div className="flex w-full min-w-0 flex-col gap-2 md:w-auto">
+                <h2 className="text-title text-foreground" id="categories-list-title">
                   Suas categorias
                 </h2>
                 <p className="text-caption text-muted">
                   Categorias inativas podem ser reativadas quando necessário.
                 </p>
               </div>
-              <span className="shrink-0 text-caption text-subtle">
+              <span className="shrink-0 text-caption text-muted">
                 {activeCategoryCount} ativas · {inactiveCategoryCount} inativas
               </span>
             </div>
@@ -224,9 +224,5 @@ function CategoriesPage() {
 
 export const Route = createFileRoute("/_private/categories/")({
   component: CategoriesPage,
-  loader: ({ context }) =>
-    context.queryClient.query({
-      ...categoriesQueryOptions(),
-      staleTime: "static",
-    }),
+  loader: ({ context }) => context.queryClient.query(categoriesQueryOptions()),
 });

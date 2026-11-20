@@ -1,22 +1,21 @@
 import { useRef, useState } from "react";
-import { useForm, type UseFormSetError } from "react-hook-form";
+import { Controller, useForm, type UseFormSetError } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
+import { TextField } from "../../../../components/fields/TextField";
 import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
   ModalBody,
-  ModalClose,
   ModalDescription,
   DiscardChangesModal,
   ModalFooter,
   ModalHeader,
   ModalTitle,
 } from "../../../../components/Modal";
-import { TextField } from "../../../../components/TextField";
 import { isApiError } from "../../../../lib/api-errors";
 import { postCategoria, putCategoria } from "../../../../services/categories/api";
 import { categoriesQueryKey } from "../../../../services/categories/queries";
@@ -94,7 +93,6 @@ export function CategoryEditorModal({
     control,
     formState: { errors, isDirty, isSubmitting },
     handleSubmit,
-    register,
     setError,
   } = useForm<CategoryFormData>({
     defaultValues: {
@@ -104,7 +102,6 @@ export function CategoryEditorModal({
     mode: "onSubmit",
     resolver: zodResolver(categoryFormSchema),
   });
-  const nameField = register("nome");
 
   const requestClose = () => {
     if (isSubmitting) {
@@ -141,7 +138,7 @@ export function CategoryEditorModal({
         });
         successMessage = "Categoria criada com sucesso.";
       }
-      await queryClient.invalidateQueries({ queryKey: [categoriesQueryKey] });
+      await queryClient.invalidateQueries({ queryKey: categoriesQueryKey });
     } catch (error) {
       applyCategoryFormError(
         error,
@@ -172,14 +169,13 @@ export function CategoryEditorModal({
         }}
         size="md"
       >
-        <ModalHeader>
+        <ModalHeader showClose={!isSubmitting && !isDiscardModalOpen}>
           <ModalTitle>{isEditing ? "Editar categoria" : "Nova categoria"}</ModalTitle>
           <ModalDescription>
             {isEditing
               ? "Atualize o nome e a organização desta categoria."
               : "Crie uma categoria para organizar suas transações."}
           </ModalDescription>
-          {!isSubmitting && !isDiscardModalOpen && <ModalClose />}
         </ModalHeader>
         <form
           className="contents"
@@ -189,19 +185,23 @@ export function CategoryEditorModal({
         >
           <ModalBody>
             {submitError && <InlineMessage tone="danger">{submitError}</InlineMessage>}
-            <TextField
-              defaultValue={category?.nome ?? ""}
-              errorMessage={errors.nome?.message}
-              inputRef={(input) => {
-                nameInputRef.current = input;
-                nameField.ref(input);
-              }}
-              isDisabled={isSubmitting}
-              label="Nome"
-              name={nameField.name}
-              onBlur={nameField.onBlur}
-              onInput={nameField.onChange}
-              placeholder="Ex.: Moradia"
+            <Controller
+              control={control}
+              name="nome"
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  errorMessage={errors.nome?.message}
+                  isDisabled={isSubmitting}
+                  isRequired
+                  label="Nome"
+                  placeholder="Ex.: Moradia"
+                  ref={(input) => {
+                    nameInputRef.current = input;
+                    field.ref(input);
+                  }}
+                />
+              )}
             />
             <CategoryParentField
               categories={categories}

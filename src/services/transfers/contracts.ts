@@ -1,22 +1,26 @@
 import { z } from "zod";
 
 import {
-  optionalTransactionTextSchema,
   positiveMoneySchema,
   transactionSituationSchema,
+  transactionTextSchema,
+  versaoEdicaoSchema,
 } from "../transactions/shared";
 
+// Campos anuláveis obrigatórios (observacoes) são enviados como null.
 export const criarTransferenciaRequestSchema = z.object({
   contaDestinoId: z.uuid(),
   contaOrigemId: z.uuid(),
   dataFinanceira: z.iso.date(),
   descricao: z.string().trim().min(1).max(255),
-  observacoes: optionalTransactionTextSchema,
+  observacoes: transactionTextSchema,
   situacao: transactionSituationSchema,
   valor: positiveMoneySchema,
 });
 
-export const alterarTransferenciaRequestSchema = criarTransferenciaRequestSchema;
+export const alterarTransferenciaRequestSchema = criarTransferenciaRequestSchema.extend({
+  versaoEdicao: versaoEdicaoSchema,
+});
 
 export const transferenciaResponseSchema = z.looseObject({
   contaDestinoId: z.uuid(),
@@ -24,10 +28,11 @@ export const transferenciaResponseSchema = z.looseObject({
   dataFinanceira: z.iso.date(),
   descricao: z.string(),
   efetivadoEm: z.iso.datetime().nullable().optional(),
-  id: z.uuid(),
   observacoes: z.string().nullable().optional(),
   situacao: transactionSituationSchema,
+  transferenciaId: z.uuid(),
   valor: z.number(),
+  versaoEdicao: z.string(),
 });
 
 export type AlterarTransferenciaRequest = z.infer<typeof alterarTransferenciaRequestSchema>;

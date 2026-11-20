@@ -14,16 +14,3 @@ body:has([data-slot="modal-overlay"]) #root {
 body {
   margin: 0;
 }
-
-@layer components {
-  .app-background {
-    background:
-      radial-gradient(circle at 0% 0%, var(--color-page-glow-value), transparent 28rem),
-      linear-gradient(
-        180deg,
-        var(--color-canvas-value) 0%,
-        color-mix(in oklch, var(--color-surface-muted-value) 88%, var(--color-brand-soft-value))
-          100%
-      );
-  }
-}

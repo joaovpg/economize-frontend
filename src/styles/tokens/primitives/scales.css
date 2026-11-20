@@ -1,0 +1,23 @@
+/* Escalas padrão do Tailwind desligadas: o sistema usa só os tokens do projeto. */
+@theme {
+  --color-*: initial;
+  --spacing: initial;
+  --spacing-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --blur-*: initial;
+  --text-shadow-*: initial;
+}
+
+/*
+ * Altura de linha numérica usada pelos papéis tipográficos. Antes ela vinha da escala de
+ * espaçamento; os valores são os mesmos, só deixaram de depender da escala fechada.
+ */
+@theme {
+  --leading-4: 1rem;
+  --leading-5: 1.25rem;
+  --leading-7: 1.75rem;
+  --leading-8: 2rem;
+}

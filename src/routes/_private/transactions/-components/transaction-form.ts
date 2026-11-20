@@ -1,78 +1,64 @@
-import { Temporal } from "@js-temporal/polyfill";
 import { z } from "zod";
 
+import { getCurrentTransactionDate, isDataIsoValida } from "../../../../lib/date";
 import {
   getCurrentTransactionMonth,
   type TransactionMonth,
 } from "../../../../lib/transaction-month";
 import {
-  type AlterarOcorrenciaRecorrenteRequest,
-  type CriarRecorrenciaRequest,
-  type DayOfWeek,
-  type RecurrenceFrequency,
-  type RecurrenceScope,
-} from "../../../../services/recurrences/contracts";
-import {
   type AlterarTransacaoRequest,
-  parseMoneyInput,
+  type ConsultaTransacaoItem,
   type CriarTransacaoRequest,
-  type FormularioEdicaoOperacaoFinanceira,
-  type FormularioOperacaoFinanceira,
+  type EscopoEdicaoTransacao,
+  type RepeticaoTransacaoRequest,
 } from "../../../../services/transactions/contracts";
-import { type TransactionType } from "../../../../services/transactions/shared";
+import {
+  transactionSituationSchema,
+  transactionTypeSchema,
+} from "../../../../services/transactions/shared";
 import {
   type AlterarTransferenciaRequest,
   type CriarTransferenciaRequest,
 } from "../../../../services/transfers/contracts";
+import {
+  repeticaoFormSchema,
+  toRepeticaoRequestFromForm,
+  validateRepeticaoFormulario,
+} from "./transaction-repetition-form";
 
-const transactionTimeZone = "America/Sao_Paulo";
-
-export const dayOfWeekOptions = [
-  { label: "Segunda-feira", shortLabel: "Seg", value: "MONDAY" },
-  { label: "Terça-feira", shortLabel: "Ter", value: "TUESDAY" },
-  { label: "Quarta-feira", shortLabel: "Qua", value: "WEDNESDAY" },
-  { label: "Quinta-feira", shortLabel: "Qui", value: "THURSDAY" },
-  { label: "Sexta-feira", shortLabel: "Sex", value: "FRIDAY" },
-  { label: "Sábado", shortLabel: "Sáb", value: "SATURDAY" },
-  { label: "Domingo", shortLabel: "Dom", value: "SUNDAY" },
-] satisfies readonly {
-  label: string;
-  shortLabel: string;
-  value: DayOfWeek;
-}[];
-
-export const recurrenceFrequencyOptions = [
-  { label: "Todos os dias", value: "DAILY" },
-  { label: "Toda semana", value: "WEEKLY" },
-  { label: "Todo mês", value: "MONTHLY" },
-  { label: "Todo ano", value: "YEARLY" },
-] satisfies readonly { label: string; value: RecurrenceFrequency }[];
-
-export const recurrenceEndOptions = [
-  { label: "Sem término", value: "none" },
-  { label: "Após uma quantidade", value: "count" },
-  { label: "Em uma data", value: "until" },
-] as const;
-
-export const recurrenceScopeOptions = [
+export const escopoEdicaoOptions = [
   {
-    description: "Altera somente o lançamento escolhido.",
-    label: "Somente esta ocorrência",
-    value: "ONLY_THIS",
+    description: "Altera somente esta ocorrência.",
+    label: "Somente esta",
+    value: "SOMENTE_ESTA",
   },
   {
-    description: "Altera este lançamento e os próximos do mesmo segmento.",
-    label: "Esta e as futuras",
-    value: "THIS_AND_FUTURE",
+    description: "Altera esta ocorrência e as seguintes.",
+    label: "Esta e as próximas",
+    value: "ESTA_E_AS_PROXIMAS",
   },
 ] satisfies readonly {
   description: string;
   label: string;
-  value: RecurrenceScope;
+  value: EscopoEdicaoTransacao;
 }[];
 
-export function isValidFormDate(value: string) {
-  return z.iso.date().safeParse(value).success;
+/**
+ * Opções de escopo de uma ocorrência de série, limitadas a `escoposDisponiveis`. "Esta e as
+ * próximas" fica desabilitado quando a própria ocorrência está efetivada, porque a API sempre
+ * recusa esse caso.
+ */
+export function getEscopoEdicaoOptions(
+  item: Pick<ConsultaTransacaoItem, "escoposDisponiveis" | "situacao">,
+) {
+  return escopoEdicaoOptions
+    .filter((option) => item.escoposDisponiveis.includes(option.value))
+    .map((option) => ({
+      description: option.description,
+      isDisabled: option.value === "ESTA_E_AS_PROXIMAS" && item.situacao === "EFETIVADA",
+      label: option.label,
+      value: option.value,
+    }));
 }
 
 export function getInitialEntryDate(selectedMonth: TransactionMonth) {
@@ -83,55 +69,19 @@ export function getInitialEntryDate(selectedMonth: TransactionMonth) {
     : selectedMonth.toPlainDate({ day: 1 }).toString();
 }
 
-export function getCurrentTransactionDate() {
-  return Temporal.Now.zonedDateTimeISO(transactionTimeZone).toPlainDate().toString();
-}
-
-export function getDayOfWeekForDate(value: string): DayOfWeek {
-  const dayOfWeekByNumber: Record<number, DayOfWeek> = {
-    1: "MONDAY",
-    2: "TUESDAY",
-    3: "WEDNESDAY",
-    4: "THURSDAY",
-    5: "FRIDAY",
-    6: "SATURDAY",
-    7: "SUNDAY",
-  };
-
-  return dayOfWeekByNumber[Temporal.PlainDate.from(value).dayOfWeek];
-}
-
-export function getDayOfWeekOrder(value: DayOfWeek) {
-  switch (value) {
-    case "MONDAY":
-      return 1;
-    case "TUESDAY":
-      return 2;
-    case "WEDNESDAY":
-      return 3;
-    case "THURSDAY":
-      return 4;
-    case "FRIDAY":
-      return 5;
-    case "SATURDAY":
-      return 6;
-    case "SUNDAY":
-      return 7;
-    default: {
-      const exhaustive: never = value;
-      return exhaustive;
-    }
+/** Valor de identificação vindo do item consultado; ausente indica dado fora do contrato. */
+export function getRequiredTargetId(value: string | null | undefined, fieldName: string) {
+  if (!value) {
+    throw new Error(`O ${fieldName} da operação não foi encontrado.`);
   }
+
+  return value;
 }
 
-export function getMonthDayForDate(value: string) {
-  return Temporal.PlainDate.from(value).day;
-}
-
-export function normalizeOptionalText(value: string) {
+export function normalizeOptionalText(value: string): string | null {
   const normalizedValue = value.trim();
 
-  return normalizedValue.length > 0 ? normalizedValue : undefined;
+  return normalizedValue.length > 0 ? normalizedValue : null;
 }
 
 export function formatFormDate(value: string) {
@@ -141,6 +91,31 @@ export function formatFormDate(value: string) {
     timeZone: "UTC",
     year: "numeric",
   }).format(new Date(`${value}T00:00:00Z`));
+}
+
+function normalizeMoneyInput(value: string) {
+  const compactValue = value.trim().replace(/\s/g, "");
+
+  if (compactValue.includes(",") && compactValue.includes(".")) {
+    return compactValue.lastIndexOf(",") > compactValue.lastIndexOf(".")
+      ? compactValue.replace(/\./g, "").replace(",", ".")
+      : compactValue.replace(/,/g, "");
+  }
+
+  return compactValue.replace(",", ".");
+}
+
+/** Converte o texto digitado em valor monetário positivo com até quatro casas, ou null. */
+export function parseMoneyInput(value: string): number | null {
+  const normalizedValue = normalizeMoneyInput(value);
+
+  if (!/^\d+(\.\d{1,4})?$/.test(normalizedValue)) {
+    return null;
+  }
+
+  const numericValue = Number(normalizedValue);
+
+  return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : null;
 }
 
 export function formatMoneyForSummary(value: string) {
@@ -164,24 +139,6 @@ function parseValidatedMoney(value: string) {
   return numericValue;
 }
 
-function buildSharedRecurrenceFields(data: {
-  categoriaId: string | null;
-  contaId: string;
-  descricao: string;
-  observacoes: string;
-  tipo: TransactionType;
-  valor: string;
-}) {
-  return {
-    categoriaId: data.categoriaId ?? undefined,
-    contaId: data.contaId,
-    descricao: data.descricao.trim(),
-    observacoes: normalizeOptionalText(data.observacoes),
-    tipo: data.tipo,
-    valor: parseValidatedMoney(data.valor),
-  };
-}
-
 function requireFormValue<T>(value: T | null | undefined, fieldName: string): T {
   if (value === undefined || value === null || value === "") {
     throw new Error(`O campo ${fieldName} não foi preenchido após a validação.`);
@@ -190,27 +147,126 @@ function requireFormValue<T>(value: T | null | undefined, fieldName: string): T 
   return value;
 }
 
-function buildTransactionRequest(
-  data: FormularioOperacaoFinanceira | FormularioEdicaoOperacaoFinanceira,
+const moneyInputSchema = z
+  .string()
+  .trim()
+  .min(1, "Informe o valor.")
+  .refine(
+    (value) => parseMoneyInput(value) !== null,
+    "Informe um valor positivo com até quatro casas decimais.",
+  );
+
+const formDateSchema = z
+  .string()
+  .min(1, "Informe uma data.")
+  .refine(isDataIsoValida, "Informe uma data válida.");
+
+const formularioTipoOperacaoSchema = z.enum(["TRANSACAO", "TRANSFERENCIA"]);
+
+export type FormularioTipoOperacao = z.infer<typeof formularioTipoOperacaoSchema>;
+
+const formularioOperacaoFinanceiraBaseSchema = z.object({
+  categoriaId: z.uuid().nullable(),
+  contaDestinoId: z.string(),
+  contaId: z.string(),
+  contaOrigemId: z.string(),
+  data: formDateSchema,
+  descricao: z.string().trim().min(1, "Informe a descrição.").max(255),
+  observacoes: z.string().max(2000),
+  repeticao: repeticaoFormSchema,
+  situacao: transactionSituationSchema,
+  tipo: transactionTypeSchema,
+  tipoOperacao: formularioTipoOperacaoSchema,
+  valor: moneyInputSchema,
+});
+
+type FormularioOperacaoFinanceiraBase = z.infer<typeof formularioOperacaoFinanceiraBaseSchema>;
+
+function addRequiredOperationFieldIssue(
+  contexto: z.RefinementCtx,
+  campo: string,
+  valor: unknown,
+  mensagem: string,
+) {
+  if (valor === undefined || valor === null || valor === "") {
+    contexto.addIssue({ code: "custom", message: mensagem, path: [campo] });
+  }
+}
+
+function validateOperationBase(
+  formulario: FormularioOperacaoFinanceiraBase,
+  contexto: z.RefinementCtx,
+) {
+  if (formulario.tipoOperacao === "TRANSFERENCIA") {
+    addRequiredOperationFieldIssue(
+      contexto,
+      "contaOrigemId",
+      formulario.contaOrigemId,
+      "Selecione a conta de origem.",
+    );
+    addRequiredOperationFieldIssue(
+      contexto,
+      "contaDestinoId",
+      formulario.contaDestinoId,
+      "Selecione a conta de destino.",
+    );
+
+    if (
+      formulario.contaOrigemId &&
+      formulario.contaDestinoId &&
+      formulario.contaOrigemId === formulario.contaDestinoId
+    ) {
+      contexto.addIssue({
+        code: "custom",
+        message: "Escolha contas diferentes.",
+        path: ["contaDestinoId"],
+      });
+    }
+  } else {
+    addRequiredOperationFieldIssue(contexto, "contaId", formulario.contaId, "Selecione uma conta.");
+  }
+
+  if (formulario.situacao === "EFETIVADA" && formulario.data > getCurrentTransactionDate()) {
+    contexto.addIssue({
+      code: "custom",
+      message: "Uma transação efetivada não pode ter data futura.",
+      path: ["data"],
+    });
+  }
+
+  if (formulario.tipoOperacao === "TRANSACAO" && formulario.repeticao.ativa) {
+    validateRepeticaoFormulario(formulario.repeticao, formulario.data, contexto);
+  }
+}
+
+/** Schema único do formulário de criação e de edição de transação ou transferência. */
+export const formularioOperacaoFinanceiraSchema =
+  formularioOperacaoFinanceiraBaseSchema.superRefine(validateOperationBase);
+
+export type FormularioOperacaoFinanceira = z.infer<typeof formularioOperacaoFinanceiraSchema>;
+
+export function toCreateTransactionRequest(
+  data: FormularioOperacaoFinanceira,
 ): CriarTransacaoRequest {
   if (data.tipoOperacao !== "TRANSACAO") {
     throw new Error("O formulário não representa uma transação.");
   }
 
   return {
-    categoriaId: data.categoriaId ?? undefined,
+    categoriaId: data.categoriaId,
     contaId: requireFormValue(data.contaId, "contaId"),
     dataFinanceira: data.data,
     descricao: data.descricao.trim(),
     observacoes: normalizeOptionalText(data.observacoes),
+    repeticao: toRepeticaoRequestFromForm(data.repeticao),
     situacao: data.situacao,
     tipo: data.tipo,
     valor: parseValidatedMoney(data.valor),
   };
 }
 
-function buildTransferRequest(
-  data: FormularioOperacaoFinanceira | FormularioEdicaoOperacaoFinanceira,
+export function toCreateTransferRequest(
+  data: FormularioOperacaoFinanceira,
 ): CriarTransferenciaRequest {
   if (data.tipoOperacao !== "TRANSFERENCIA") {
     throw new Error("O formulário não representa uma transferência.");
@@ -227,95 +283,27 @@ function buildTransferRequest(
   };
 }
 
-export const toCreateTransactionRequest: (
+export type EdicaoTransacaoContexto = {
+  /** Somente para ocorrência de série; omitido em transação simples. */
+  escopo?: EscopoEdicaoTransacao;
+  /** Repetição a reenviar; null mantém (ou torna) a transação simples. */
+  repeticao: RepeticaoTransacaoRequest | null;
+  versaoEdicao: string;
+};
+
+export function toEditTransactionRequest(
   data: FormularioOperacaoFinanceira,
-) => CriarTransacaoRequest = buildTransactionRequest;
+  { escopo, repeticao, versaoEdicao }: EdicaoTransacaoContexto,
+): AlterarTransacaoRequest {
+  const request = { ...toCreateTransactionRequest(data), repeticao, versaoEdicao };
 
-export const toEditTransactionRequest: (
-  data: FormularioEdicaoOperacaoFinanceira,
-) => AlterarTransacaoRequest = buildTransactionRequest;
-
-export const toCreateTransferRequest: (
-  data: FormularioOperacaoFinanceira,
-) => CriarTransferenciaRequest = buildTransferRequest;
-
-export const toEditTransferRequest: (
-  data: FormularioEdicaoOperacaoFinanceira,
-) => AlterarTransferenciaRequest = buildTransferRequest;
-
-export function toEditRecurrenceOccurrenceRequest(
-  data: FormularioEdicaoOperacaoFinanceira,
-  escopo: RecurrenceScope,
-): AlterarOcorrenciaRecorrenteRequest {
-  if (data.tipoOperacao !== "RECORRENCIA" && data.tipoOperacao !== "PARCELAMENTO") {
-    throw new Error("O formulário não representa uma recorrência ou parcelamento.");
-  }
-
-  return {
-    ...buildSharedRecurrenceFields(data),
-    dataFinanceira: data.data,
-    escopo,
-  };
+  // Transação simples não envia escopo; o campo só existe para ocorrência de série.
+  return escopo === undefined ? request : { ...request, escopo };
 }
 
-export function toCreateRecurrenceRequest(
+export function toEditTransferRequest(
   data: FormularioOperacaoFinanceira,
-): CriarRecorrenciaRequest {
-  if (data.tipoOperacao !== "RECORRENCIA") {
-    throw new Error("O formulário não representa uma recorrência.");
-  }
-
-  const frequency = requireFormValue(data.frequencia, "frequencia");
-  const interval = requireFormValue(data.intervalo, "intervalo");
-  const request: CriarRecorrenciaRequest = {
-    ...buildSharedRecurrenceFields(data),
-    diasMes: frequency === "MONTHLY" && data.diasMes.length > 0 ? data.diasMes : undefined,
-    diasSemana: frequency === "WEEKLY" && data.diasSemana.length > 0 ? data.diasSemana : undefined,
-    frequencia: frequency,
-    inicio: data.data,
-    intervalo: Number(interval),
-    tipoGrupo: "RECORRENCIA",
-  };
-
-  if (data.semTermino) {
-    return request;
-  }
-
-  if (data.quantidadeOcorrencias !== "") {
-    return {
-      ...request,
-      quantidadeOcorrencias: Number(data.quantidadeOcorrencias),
-    };
-  }
-
-  if (data.ate !== "") {
-    return { ...request, ate: data.ate };
-  }
-
-  throw new Error("A recorrência precisa ter um término válido.");
-}
-
-export function toCreateInstallmentRequest(
-  data: FormularioOperacaoFinanceira,
-): CriarRecorrenciaRequest {
-  if (data.tipoOperacao !== "PARCELAMENTO") {
-    throw new Error("O formulário não representa um parcelamento.");
-  }
-
-  const interval = requireFormValue(data.intervalo, "intervalo");
-  const firstInstallment = requireFormValue(data.numeroPrimeiraParcela, "numeroPrimeiraParcela");
-  const totalInstallments = requireFormValue(
-    data.quantidadeTotalOriginal,
-    "quantidadeTotalOriginal",
-  );
-
-  return {
-    ...buildSharedRecurrenceFields(data),
-    frequencia: "MONTHLY",
-    inicio: data.data,
-    intervalo: Number(interval),
-    numeroPrimeiraParcela: Number(firstInstallment),
-    quantidadeTotalOriginal: Number(totalInstallments),
-    tipoGrupo: "PARCELAMENTO",
-  };
+  versaoEdicao: string,
+): AlterarTransferenciaRequest {
+  return { ...toCreateTransferRequest(data), versaoEdicao };
 }

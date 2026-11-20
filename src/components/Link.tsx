@@ -1,10 +1,12 @@
 import { forwardRef, type ReactNode } from "react";
 
 import { createLink, type LinkComponent } from "@tanstack/react-router";
-import { tv, type VariantProps } from "tailwind-variants";
 
+import { tv } from "../utils/tailwind";
 import { buttonStyles } from "./Button/buttonStyles";
 import { IconSlot } from "./IconSlot";
+
+import type { VariantProps } from "tailwind-variants";
 
 const linkStyles = tv(
   {
@@ -14,22 +16,30 @@ const linkStyles = tv(
     },
     extend: buttonStyles,
     variants: {
-      active: {
-        false: "",
-        true: "bg-brand-soft! text-brand-hover!",
-      },
       linkVariant: {
         back: "text-caption",
-        brand: "gap-3 font-bold tracking-tight",
-        compactBrand: "gap-2.5 text-title-compact tracking-tight text-foreground! no-underline",
+        brand: "gap-3",
+        compactBrand: "gap-2 text-title no-underline",
         default: "",
-        header: "font-bold [&>span>svg]:size-4",
+        header: "[&>span>svg]:size-4",
         navigation:
-          "h-auto! min-h-0! rounded-full! px-3! py-1.5! text-button text-muted! no-underline data-hovered:text-foreground! data-hovered:no-underline max-[28rem]:px-2.5!",
+          "h-auto! min-h-0! rounded-full! px-3! py-1! text-body-strong no-underline data-hovered:no-underline max-sm:px-2!",
+      },
+      active: {
+        false: "",
+        true: "",
       },
     },
+    // As cores ficam em `compoundVariants` porque elas são aplicadas depois das variantes do botão
+    // estendido, então o merge mantém a cor do link e descarta a cor da variante `link` do botão.
+    compoundVariants: [
+      { class: "text-foreground", linkVariant: "compactBrand" },
+      { class: "text-muted data-hovered:text-foreground", linkVariant: "navigation" },
+      { active: true, class: "bg-brand-soft text-brand-hover" },
+    ],
   },
-  { twMerge: false },
+  // Explícito porque `buttonStyles` desliga o merge e a configuração é herdada pelo `extend`.
+  { twMerge: true },
 );
 
 type StyledLinkProps = Omit<React.ComponentPropsWithoutRef<"a">, "children" | "className"> &
@@ -47,7 +57,6 @@ function StyledLink(
     children,
     className,
     active = false,
-    emphasis = "default",
     isIconOnly = false,
     leadingIcon,
     linkVariant = "default",
@@ -65,7 +74,6 @@ function StyledLink(
       className={linkStyles({
         active,
         className,
-        emphasis,
         isIconOnly,
         linkVariant,
         size,

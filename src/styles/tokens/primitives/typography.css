@@ -1,8 +1,6 @@
 @theme {
-  /* Font families */
-  --font-display: "Literata", Georgia, serif;
-  --font-ui: "Geist Sans", "Geist", Inter, system-ui, sans-serif;
-  --font-mono: "Geist Mono", "SFMono-Regular", Consolas, monospace;
+  /* Família tipográfica única: Geist, com pesos 400 e 600 */
+  --font-ui: "Geist", "Geist Sans", Inter, system-ui, sans-serif;
 
   /* Font sizes */
   --text-xs: 0.75rem;
@@ -23,9 +21,5 @@
   --leading-relaxed: 1.7;
 
   /* Letter spacing */
-  --tracking-display: -0.035em;
   --tracking-heading: -0.02em;
-  --tracking-label: 0.04em;
-  --tracking-metric: -0.03em;
-  --tracking-mono: -0.01em;
 }

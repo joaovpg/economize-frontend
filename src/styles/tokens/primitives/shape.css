@@ -1,0 +1,58 @@
+@theme {
+  /* Raios: quatro papéis. Regra de concentricidade em docs/agent-guidelines/ui-and-styling.md */
+  --radius-sm: 4px;
+  --radius-control: 8px;
+  --radius-surface: 12px;
+
+  /* Opacidade de controles desabilitados ou em processamento */
+  --opacity-disabled: 0.42;
+
+  /* Escala de espaçamento fechada: vale também para tamanhos, inset, translate e gap */
+  --spacing-0: 0px;
+  --spacing-px: 1px;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+
+  /* Tamanhos de layout com nome de papel, fora da escala numérica */
+  --spacing-touch: 2.75rem;
+  --spacing-calendar: 17.5rem;
+  --spacing-menu: 10rem;
+  --spacing-month: 8rem;
+  --spacing-textarea: 7rem;
+  --spacing-state-loading: 12rem;
+  --spacing-state-error: 20rem;
+  --spacing-auth: 26.875rem;
+  --spacing-auth-card: 22.5rem;
+  --spacing-sidebar: 18.25rem;
+  --spacing-form-aside: 12rem;
+  --spacing-metric-min: 10rem;
+
+  /* Medidas de texto em ch, usadas como largura máxima */
+  --container-measure-heading: 11ch;
+  --container-measure-lead: 35ch;
+
+  /* Espaçamento interno de modais e recuo para áreas seguras do dispositivo */
+  --spacing-modal: 1.5rem;
+  --spacing-modal-mobile: 1.25rem;
+  --spacing-modal-inset-top: max(var(--spacing-modal), env(safe-area-inset-top));
+  --spacing-modal-inset-right: max(var(--spacing-modal), env(safe-area-inset-right));
+  --spacing-modal-inset-bottom: max(var(--spacing-modal), env(safe-area-inset-bottom));
+  --spacing-modal-inset-left: max(var(--spacing-modal), env(safe-area-inset-left));
+  --spacing-modal-mobile-inset-top: max(var(--spacing-modal-mobile), env(safe-area-inset-top));
+  --spacing-modal-mobile-inset-right: max(var(--spacing-modal-mobile), env(safe-area-inset-right));
+  --spacing-modal-mobile-inset-bottom: max(
+    var(--spacing-modal-mobile),
+    env(safe-area-inset-bottom)
+  );
+  --spacing-modal-mobile-inset-left: max(var(--spacing-modal-mobile), env(safe-area-inset-left));
+}

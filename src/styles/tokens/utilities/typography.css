@@ -1,44 +1,18 @@
-@utility text-display-hero {
-  @apply font-display text-[clamp(2.875rem,5vw,3.625rem)] leading-tight font-semibold tracking-display;
+/* Seis papéis tipográficos. Cada um define tamanho, altura de linha e peso; a cor é uma classe à parte. */
+
+@utility text-title-page {
+  @apply font-ui text-2xl leading-8 font-semibold tracking-heading;
 }
 
-@utility text-page-title {
-  @apply font-display text-[clamp(2.375rem,7vw,3.625rem)] leading-[0.98] font-semibold tracking-display;
-}
-
-@utility text-section-title {
-  @apply font-display text-2xl leading-8 font-semibold tracking-heading;
-}
-
-@utility text-card-title {
-  @apply font-display text-xl leading-7 font-semibold tracking-heading;
-}
-
-@utility text-title-compact {
-  @apply font-ui text-md leading-6 font-semibold;
-}
-
-@utility text-metric {
-  @apply font-ui text-3xl leading-none font-bold tracking-metric;
-}
-
-@utility text-body-large {
-  @apply font-ui text-lg leading-7 font-normal;
+@utility text-title {
+  @apply font-ui text-lg leading-7 font-semibold;
 }
 
 @utility text-body {
-  @apply font-ui text-md leading-6 font-normal;
-}
-
-@utility text-body-small {
   @apply font-ui text-sm leading-5 font-normal;
 }
 
-@utility text-label {
-  @apply font-ui text-sm leading-5 font-semibold;
-}
-
-@utility text-button {
+@utility text-body-strong {
   @apply font-ui text-sm leading-5 font-semibold;
 }
 
@@ -46,22 +20,9 @@
   @apply font-ui text-xs leading-4 font-normal;
 }
 
-@utility text-caption-strong {
-  @apply font-ui text-xs leading-4 font-semibold;
-}
-
-@utility text-validation {
-  @apply font-ui text-xs leading-4 font-normal;
-}
-
-@utility text-meta {
-  @apply font-mono text-[0.8125rem] leading-normal font-normal tracking-mono;
-}
-
-@utility text-code {
-  @apply font-mono text-[0.8125rem] leading-[1.6] font-normal;
-}
-
-@utility text-token {
-  @apply font-mono text-xs leading-[1.4] font-medium tracking-mono;
+/* Valores numéricos com colunas alinhadas, como saldos e totais. */
+@utility text-metric {
+  @apply font-ui leading-8 font-semibold;
+  font-size: 1.75rem;
+  font-variant-numeric: tabular-nums;
 }

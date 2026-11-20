@@ -2,25 +2,29 @@ import { useRef, useState } from "react";
 import { Controller, useForm, type UseFormSetError } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { today } from "@internationalized/date";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
+import { DatePicker } from "../../../../components/fields/DatePicker";
+import { NumberField } from "../../../../components/fields/NumberField";
+import { TextField } from "../../../../components/fields/TextField";
 import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
   ModalBody,
-  ModalClose,
   ModalDescription,
   DiscardChangesModal,
   ModalFooter,
   ModalHeader,
   ModalTitle,
 } from "../../../../components/Modal";
-import { NumberField } from "../../../../components/NumberField";
-import { TextField } from "../../../../components/TextField";
 import { isApiError } from "../../../../lib/api-errors";
-import { postConta } from "../../../../services/accounts/api";
+import { parseFormDate, transactionTimeZone } from "../../../../lib/date";
+import { postConta, putConta } from "../../../../services/accounts/api";
+import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { accountsQueryKey } from "../../../../services/accounts/queries";
+import { transactionsQueryKey } from "../../../../services/transactions/queries";
 import { accountFormSchema, type AccountFormData } from "./account-form";
 
 function getAccountFormField(field: string | undefined): keyof AccountFormData | null {
@@ -38,9 +42,8 @@ function applyAccountFormError(
   error: unknown,
   setError: UseFormSetError<AccountFormData>,
   setSubmitError: (message: string) => void,
+  fallback: string,
 ) {
-  const fallback = "Não foi possível cadastrar a conta. Tente novamente.";
-
   if (!isApiError(error)) {
     setSubmitError(fallback);
     return;
@@ -64,11 +67,13 @@ function applyAccountFormError(
 }
 
 type AccountEditorModalProps = {
+  account: ContaResponse | null;
   onClose: () => void;
   onSaved: (message: string) => Promise<void>;
 };
 
-export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps) {
+export function AccountEditorModal({ account, onClose, onSaved }: AccountEditorModalProps) {
+  const isEditing = account !== null;
   const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -79,25 +84,36 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
       void queryClient.invalidateQueries({ queryKey: accountsQueryKey }).catch(() => undefined);
     },
   });
+  const editAccountMutation = useMutation({
+    mutationFn: ({ id, input }: { id: string; input: Parameters<typeof putConta>[1] }) =>
+      putConta(id, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: accountsQueryKey }).catch(() => undefined);
+      void queryClient.invalidateQueries({ queryKey: transactionsQueryKey }).catch(() => undefined);
+    },
+  });
   const {
     control,
     formState: { errors, isDirty, isSubmitting },
     handleSubmit,
-    register,
     setError,
   } = useForm<AccountFormData>({
-    defaultValues: {
-      dataSaldoInicial: new Date().toISOString().slice(0, 10),
-      moeda: "BRL",
-      nome: "",
-      saldoInicial: 0,
-    },
+    defaultValues: account
+      ? {
+          dataSaldoInicial: account.dataSaldoInicial,
+          moeda: account.moeda,
+          nome: account.nome,
+          saldoInicial: account.saldoInicial,
+        }
+      : {
+          dataSaldoInicial: today(transactionTimeZone).toString(),
+          moeda: "BRL",
+          nome: "",
+          saldoInicial: 0,
+        },
     mode: "onSubmit",
     resolver: zodResolver(accountFormSchema),
   });
-  const nameField = register("nome");
-  const currencyField = register("moeda");
-  const dateField = register("dataSaldoInicial");
 
   const requestClose = () => {
     if (isSubmitting) {
@@ -114,22 +130,48 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
 
   const handleFormSubmit = async (data: AccountFormData) => {
     setSubmitError(null);
+    let successMessage: string;
 
     try {
-      await createAccountMutation.mutateAsync({
-        dataSaldoInicial: data.dataSaldoInicial,
-        moeda: data.moeda,
-        nome: data.nome.trim(),
-        saldoInicial: data.saldoInicial,
-      });
-      await queryClient.invalidateQueries({ queryKey: accountsQueryKey });
+      if (account) {
+        await editAccountMutation.mutateAsync({
+          id: account.id,
+          input: {
+            ativo: account.ativo,
+            dataSaldoInicial: data.dataSaldoInicial,
+            moeda: data.moeda,
+            nome: data.nome.trim(),
+            saldoInicial: data.saldoInicial,
+          },
+        });
+        successMessage = "Conta atualizada com sucesso.";
+      } else {
+        await createAccountMutation.mutateAsync({
+          dataSaldoInicial: data.dataSaldoInicial,
+          moeda: data.moeda,
+          nome: data.nome.trim(),
+          saldoInicial: data.saldoInicial,
+        });
+        successMessage = "Conta criada com sucesso.";
+      }
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: accountsQueryKey }),
+        queryClient.invalidateQueries({ queryKey: transactionsQueryKey }),
+      ]);
     } catch (error) {
-      applyAccountFormError(error, setError, setSubmitError);
+      applyAccountFormError(
+        error,
+        setError,
+        setSubmitError,
+        isEditing
+          ? "Não foi possível atualizar a conta. Tente novamente."
+          : "Não foi possível cadastrar a conta. Tente novamente.",
+      );
       return;
     }
 
     onClose();
-    void onSaved("Conta criada com sucesso.");
+    void onSaved(successMessage);
   };
 
   return (
@@ -146,12 +188,13 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
         }}
         size="md"
       >
-        <ModalHeader>
-          <ModalTitle>Nova conta</ModalTitle>
+        <ModalHeader showClose={!isSubmitting && !isDiscardModalOpen}>
+          <ModalTitle>{isEditing ? "Editar conta" : "Nova conta"}</ModalTitle>
           <ModalDescription>
-            Cadastre uma conta e informe o saldo a partir da data escolhida.
+            {isEditing
+              ? "Atualize os dados desta conta. O status ativa ou inativa é alterado na listagem."
+              : "Cadastre uma conta e informe o saldo a partir da data escolhida."}
           </ModalDescription>
-          {!isSubmitting && !isDiscardModalOpen && <ModalClose />}
         </ModalHeader>
 
         <form
@@ -163,31 +206,40 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
           <ModalBody>
             {submitError && <InlineMessage tone="danger">{submitError}</InlineMessage>}
 
-            <TextField
-              errorMessage={errors.nome?.message}
-              inputRef={(input) => {
-                nameInputRef.current = input;
-                nameField.ref(input);
-              }}
-              isDisabled={isSubmitting}
-              label="Nome"
-              maxLength={120}
-              name={nameField.name}
-              onBlur={nameField.onBlur}
-              onInput={nameField.onChange}
-              placeholder="Ex.: Conta corrente"
+            <Controller
+              control={control}
+              name="nome"
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  errorMessage={errors.nome?.message}
+                  isDisabled={isSubmitting}
+                  isRequired
+                  label="Nome"
+                  maxLength={120}
+                  placeholder="Ex.: Conta corrente"
+                  ref={(input) => {
+                    nameInputRef.current = input;
+                    field.ref(input);
+                  }}
+                />
+              )}
             />
 
-            <TextField
-              errorMessage={errors.moeda?.message}
-              inputRef={currencyField.ref}
-              isDisabled={isSubmitting}
-              label="Moeda"
-              maxLength={3}
-              name={currencyField.name}
-              onBlur={currencyField.onBlur}
-              onInput={currencyField.onChange}
-              placeholder="BRL"
+            <Controller
+              control={control}
+              name="moeda"
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  errorMessage={errors.moeda?.message}
+                  isDisabled={isSubmitting}
+                  isRequired
+                  label="Moeda"
+                  maxLength={3}
+                  placeholder="BRL"
+                />
+              )}
             />
 
             <Controller
@@ -196,6 +248,7 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
               render={({ field }) => (
                 <NumberField
                   errorMessage={errors.saldoInicial?.message}
+                  isRequired
                   formatOptions={{ maximumFractionDigits: 4 }}
                   isDisabled={isSubmitting}
                   label="Saldo inicial"
@@ -206,15 +259,23 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
               )}
             />
 
-            <TextField
-              errorMessage={errors.dataSaldoInicial?.message}
-              inputRef={dateField.ref}
-              isDisabled={isSubmitting}
-              label="Data do saldo inicial"
-              name={dateField.name}
-              onBlur={dateField.onBlur}
-              onInput={dateField.onChange}
-              type="date"
+            <Controller
+              control={control}
+              name="dataSaldoInicial"
+              render={({ field }) => (
+                <DatePicker
+                  todayValue={today(transactionTimeZone)}
+                  errorMessage={errors.dataSaldoInicial?.message}
+                  isDisabled={isSubmitting}
+                  isRequired
+                  ref={field.ref}
+                  label="Data do saldo inicial"
+                  name={field.name}
+                  onBlur={field.onBlur}
+                  onChange={(date) => field.onChange(date?.toString() ?? "")}
+                  value={parseFormDate(field.value)}
+                />
+              )}
             />
           </ModalBody>
 
@@ -229,7 +290,7 @@ export function AccountEditorModal({ onClose, onSaved }: AccountEditorModalProps
               Cancelar
             </Button>
             <Button form="account-editor-form" isPending={isSubmitting} size="sm" type="submit">
-              Cadastrar conta
+              {isEditing ? "Salvar alterações" : "Cadastrar conta"}
             </Button>
           </ModalFooter>
         </form>

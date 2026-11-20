@@ -4,7 +4,7 @@ import { Tree, TreeItem, TreeItemContent, type Selection } from "react-aria-comp
 import { CaretDownIcon } from "@phosphor-icons/react/dist/csr/CaretDown";
 
 import { Button } from "../Button";
-import { Checkbox } from "../Checkbox";
+import { Checkbox } from "../fields/Checkbox";
 
 export type FilterTreeItem<TSelectionKey extends string = string> =
   | {
@@ -175,8 +175,8 @@ export function FilterTree<TSelectionKey extends string>({
           {({ hasChildItems, isExpanded, isFocusVisible }) => (
             <div
               className={[
-                "flex min-h-6.5 min-w-0 items-center gap-2 rounded-lg pl-[calc((var(--tree-item-level)-1)*1rem)] text-caption text-muted max-[48rem]:min-h-11",
-                hasChildren(item) ? "font-medium" : "",
+                "flex min-h-6 min-w-0 items-center gap-2 rounded-control pl-[calc((var(--tree-item-level)-1)*1rem)] text-caption text-muted max-md:min-h-touch",
+                hasChildren(item) ? "font-semibold" : "",
                 isFocusVisible ? "outline-2 outline-offset-2 outline-solid outline-brand" : "",
               ]
                 .filter(Boolean)
@@ -194,7 +194,7 @@ export function FilterTree<TSelectionKey extends string>({
               {hasChildItems && (
                 <Button
                   aria-label={isExpanded ? `Recolher ${item.label}` : `Expandir ${item.label}`}
-                  className="ml-auto size-4.5! shrink-0 rounded-[0.3125rem]!"
+                  className="ml-auto size-4! shrink-0 rounded-sm!"
                   isIconOnly
                   size="sm"
                   variant="ghost"
@@ -214,7 +214,7 @@ export function FilterTree<TSelectionKey extends string>({
   return (
     <Tree
       aria-label={ariaLabel}
-      className="grid gap-1.75 outline-none"
+      className="grid gap-2 outline-none"
       defaultExpandedKeys={getBranchKeys(items)}
       onSelectionChange={handleSelectionChange}
       selectedKeys={currentTreeSelection}

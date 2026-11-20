@@ -1,6 +1,6 @@
 @layer base {
   html {
-    @apply bg-canvas font-sans text-foreground;
+    @apply bg-canvas font-ui text-foreground;
     height: 100%;
     overflow: hidden;
     text-rendering: optimizeLegibility;
@@ -19,6 +19,6 @@
   }
 
   :focus-visible {
-    @apply rounded-md outline-2 outline-offset-4 outline-brand/50;
+    @apply rounded-control outline-2 outline-offset-4 outline-brand/50;
   }
 }

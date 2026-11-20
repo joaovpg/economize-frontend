@@ -114,23 +114,12 @@
       "error",
       {
         "allow": [
-          "text-display-hero",
-          "text-page-title",
-          "text-section-title",
-          "text-card-title",
-          "text-title-compact",
+          "text-title-page",
+          "text-title",
           "text-metric",
-          "text-body-large",
           "text-body",
-          "text-body-small",
-          "text-label",
-          "text-button",
+          "text-body-strong",
           "text-caption",
-          "text-caption-strong",
-          "text-validation",
-          "text-meta",
-          "text-code",
-          "text-token",
           "shadow-dialog",
           "shadow-popover",
           "shadow-nav-active",
@@ -181,15 +170,5 @@
     "tailwindcss/no-conflicting-classes": "error",
     "tailwindcss/no-deprecated-classes": "error"
   },
-  "overrides": [
-    {
-      "files": ["src/components/**"],
-      "rules": {
-        "shadcn/no-restyle": "off",
-        "shadcn/no-arbitrary-values": "off",
-        "shadcn/require-static-classes": "off"
-      }
-    }
-  ],
   "ignorePatterns": ["src/routeTree.gen.ts"]
 }

@@ -2,53 +2,62 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { today } from "@internationalized/date";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "../../../../components/Button";
-import { CurrencyField } from "../../../../components/CurrencyField";
+import { CurrencyField } from "../../../../components/fields/CurrencyField";
+import { DatePicker } from "../../../../components/fields/DatePicker";
+import { RadioGroup, RadioItem } from "../../../../components/fields/RadioGroup";
+import { TextArea } from "../../../../components/fields/TextArea";
+import { TextField } from "../../../../components/fields/TextField";
 import { InlineMessage } from "../../../../components/InlineMessage";
 import {
   Modal,
   ModalBody,
-  ModalClose,
   ModalDescription,
   ModalFooter,
   ModalHeader,
   ModalTitle,
 } from "../../../../components/Modal";
-import { RadioGroup, RadioItem } from "../../../../components/RadioGroup";
-import { TextArea } from "../../../../components/TextArea";
-import { TextField } from "../../../../components/TextField";
+import { getGuidedApiErrorMessage } from "../../../../lib/api-errors";
+import { isDataIsoValida, parseFormDate, transactionTimeZone } from "../../../../lib/date";
 import { type ContaResponse } from "../../../../services/accounts/contracts";
 import { type CategoriaResponse } from "../../../../services/categories/contracts";
-import { putOcorrenciaRecorrente } from "../../../../services/recurrences/api";
-import { type RecurrenceScope } from "../../../../services/recurrences/contracts";
 import { putTransacao } from "../../../../services/transactions/api";
 import {
-  formularioEdicaoOperacaoFinanceiraSchema,
   type ConsultaTransacaoItem,
-  type FormularioEdicaoOperacaoFinanceira,
-  type FormularioTipoOperacao,
+  type EscopoEdicaoTransacao,
+  type RepeticaoTransacaoRequest,
 } from "../../../../services/transactions/contracts";
 import { transactionsQueryKey } from "../../../../services/transactions/queries";
 import { putTransferencia } from "../../../../services/transfers/api";
 import { DiscardChangesModal, type DiscardAction } from "./DiscardChangesModal";
-import { applyFormError, getServerFieldName } from "./form-errors";
+import { applyFormError, getServerFieldName, isStaleTransactionError } from "./form-errors";
 import {
   formatFormDate,
   formatMoneyForSummary,
-  isValidFormDate,
-  recurrenceScopeOptions,
-  toEditRecurrenceOccurrenceRequest,
+  formularioOperacaoFinanceiraSchema,
+  getEscopoEdicaoOptions,
+  getRequiredTargetId,
   toEditTransactionRequest,
   toEditTransferRequest,
+  type FormularioOperacaoFinanceira,
+  type FormularioTipoOperacao,
 } from "./transaction-form";
+import { getRepeticaoResumo } from "./transaction-repetition";
+import {
+  createRepeticaoFormValuesParaEscopo,
+  toRepeticaoFormValues,
+  toRepeticaoRequestFromForm,
+} from "./transaction-repetition-form";
 import {
   AccountSelect,
   CategorySelect,
   TransactionSituationField,
   TransactionTypeField,
 } from "./TransactionFormFields";
+import { TransactionRepetitionFields } from "./TransactionRepetitionFields";
 
 type TransactionEditModalProps = {
   accounts: readonly ContaResponse[];
@@ -59,20 +68,17 @@ type TransactionEditModalProps = {
 };
 
 type EditOperationResponse =
-  | Awaited<ReturnType<typeof putOcorrenciaRecorrente>>
   | Awaited<ReturnType<typeof putTransacao>>
   | Awaited<ReturnType<typeof putTransferencia>>;
 
 function getEditOperation(target: ConsultaTransacaoItem): FormularioTipoOperacao | null {
   switch (target.origem) {
     case "TRANSACAO_SIMPLES":
+    case "TRANSACAO_RECORRENTE":
+    case "PARCELA":
       return "TRANSACAO";
     case "TRANSFERENCIA":
       return "TRANSFERENCIA";
-    case "TRANSACAO_RECORRENTE":
-      return "RECORRENCIA";
-    case "PARCELA":
-      return "PARCELAMENTO";
     case "SALDO_INICIAL_CONTA":
       return null;
     default: {
@@ -88,10 +94,6 @@ function getOperationLabel(operation: FormularioTipoOperacao) {
       return "transação";
     case "TRANSFERENCIA":
       return "transferência";
-    case "RECORRENCIA":
-      return "recorrência";
-    case "PARCELAMENTO":
-      return "parcelamento";
     default: {
       const exhaustive: never = operation;
       return exhaustive;
@@ -105,10 +107,6 @@ function getSuccessMessage(operation: FormularioTipoOperacao) {
       return "Transação atualizada com sucesso.";
     case "TRANSFERENCIA":
       return "Transferência atualizada com sucesso.";
-    case "RECORRENCIA":
-      return "Recorrência atualizada com sucesso.";
-    case "PARCELAMENTO":
-      return "Parcelamento atualizado com sucesso.";
     default: {
       const exhaustive: never = operation;
       return exhaustive;
@@ -122,10 +120,6 @@ function getErrorFallback(operation: FormularioTipoOperacao) {
       return "Não foi possível atualizar a transação. Tente novamente.";
     case "TRANSFERENCIA":
       return "Não foi possível atualizar a transferência. Tente novamente.";
-    case "RECORRENCIA":
-      return "Não foi possível atualizar a recorrência. Tente novamente.";
-    case "PARCELAMENTO":
-      return "Não foi possível atualizar o parcelamento. Tente novamente.";
     default: {
       const exhaustive: never = operation;
       return exhaustive;
@@ -133,18 +127,11 @@ function getErrorFallback(operation: FormularioTipoOperacao) {
   }
 }
 
-function getRequiredTargetId(value: string | null | undefined, fieldName: string) {
-  if (!value) {
-    throw new Error(`O ${fieldName} da operação não foi encontrado.`);
-  }
-
-  return value;
-}
-
 function getInitialValues(
   target: ConsultaTransacaoItem,
   operation: FormularioTipoOperacao,
-): FormularioEdicaoOperacaoFinanceira {
+  escopoInicial: EscopoEdicaoTransacao,
+): FormularioOperacaoFinanceira {
   const isTransfer = operation === "TRANSFERENCIA";
   const isTransferOrigin = isTransfer && target.valor < 0;
   const counterpartyAccountId = target.contaContraparteId ?? "";
@@ -159,6 +146,7 @@ function getInitialValues(
     data: target.dataFinanceira,
     descricao: target.descricao,
     observacoes: target.observacoes ?? "",
+    repeticao: createRepeticaoFormValuesParaEscopo(target, escopoInicial),
     situacao: target.situacao ?? "PLANEJADA",
     tipo: target.valor >= 0 ? "RECEITA" : "DESPESA",
     tipoOperacao: operation,
@@ -166,7 +154,7 @@ function getInitialValues(
   };
 }
 
-function getEditField(field: string | undefined): keyof FormularioEdicaoOperacaoFinanceira | null {
+function getEditField(field: string | undefined): keyof FormularioOperacaoFinanceira | null {
   const fieldName = getServerFieldName(field);
 
   if (
@@ -178,7 +166,7 @@ function getEditField(field: string | undefined): keyof FormularioEdicaoOperacao
     return "data";
   }
 
-  const validFields: readonly (keyof FormularioEdicaoOperacaoFinanceira)[] = [
+  const validFields: readonly (keyof FormularioOperacaoFinanceira)[] = [
     "categoriaId",
     "contaDestinoId",
     "contaId",
@@ -195,6 +183,36 @@ function getEditField(field: string | undefined): keyof FormularioEdicaoOperacao
   return validFields.find((validField) => validField === fieldName) ?? null;
 }
 
+/**
+ * Reenvia a repetição lida da ocorrência, sem alterar a regra. Usado em "Somente esta", que não
+ * altera a regra da série.
+ */
+function getRepeticaoLidaParaEscrita(target: ConsultaTransacaoItem): RepeticaoTransacaoRequest {
+  const repeticao = toRepeticaoRequestFromForm(toRepeticaoFormValues(target.repeticao ?? null));
+
+  if (!repeticao) {
+    throw new Error("A repetição da ocorrência não foi encontrada.");
+  }
+
+  return repeticao;
+}
+
+type RepetitionSummaryProps = {
+  target: ConsultaTransacaoItem;
+};
+
+/** Resumo somente leitura da repetição de uma ocorrência de série em "Somente esta". */
+function RepetitionSummary({ target }: RepetitionSummaryProps) {
+  const summary = getRepeticaoResumo(target);
+
+  return (
+    <section className="grid min-w-0 gap-2 rounded-control border border-border bg-surface-muted px-3 py-3">
+      <p className="m-0 text-body-strong text-foreground">Repetir</p>
+      {summary && <p className="m-0 text-body text-muted">{summary}</p>}
+    </section>
+  );
+}
+
 export function TransactionEditModal({
   accounts,
   categories,
@@ -206,36 +224,40 @@ export function TransactionEditModal({
   const operation = editOperation ?? "TRANSACAO";
   const operationLabel = getOperationLabel(operation);
   const isTransfer = operation === "TRANSFERENCIA";
-  const isRecurring = operation === "RECORRENCIA" || operation === "PARCELAMENTO";
+  const isRecurring = target.origem === "TRANSACAO_RECORRENTE" || target.origem === "PARCELA";
   const [discardAction, setDiscardAction] = useState<DiscardAction>(null);
   const [isScopeDirty, setIsScopeDirty] = useState(false);
-  const [scope, setScope] = useState<RecurrenceScope>("ONLY_THIS");
+  const scopeOptions = getEscopoEdicaoOptions(target);
+  const initialScope = scopeOptions.find((option) => !option.isDisabled)?.value ?? "SOMENTE_ESTA";
+  const [scope, setScope] = useState<EscopoEdicaoTransacao>(initialScope);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const descriptionInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
-  const editMutation = useMutation<
-    EditOperationResponse,
-    unknown,
-    FormularioEdicaoOperacaoFinanceira
-  >({
+  const editMutation = useMutation<EditOperationResponse, unknown, FormularioOperacaoFinanceira>({
     mutationFn: (data) => {
       switch (data.tipoOperacao) {
         case "TRANSACAO":
           return putTransacao(
-            getRequiredTargetId(target.operacaoId, "identificador da transação"),
-            toEditTransactionRequest(data),
+            getRequiredTargetId(target.chaveEdicao, "chave de edição da transação"),
+            toEditTransactionRequest(data, {
+              escopo: isRecurring ? scope : undefined,
+              repeticao:
+                isRecurring && scope === "SOMENTE_ESTA"
+                  ? getRepeticaoLidaParaEscrita(target)
+                  : toRepeticaoRequestFromForm(data.repeticao),
+              versaoEdicao: getRequiredTargetId(
+                target.versaoEdicao,
+                "versão de edição da transação",
+              ),
+            }),
           );
         case "TRANSFERENCIA":
           return putTransferencia(
             getRequiredTargetId(target.operacaoId, "identificador da transferência"),
-            toEditTransferRequest(data),
-          );
-        case "RECORRENCIA":
-        case "PARCELAMENTO":
-          return putOcorrenciaRecorrente(
-            getRequiredTargetId(target.segmentoRecorrenciaId, "segmento da recorrência"),
-            getRequiredTargetId(target.dataOriginalRecorrencia, "data original da ocorrência"),
-            toEditRecurrenceOccurrenceRequest(data, scope),
+            toEditTransferRequest(
+              data,
+              getRequiredTargetId(target.versaoEdicao, "versão de edição da transferência"),
+            ),
           );
         default: {
           const exhaustive: never = data.tipoOperacao;
@@ -248,22 +270,32 @@ export function TransactionEditModal({
     },
   });
   const {
+    clearErrors,
     control,
     formState: { errors, isDirty, isSubmitting },
     handleSubmit,
     setError,
     setValue,
-  } = useForm<FormularioEdicaoOperacaoFinanceira>({
-    defaultValues: getInitialValues(target, operation),
+  } = useForm<FormularioOperacaoFinanceira>({
+    defaultValues: getInitialValues(target, operation, initialScope),
     mode: "onSubmit",
-    resolver: zodResolver(formularioEdicaoOperacaoFinanceiraSchema),
+    resolver: zodResolver(formularioOperacaoFinanceiraSchema),
   });
+  const situation = useWatch({ control, name: "situacao" });
   const accountId = useWatch({ control, name: "contaId" });
   const destinationAccountId = useWatch({ control, name: "contaDestinoId" });
   const originAccountId = useWatch({ control, name: "contaOrigemId" });
   const transactionType = useWatch({ control, name: "tipo" });
   const summaryDate = useWatch({ control, name: "data" });
   const summaryValue = useWatch({ control, name: "valor" });
+  const repetitionActive = useWatch({ control, name: "repeticao.ativa" });
+  const repetitionEndType = useWatch({ control, name: "repeticao.termino.tipo" });
+  // "Somente esta" mostra a repetição lida e não a edita; o formulário fica com a seção desligada.
+  const isRepetitionEditable = !isTransfer && (!isRecurring || scope === "ESTA_E_AS_PROXIMAS");
+  const isInstallment =
+    scope === "SOMENTE_ESTA" && isRecurring
+      ? target.repeticao?.termino.tipo === "PARCELAS"
+      : repetitionActive && repetitionEndType === "PARCELAS";
   const originAccount = accounts.find((account) => account.id === originAccountId);
 
   useEffect(() => {
@@ -308,7 +340,7 @@ export function TransactionEditModal({
     onClose();
   }, [discardAction, onClose, setDiscardAction]);
 
-  const handleFormSubmit = async (data: FormularioEdicaoOperacaoFinanceira) => {
+  const handleFormSubmit = async (data: FormularioOperacaoFinanceira) => {
     setSubmitError(null);
 
     if (data.tipoOperacao === "TRANSFERENCIA") {
@@ -334,6 +366,20 @@ export function TransactionEditModal({
     try {
       await editMutation.mutateAsync(data);
     } catch (error) {
+      const guidedMessage = getGuidedApiErrorMessage(error);
+
+      if (guidedMessage) {
+        setSubmitError(guidedMessage);
+
+        if (isStaleTransactionError(error)) {
+          void queryClient
+            .invalidateQueries({ queryKey: transactionsQueryKey })
+            .catch(() => undefined);
+        }
+
+        return;
+      }
+
       applyFormError(
         error,
         setError,
@@ -359,13 +405,13 @@ export function TransactionEditModal({
       {originAccount?.nome ?? "origem não selecionada"} e{" "}
       {accounts.find((account) => account.id === destinationAccountId)?.nome ??
         "destino não selecionado"}
-      , em {isValidFormDate(summaryDate) ? formatFormDate(summaryDate) : "data não informada"}.
+      , em {isDataIsoValida(summaryDate) ? formatFormDate(summaryDate) : "data não informada"}.
     </>
   ) : (
     <>
       Resumo: {transactionType === "RECEITA" ? "receita" : "despesa"} de{" "}
       {formatMoneyForSummary(summaryValue)} na conta {accountLabel}, em{" "}
-      {isValidFormDate(summaryDate) ? formatFormDate(summaryDate) : "data não informada"}.
+      {isDataIsoValida(summaryDate) ? formatFormDate(summaryDate) : "data não informada"}.
     </>
   );
 
@@ -383,10 +429,9 @@ export function TransactionEditModal({
         }}
         size="lg"
       >
-        <ModalHeader>
+        <ModalHeader showClose={!isSubmitting && discardAction === null}>
           <ModalTitle>Editar {operationLabel}</ModalTitle>
           <ModalDescription>Atualize os dados da movimentação selecionada.</ModalDescription>
-          {!isSubmitting && discardAction === null && <ModalClose />}
         </ModalHeader>
         <form className="contents" noValidate onSubmit={handleSubmit(handleFormSubmit)}>
           <ModalBody>
@@ -398,21 +443,28 @@ export function TransactionEditModal({
                 isDisabled={isSubmitting}
                 label="Aplicar alteração"
                 onChange={(nextValue) => {
-                  const nextScope = recurrenceScopeOptions.find(
+                  const nextScope = scopeOptions.find(
                     (option) => option.value === nextValue,
                   )?.value;
 
                   if (nextScope) {
                     setScope(nextScope);
-                    setIsScopeDirty(nextScope !== "ONLY_THIS");
+                    setIsScopeDirty(nextScope !== "SOMENTE_ESTA");
+                    // Voltar para "Somente esta" descarta as mudanças na repetição.
+                    setValue("repeticao", createRepeticaoFormValuesParaEscopo(target, nextScope), {
+                      shouldDirty: true,
+                      shouldValidate: false,
+                    });
+                    clearErrors("repeticao");
                   }
                 }}
                 value={scope}
               >
-                {recurrenceScopeOptions.map((option) => (
+                {scopeOptions.map((option) => (
                   <RadioItem
-                    focusOnOpen={option.value === "ONLY_THIS"}
                     description={option.description}
+                    focusOnOpen={option.value === "SOMENTE_ESTA"}
+                    isDisabled={option.isDisabled}
                     key={option.value}
                     value={option.value}
                   >
@@ -428,6 +480,7 @@ export function TransactionEditModal({
                 name="tipo"
                 render={({ field }) => (
                   <TransactionTypeField
+                    isRequired
                     focusOnOpen={!isRecurring}
                     isDisabled={isSubmitting}
                     onChange={field.onChange}
@@ -437,7 +490,7 @@ export function TransactionEditModal({
               />
             )}
 
-            <div className="grid min-w-0 gap-3.5 sm:grid-cols-[minmax(0,1fr)_12rem]">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-[minmax(0,1fr)_var(--spacing-form-aside)]">
               <Controller
                 control={control}
                 name="descricao"
@@ -447,12 +500,13 @@ export function TransactionEditModal({
                     className="min-w-0"
                     errorMessage={errors.descricao?.message}
                     isDisabled={isSubmitting}
+                    isRequired
                     label="Descrição"
                     maxLength={255}
                     name={field.name}
                     onBlur={field.onBlur}
-                    onInput={field.onChange}
-                    inputRef={(input) => {
+                    onChange={field.onChange}
+                    ref={(input) => {
                       descriptionInputRef.current = input;
                       field.ref(input);
                     }}
@@ -485,11 +539,12 @@ export function TransactionEditModal({
                           : undefined
                       }
                       isDisabled={isSubmitting}
-                      label={operation === "PARCELAMENTO" ? "Valor da parcela" : "Valor"}
+                      isRequired
+                      label={isInstallment ? "Valor de cada parcela" : "Valor"}
                       name={field.name}
                       onBlur={field.onBlur}
-                      onValueChange={field.onChange}
-                      inputRef={field.ref}
+                      onChange={field.onChange}
+                      ref={field.ref}
                       placeholder="R$ 0,00"
                       value={displayValue}
                     />
@@ -498,21 +553,27 @@ export function TransactionEditModal({
               />
             </div>
 
-            <div className="grid min-w-0 gap-3.5 sm:grid-cols-2">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
               <Controller
                 control={control}
                 name="data"
                 render={({ field }) => (
-                  <TextField
+                  <DatePicker
+                    todayValue={today(transactionTimeZone)}
                     errorMessage={errors.data?.message}
                     isDisabled={isSubmitting}
+                    isRequired
                     label="Data financeira"
+                    maxValue={
+                      (operation === "TRANSACAO" || isTransfer) && situation === "EFETIVADA"
+                        ? today(transactionTimeZone)
+                        : undefined
+                    }
                     name={field.name}
                     onBlur={field.onBlur}
-                    onInput={field.onChange}
-                    inputRef={field.ref}
-                    type="date"
-                    value={field.value}
+                    onChange={(date) => field.onChange(date?.toString() ?? "")}
+                    ref={field.ref}
+                    value={parseFormDate(field.value)}
                   />
                 )}
               />
@@ -522,6 +583,12 @@ export function TransactionEditModal({
                   name="situacao"
                   render={({ field }) => (
                     <TransactionSituationField
+                      isRequired
+                      description={
+                        isRepetitionEditable && repetitionActive
+                          ? "Vale só para a primeira ocorrência"
+                          : undefined
+                      }
                       isDisabled={isSubmitting}
                       onChange={field.onChange}
                       value={field.value}
@@ -534,7 +601,7 @@ export function TransactionEditModal({
             </div>
 
             {isTransfer ? (
-              <div className="grid min-w-0 gap-3.5 sm:grid-cols-2">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2">
                 <Controller
                   control={control}
                   name="contaOrigemId"
@@ -544,6 +611,7 @@ export function TransactionEditModal({
                       errorMessage={errors.contaOrigemId?.message}
                       includeSelectedInactive
                       isDisabled={isSubmitting}
+                      isRequired
                       label="Conta de origem"
                       name={field.name}
                       onBlur={field.onBlur}
@@ -568,6 +636,7 @@ export function TransactionEditModal({
                       excludedAccountId={originAccountId}
                       includeSelectedInactive
                       isDisabled={isSubmitting}
+                      isRequired
                       label="Conta de destino"
                       name={field.name}
                       onBlur={field.onBlur}
@@ -578,7 +647,7 @@ export function TransactionEditModal({
                 />
               </div>
             ) : (
-              <div className="grid min-w-0 gap-3.5 sm:grid-cols-2">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2">
                 <Controller
                   control={control}
                   name="contaId"
@@ -588,6 +657,7 @@ export function TransactionEditModal({
                       errorMessage={errors.contaId?.message}
                       includeSelectedInactive
                       isDisabled={isSubmitting}
+                      isRequired
                       label="Conta"
                       name={field.name}
                       onBlur={field.onBlur}
@@ -615,6 +685,31 @@ export function TransactionEditModal({
               </div>
             )}
 
+            {isRecurring && scope === "SOMENTE_ESTA" && <RepetitionSummary target={target} />}
+
+            {isRepetitionEditable && (
+              <>
+                <TransactionRepetitionFields
+                  control={control}
+                  dataFinanceira={summaryDate}
+                  isDisabled={isSubmitting}
+                  valoresAoAtivar={createRepeticaoFormValuesParaEscopo(target, scope)}
+                />
+                {isRecurring && (
+                  <InlineMessage tone="warning">
+                    Altera esta ocorrência e as seguintes; a data desta ocorrência passa a ser o
+                    início da nova regra.
+                  </InlineMessage>
+                )}
+                {isRecurring && !repetitionActive && (
+                  <InlineMessage tone="warning">
+                    Esta ocorrência vira uma transação simples e as próximas deixam de existir.
+                    Ocorrências já efetivadas são mantidas.
+                  </InlineMessage>
+                )}
+              </>
+            )}
+
             <Controller
               control={control}
               name="observacoes"
@@ -626,9 +721,9 @@ export function TransactionEditModal({
                   maxLength={2000}
                   name={field.name}
                   onBlur={field.onBlur}
-                  onInput={field.onChange}
+                  onChange={field.onChange}
                   placeholder="Adicione uma observação opcional"
-                  textAreaRef={field.ref}
+                  ref={field.ref}
                   value={field.value}
                 />
               )}
@@ -636,7 +731,7 @@ export function TransactionEditModal({
 
             <output
               aria-live="polite"
-              className="rounded-xl border border-border bg-surface-muted px-3.5 py-3 text-body-small text-muted"
+              className="rounded-control border border-border bg-surface-muted px-3 py-3 text-body text-muted"
             >
               {summary}
             </output>
